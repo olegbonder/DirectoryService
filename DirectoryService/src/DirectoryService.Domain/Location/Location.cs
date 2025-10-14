@@ -2,7 +2,7 @@
 {
     public class Location
     {
-        public Location(LocationName name, LocationAddress address, LocationTimezone timezone)
+        public Location(LocationName name, Address address, LocationTimezone timezone)
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -16,7 +16,7 @@
 
         public LocationName Name { get; private set; }
 
-        public LocationAddress Address { get; private set; }
+        public Address Address { get; private set; }
 
         public LocationTimezone Timezone { get; private set; }
 
