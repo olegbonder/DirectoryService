@@ -1,12 +1,19 @@
-﻿namespace DirectoryService.Domain.Department
+﻿using CSharpFunctionalExtensions;
+
+namespace DirectoryService.Domain.Departments
 {
     public class Department
     {
-        private IReadOnlyCollection<Department> _childDepartments = [];
+        private IReadOnlyCollection<Department> _children = [];
         private IReadOnlyCollection<DepartmentLocation> _locations = [];
         private IReadOnlyCollection<DepartmentPosition> _positions = [];
 
-        public Department(
+        // EF Core
+        private Department()
+        {
+        }
+
+        private Department(
             DepartmentName name,
             DepartmentIdentifier identifier,
             Guid parentId,
@@ -19,7 +26,7 @@
             Name = name;
             Identifier = identifier;
             ParentId = parentId;
-            _childDepartments = childs.ToList();
+            _children = childs.ToList();
             _locations = locations;
             _positions = positions;
             Path = path;
@@ -36,7 +43,9 @@
 
         public Guid? ParentId { get; private set; }
 
-        public IReadOnlyCollection<Department> ChildDepartments => _childDepartments;
+        public Department Parent { get; private set; }
+
+        public IReadOnlyCollection<Department> Children => _children;
 
         public IReadOnlyCollection<DepartmentLocation> DepartmentLocations => _locations;
 
@@ -51,5 +60,22 @@
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
+
+        public Result<Department> Create(
+            DepartmentName name,
+            DepartmentIdentifier identifier,
+            Guid parentId,
+            IEnumerable<Department> childs,
+            DepartmentPath path,
+            IReadOnlyCollection<DepartmentLocation> locations,
+            IReadOnlyCollection<DepartmentPosition> positions)
+        {
+            if (locations.Count < 1)
+            {
+                return Result.Failure<Department>("У подразделения должна быть хотя бы одна локация");
+            }
+
+            return new Department(name, identifier, parentId, childs, path, locations, positions);
+        }
     }
 }

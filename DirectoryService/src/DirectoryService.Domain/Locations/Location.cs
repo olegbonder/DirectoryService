@@ -1,8 +1,15 @@
-﻿namespace DirectoryService.Domain.Location
+﻿using CSharpFunctionalExtensions;
+
+namespace DirectoryService.Domain.Locations
 {
     public class Location
     {
-        public Location(LocationName name, Address address, LocationTimezone timezone)
+        // EF Core
+        private Location()
+        {
+        }
+
+        private Location(LocationName name, Address address, LocationTimezone timezone)
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -25,5 +32,10 @@
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
+
+        public static Result<Location> Create(LocationName name, Address address, LocationTimezone timezone)
+        {
+            return new Location(name, address, timezone); 
+        }
     }
 }
