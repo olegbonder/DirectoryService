@@ -1,10 +1,15 @@
-﻿using DirectoryService.Domain.Location;
+﻿using CSharpFunctionalExtensions;
 
-namespace DirectoryService.Domain.Position
+namespace DirectoryService.Domain.Positions
 {
     public class Position
     {
-        public Position(PositionName name, PositionDesription desription)
+        // EF Core
+        private Position()
+        {
+        }
+
+        private Position(PositionName name, PositionDesription desription)
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -24,5 +29,10 @@ namespace DirectoryService.Domain.Position
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
+
+        public static Result<Position> Create(PositionName name, PositionDesription desription)
+        {
+            return new Position(name, desription);
+        }
     }
 }
