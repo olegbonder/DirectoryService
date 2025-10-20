@@ -13,7 +13,9 @@ namespace DirectoryService.Infrastructure.DataBase.Configurations
 
             builder.HasKey(d => d.Id).HasName("pk_departments");
 
-            builder.Property(d => d.Id).HasColumnName("id");
+            builder.Property(d => d.Id)
+                .HasConversion(d => d.Value, id => DepartmentId.Current(id))
+                .HasColumnName("id");
 
             builder.OwnsOne(d => d.Name, db =>
             {
@@ -30,7 +32,6 @@ namespace DirectoryService.Infrastructure.DataBase.Configurations
                     .HasMaxLength(LengthConstants.LENGTH_150)
                     .HasColumnName("identifier");
             });
-
 
             builder.OwnsOne(d => d.Path, db =>
             {

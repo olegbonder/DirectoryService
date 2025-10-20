@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Locations
 {
@@ -29,22 +29,22 @@ namespace DirectoryService.Domain.Locations
         {
             if (string.IsNullOrWhiteSpace(country))
             {
-                return Result.Failure<Address>($"Свойство \"{nameof(Country)}\" не должно быть пустым");
+                return $"Свойство \"{nameof(Country)}\" не должно быть пустым";
             }
 
             if (string.IsNullOrWhiteSpace(city))
             {
-                return Result.Failure<Address>($"Свойство \"{nameof(City)}\" не должно быть пустым");
+                return $"Свойство \"{nameof(City)}\" не должно быть пустым";
             }
 
             if (string.IsNullOrWhiteSpace(street))
             {
-                return Result.Failure<Address>($"Свойство \"{nameof(Street)}\" не должно быть пустым");
+                return $"Свойство \"{nameof(Street)}\" не должно быть пустым";
             }
 
             if (string.IsNullOrWhiteSpace(houseNumber))
             {
-                return Result.Failure<Address>($"Свойство \"{nameof(HouseNumber)}\" не должно быть пустым");
+                return $"Свойство \"{nameof(HouseNumber)}\" не должно быть пустым";
             }
 
             return new Address(country, city, street, houseNumber, flatNumber);

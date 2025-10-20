@@ -1,15 +1,18 @@
-﻿namespace DirectoryService.Domain
+﻿using DirectoryService.Domain.Departments;
+using DirectoryService.Domain.Locations;
+
+namespace DirectoryService.Domain
 {
     public class DepartmentLocation
     {
-        public DepartmentLocation(Guid departmentId, Guid locationId)
+        public DepartmentLocation(DepartmentId departmentId, LocationId locationId)
         {
             DepartmentId = departmentId;
             LocationId = locationId;
         }
 
-        public Guid DepartmentId { get; private set; }
+        public DepartmentId DepartmentId { get; private set; }
 
-        public Guid LocationId { get; private set; }
+        public LocationId LocationId { get; private set; }
     }
 }

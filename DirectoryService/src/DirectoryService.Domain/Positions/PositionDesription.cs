@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Positions
 {
@@ -15,7 +15,7 @@ namespace DirectoryService.Domain.Positions
         {
             if (string.IsNullOrWhiteSpace(desription) == false && desription.Length > LengthConstants.LENGTH_1000)
             {
-                throw new ArgumentException($"Свойство \"Description\" не должно быть быть больше {LengthConstants.LENGTH_1000} символов");
+                return $"Свойство \"Description\" не должно быть быть больше {LengthConstants.LENGTH_1000} символов";
             }
 
             return new PositionDesription(desription);

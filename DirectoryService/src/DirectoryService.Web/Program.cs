@@ -5,8 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<ApplicationDbContext>(sp =>
-    new ApplicationDbContext(builder.Configuration.GetConnectionString("DirectoryServiceDb") !));
+builder.Services.AddScoped<ApplicationDbContext>();
 
 var app = builder.Build();
 

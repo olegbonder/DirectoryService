@@ -7,41 +7,44 @@ namespace DirectoryService.Infrastructure.DataBase.Configurations
 {
     public class PositionConfiguration : IEntityTypeConfiguration<Position>
     {
-        public void Configure(EntityTypeBuilder<Position> buipder)
+        public void Configure(EntityTypeBuilder<Position> builder)
         {
-            buipder.ToTable("positions");
+            builder.ToTable("positions");
 
-            buipder.HasKey(p => p.Id).HasName("pk_positions");
+            builder.HasKey(p => p.Id).HasName("pk_positions");
 
-            buipder.Property(p => p.Id).HasColumnName("id");
-
-            buipder.Property(p => p.Name)
+            builder.Property(d => d.Id)
                 .HasConversion(
                     p => p.Value,
-                    name => PositionName.Create(name).Value)
-                .IsRequired()
-                .HasMaxLength(LengthConstants.LENGTH_100)
-                .HasColumnName("name");
+                    id => PositionId.Current(id))
+                .HasColumnName("id");
 
-            buipder.HasIndex(p => p.Name).IsUnique();
+            builder.OwnsOne(p => p.Name, nb =>
+            {
+                nb.Property(d => d.Value)
+                    .IsRequired()
+                    .HasMaxLength(LengthConstants.LENGTH_100)
+                    .HasColumnName("name");
+                nb.HasIndex(p => p.Value).IsUnique();
+            });
 
-            buipder.Property(p => p.Description)
+            builder.Property(p => p.Description)
                 .HasConversion(
                     p => p.Value,
-                    description => PositionDesription.Create(description).Value)
+                    description => PositionDesription.Create(description).Value())
                 .IsRequired(false)
                 .HasMaxLength(LengthConstants.LENGTH_1000)
                 .HasColumnName("description");
 
-            buipder.Property(p => p.IsActive)
+            builder.Property(p => p.IsActive)
                 .IsRequired()
                 .HasColumnName("is_active");
 
-            buipder.Property(p => p.CreatedAt)
+            builder.Property(p => p.CreatedAt)
                 .IsRequired()
                 .HasColumnName("created_at");
 
-            buipder.Property(p => p.UpdatedAt)
+            builder.Property(p => p.UpdatedAt)
                 .IsRequired()
                 .HasColumnName("updated_at");
         }

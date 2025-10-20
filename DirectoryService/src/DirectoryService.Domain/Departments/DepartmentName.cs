@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Departments
 {
@@ -15,12 +15,12 @@ namespace DirectoryService.Domain.Departments
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return Result.Failure<DepartmentName>("Свойство \"Name\" не должно быть пустым");
+                return "Свойство \"Name\" не должно быть пустым";
             }
 
             if (name.Length < LengthConstants.LENGTH_3 || name.Length > LengthConstants.LENGTH_150)
             {
-                return Result.Failure<DepartmentName>($"Свойство \"Name\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов");
+                return $"Свойство \"Name\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов";
             }
 
             return new DepartmentName(name);

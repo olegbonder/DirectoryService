@@ -13,15 +13,19 @@ namespace DirectoryService.Infrastructure.DataBase.Configurations
 
             builder.HasKey(l => l.Id).HasName("pk_locations");
 
-            builder.Property(l => l.Id).HasColumnName("id");
+            builder.Property(l => l.Id)
+                .HasConversion(
+                    l => l.Value,
+                    id => LocationId.Current(id))
+                .HasColumnName("id");
 
             builder.OwnsOne(l => l.Name, lb =>
             {
-                lb.Property(n => n.Value)
+                lb.Property(ln => ln.Value)
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_120)
                     .HasColumnName("name");
-                lb.HasIndex(l => l.Value).IsUnique();
+                lb.HasIndex(ln => ln.Value).IsUnique();
             });
 
             builder.OwnsOne(l => l.Address, lb =>

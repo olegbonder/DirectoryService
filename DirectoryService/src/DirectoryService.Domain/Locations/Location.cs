@@ -1,25 +1,24 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Locations
 {
-    public class Location
+    public class Location : Entity<LocationId>
     {
         // EF Core
-        private Location()
+        private Location(LocationId id)
+            : base(id)
         {
         }
 
-        private Location(LocationName name, Address address, LocationTimezone timezone)
+        private Location(LocationId id, LocationName name, Address address, LocationTimezone timezone)
+            : base(id)
         {
-            Id = Guid.NewGuid();
             Name = name;
             Address = address;
             Timezone = timezone;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
-
-        public Guid Id { get; private set; }
 
         public LocationName Name { get; private set; }
 
@@ -33,9 +32,9 @@ namespace DirectoryService.Domain.Locations
 
         public DateTime UpdatedAt { get; private set; }
 
-        public static Result<Location> Create(LocationName name, Address address, LocationTimezone timezone)
+        public static Result<Location> Create(LocationId id, LocationName name, Address address, LocationTimezone timezone)
         {
-            return new Location(name, address, timezone); 
+            return new Location(id, name, address, timezone);
         }
     }
 }
