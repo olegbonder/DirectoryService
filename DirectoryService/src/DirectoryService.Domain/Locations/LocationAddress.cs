@@ -2,9 +2,9 @@
 
 namespace DirectoryService.Domain.Locations
 {
-    public class Address
+    public class LocationAddress
     {
-        private Address(string country, string city, string street, string houseNumber, string? flatNumber)
+        private LocationAddress(string country, string city, string street, string houseNumber, string? flatNumber)
         {
             Country = country;
             City = city;
@@ -25,7 +25,7 @@ namespace DirectoryService.Domain.Locations
 
         public string? FlatNumber { get; }
 
-        public static Result<Address> Create(string country, string city, string street, string houseNumber, string? flatNumber)
+        public static Result<LocationAddress> Create(string country, string city, string street, string houseNumber, string? flatNumber)
         {
             if (string.IsNullOrWhiteSpace(country))
             {
@@ -47,7 +47,7 @@ namespace DirectoryService.Domain.Locations
                 return $"Свойство \"{nameof(HouseNumber)}\" не должно быть пустым";
             }
 
-            return new Address(country, city, street, houseNumber, flatNumber);
+            return new LocationAddress(country, city, street, houseNumber, flatNumber);
         }
     }
 }

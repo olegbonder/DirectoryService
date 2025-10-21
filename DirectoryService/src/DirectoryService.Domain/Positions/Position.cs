@@ -29,9 +29,10 @@ namespace DirectoryService.Domain.Positions
 
         public DateTime UpdatedAt { get; private set; }
 
-        public static Result<Position> Create(PositionId id, PositionName name, PositionDesription desription)
+        public static Result<Position> Create(PositionName name, PositionDesription desription)
         {
-            return new Position(id, name, desription);
+            var newPositionId = PositionId.Create();
+            return new Position(newPositionId, name, desription);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace DirectoryService.Domain.Locations
         {
         }
 
-        private Location(LocationId id, LocationName name, Address address, LocationTimezone timezone)
+        private Location(LocationId id, LocationName name, LocationAddress address, LocationTimezone timezone)
             : base(id)
         {
             Name = name;
@@ -22,7 +22,7 @@ namespace DirectoryService.Domain.Locations
 
         public LocationName Name { get; private set; }
 
-        public Address Address { get; private set; }
+        public LocationAddress Address { get; private set; }
 
         public LocationTimezone Timezone { get; private set; }
 
@@ -32,9 +32,10 @@ namespace DirectoryService.Domain.Locations
 
         public DateTime UpdatedAt { get; private set; }
 
-        public static Result<Location> Create(LocationId id, LocationName name, Address address, LocationTimezone timezone)
+        public static Result<Location> Create(LocationName name, LocationAddress address, LocationTimezone timezone)
         {
-            return new Location(id, name, address, timezone);
+            var newLocationId = LocationId.Create();
+            return new Location(newLocationId, name, address, timezone);
         }
     }
 }

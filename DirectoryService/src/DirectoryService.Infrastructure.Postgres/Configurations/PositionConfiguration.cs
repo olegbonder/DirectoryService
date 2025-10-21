@@ -3,7 +3,7 @@ using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DirectoryService.Infrastructure.DataBase.Configurations
+namespace DirectoryService.Infrastructure.Postgres.Configurations
 {
     public class PositionConfiguration : IEntityTypeConfiguration<Position>
     {
@@ -31,7 +31,7 @@ namespace DirectoryService.Infrastructure.DataBase.Configurations
             builder.Property(p => p.Description)
                 .HasConversion(
                     p => p.Value,
-                    description => PositionDesription.Create(description).Value())
+                    description => PositionDesription.Create(description).Value)
                 .IsRequired(false)
                 .HasMaxLength(LengthConstants.LENGTH_1000)
                 .HasColumnName("description");

@@ -62,7 +62,6 @@ namespace DirectoryService.Domain.Departments
         public DateTime UpdatedAt { get; private set; }
 
         public Result<Department> Create(
-            DepartmentId id,
             DepartmentName name,
             DepartmentIdentifier identifier,
             DepartmentId parentId,
@@ -76,7 +75,8 @@ namespace DirectoryService.Domain.Departments
                 return "У подразделения должна быть хотя бы одна локация";
             }
 
-            return new Department(id, name, identifier, parentId, childs, path, locations, positions);
+            var newDeptId = DepartmentId.Create();
+            return new Department(newDeptId, name, identifier, parentId, childs, path, locations, positions);
         }
     }
 }

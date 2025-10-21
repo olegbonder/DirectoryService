@@ -3,7 +3,7 @@ using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DirectoryService.Infrastructure.DataBase.Configurations
+namespace DirectoryService.Infrastructure.Postgres.Configurations
 {
     public class LocationConfiguration : IEntityTypeConfiguration<Location>
     {

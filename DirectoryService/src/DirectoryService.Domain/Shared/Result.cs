@@ -41,13 +41,13 @@
 
         private readonly TValue _value;
 
-        public TValue Value() => IsSuccess
+        public TValue Value => IsSuccess
             ? _value
             : throw new InvalidOperationException("The value of a failure can not be access");
 
         public static Result<TValue> Success(TValue value) => new(value, true, null);
 
-        public new static Result<TValue> Failure(string error) => new(default!, false, error);
+        public static Result<TValue> Failure(string error) => new(default!, false, error);
 
         public static implicit operator Result<TValue>(TValue value) => new(value, true, null);
 

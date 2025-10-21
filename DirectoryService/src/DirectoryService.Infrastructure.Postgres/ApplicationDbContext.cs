@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace DirectoryService.Infrastructure.DataBase
+namespace DirectoryService.Infrastructure.Postgres
 {
     public class ApplicationDbContext(IConfiguration configuration): DbContext
     {
