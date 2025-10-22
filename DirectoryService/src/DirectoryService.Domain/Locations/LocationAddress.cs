@@ -1,16 +1,17 @@
-﻿using DirectoryService.Domain.Shared;
+﻿using DirectoryService.Contracts.Locations;
+using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Locations
 {
     public class LocationAddress
     {
-        private LocationAddress(string country, string city, string street, string houseNumber, string? flatNumber)
+        private LocationAddress(AddressDTO dto)
         {
-            Country = country;
-            City = city;
-            Street = street;
-            HouseNumber = houseNumber;
-            FlatNumber = flatNumber;
+            Country = dto.Country;
+            City = dto.City;
+            Street = dto.Street;
+            HouseNumber = dto.House;
+            FlatNumber = dto.FlatNumber;
         }
 
         public string FullAddress => $"{Country} {City} {Street} {HouseNumber} {FlatNumber}";
@@ -25,29 +26,29 @@ namespace DirectoryService.Domain.Locations
 
         public string? FlatNumber { get; }
 
-        public static Result<LocationAddress> Create(string country, string city, string street, string houseNumber, string? flatNumber)
+        public static Result<LocationAddress> Create(AddressDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(country))
+            if (string.IsNullOrWhiteSpace(dto.Country))
             {
                 return $"Свойство \"{nameof(Country)}\" не должно быть пустым";
             }
 
-            if (string.IsNullOrWhiteSpace(city))
+            if (string.IsNullOrWhiteSpace(dto.City))
             {
                 return $"Свойство \"{nameof(City)}\" не должно быть пустым";
             }
 
-            if (string.IsNullOrWhiteSpace(street))
+            if (string.IsNullOrWhiteSpace(dto.Street))
             {
                 return $"Свойство \"{nameof(Street)}\" не должно быть пустым";
             }
 
-            if (string.IsNullOrWhiteSpace(houseNumber))
+            if (string.IsNullOrWhiteSpace(dto.House))
             {
                 return $"Свойство \"{nameof(HouseNumber)}\" не должно быть пустым";
             }
 
-            return new LocationAddress(country, city, street, houseNumber, flatNumber);
+            return new LocationAddress(dto);
         }
     }
 }

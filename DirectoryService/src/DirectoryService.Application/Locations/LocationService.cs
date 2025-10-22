@@ -30,7 +30,7 @@ namespace DirectoryService.Application.Locations
                 return "Адрес не может быть пустым";
             }
 
-            var locAddressRes = LocationAddress.Create(locAdr.Country, locAdr.City, locAdr.Street, locAdr.House, locAdr.FlatNumber);
+            var locAddressRes = LocationAddress.Create(locAdr);
             if (locAddressRes.IsFailure)
             {
                 return locAddressRes.Error!;
