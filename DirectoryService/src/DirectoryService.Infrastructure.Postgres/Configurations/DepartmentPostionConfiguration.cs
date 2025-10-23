@@ -1,11 +1,10 @@
 ﻿using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DirectoryService.Infrastructure.DataBase.Configurations
+namespace DirectoryService.Infrastructure.Postgres.Configurations
 {
     public class DepartmentPostionConfiguration : IEntityTypeConfiguration<DepartmentPosition>
     {
@@ -13,25 +12,32 @@ namespace DirectoryService.Infrastructure.DataBase.Configurations
         {
             builder.ToTable("department_positions");
 
-            builder.HasKey(dl => new { dl.DepartmentId, dl.PositionId }).HasName("pk_department_positions");
+            builder.HasKey(dp => new { dp.DepartmentId, dp.PositionId })
+                .HasName("pk_department_positions");
 
-            builder.Property(dl => dl.PositionId)
+            builder.Property(dp => dp.PositionId)
+                .HasConversion(
+                    dp => dp.Value,
+                    positionId => PositionId.Current(positionId))
                 .IsRequired()
                 .HasColumnName("position_id");
 
-            builder.Property(dl => dl.DepartmentId)
+            builder.Property(dp => dp.DepartmentId)
+                .HasConversion(
+                    dp => dp.Value,
+                    departmentId => DepartmentId.Current(departmentId))
                 .IsRequired()
                 .HasColumnName("department_id");
 
             builder.HasOne<Department>()
-                .WithMany(d => d.DepartmentPositions)
-                .HasForeignKey(dl => dl.PositionId)
-                .HasConstraintName("fk_department_positions_position_id");
+                .WithMany(dp => dp.DepartmentPositions)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("fk_department_positions_department_id");
 
             builder.HasOne<Position>()
                 .WithMany()
-                .HasForeignKey(dl => dl.DepartmentId)
-                .HasConstraintName("fk_department_positions_department_id");
+                .HasForeignKey(dl => dl.PositionId)
+                .HasConstraintName("fk_department_positions_position_id");
         }
     }
 }

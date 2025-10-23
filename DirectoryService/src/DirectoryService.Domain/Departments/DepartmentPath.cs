@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Departments
 {

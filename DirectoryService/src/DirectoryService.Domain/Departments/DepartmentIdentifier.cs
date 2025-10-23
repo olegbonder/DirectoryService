@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
+using System.Text.RegularExpressions;
 
 namespace DirectoryService.Domain.Departments
 {
@@ -18,17 +18,17 @@ namespace DirectoryService.Domain.Departments
         {
             if (string.IsNullOrWhiteSpace(identifier))
             {
-                return Result.Failure<DepartmentIdentifier>("Свойство \"Identifier\" не должно быть пустым");
+                return "Свойство \"Identifier\" не должно быть пустым";
             }
 
             if (identifier.Length < LengthConstants.LENGTH_3 || identifier.Length > LengthConstants.LENGTH_150)
             {
-                return Result.Failure<DepartmentIdentifier>($"Свойство \"Identifier\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов");
+                return $"Свойство \"Identifier\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов";
             }
 
             if (Regex.IsMatch(identifier, ONLY_LATIN_REGEX) == false)
             {
-                return Result.Failure<DepartmentIdentifier>("Свойство \"Identifier\" должно содержать латинские буквы");
+                return "Свойство \"Identifier\" должно содержать латинские буквы";
             }
 
             return new DepartmentIdentifier(identifier);

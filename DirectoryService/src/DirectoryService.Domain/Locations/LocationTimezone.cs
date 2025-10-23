@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Locations
 {
@@ -15,12 +15,12 @@ namespace DirectoryService.Domain.Locations
         {
             if (string.IsNullOrWhiteSpace(timeZone))
             {
-                return Result.Failure<LocationTimezone>("Свойство \"Timezone\" не должно быть пустым");
+                return "Свойство \"Timezone\" не должно быть пустым";
             }
 
             if(TimeZoneInfo.TryFindSystemTimeZoneById(timeZone, out TimeZoneInfo? tz) == false)
             {
-                return Result.Failure<LocationTimezone>("Указанное значение не является часовым поясом!");
+                return "Указанное значение не является часовым поясом!";
             }
 
             return new LocationTimezone(timeZone);

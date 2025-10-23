@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Locations
 {
@@ -15,12 +15,12 @@ namespace DirectoryService.Domain.Locations
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return Result.Failure<LocationName>("Свойство \"Name\" не должно быть пустым");
+                return "Свойство \"Name\" не должно быть пустым";
             }
 
             if (name.Length < LengthConstants.LENGTH_3 || name.Length > LengthConstants.LENGTH_120)
             {
-                return Result.Failure<LocationName>($"Свойство \"Name\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов");
+                return $"Свойство \"Name\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов";
             }
 
             return new LocationName(name);

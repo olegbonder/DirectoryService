@@ -1,24 +1,23 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Positions
 {
-    public class Position
+    public class Position : Entity<PositionId>
     {
         // EF Core
-        private Position()
+        private Position(PositionId id)
+            : base(id)
         {
         }
 
-        private Position(PositionName name, PositionDesription desription)
+        private Position(PositionId id,  PositionName name, PositionDesription desription)
+            : base(id)
         {
-            Id = Guid.NewGuid();
             Name = name;
             Description = desription;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
-
-        public Guid Id { get; private set; }
 
         public PositionName Name { get; private set; }
 
@@ -32,7 +31,8 @@ namespace DirectoryService.Domain.Positions
 
         public static Result<Position> Create(PositionName name, PositionDesription desription)
         {
-            return new Position(name, desription);
+            var newPositionId = PositionId.Create();
+            return new Position(newPositionId, name, desription);
         }
     }
 }

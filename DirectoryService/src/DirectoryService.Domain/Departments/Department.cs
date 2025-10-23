@@ -1,28 +1,30 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Departments
 {
-    public class Department
+    public class Department : Entity<DepartmentId>
     {
         private IReadOnlyCollection<Department> _children = [];
         private IReadOnlyCollection<DepartmentLocation> _locations = [];
         private IReadOnlyCollection<DepartmentPosition> _positions = [];
 
         // EF Core
-        private Department()
+        private Department(DepartmentId id)
+            : base(id)
         {
         }
 
         private Department(
+            DepartmentId id,
             DepartmentName name,
             DepartmentIdentifier identifier,
-            Guid parentId,
+            DepartmentId parentId,
             IEnumerable<Department> childs,
             DepartmentPath path,
             IReadOnlyCollection<DepartmentLocation> locations,
             IReadOnlyCollection<DepartmentPosition> positions)
+            : base(id)
         {
-            Id = Guid.NewGuid();
             Name = name;
             Identifier = identifier;
             ParentId = parentId;
@@ -35,13 +37,11 @@ namespace DirectoryService.Domain.Departments
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public Guid Id { get; private set; }
-
         public DepartmentName Name { get; private set; }
 
         public DepartmentIdentifier Identifier { get; private set; }
 
-        public Guid? ParentId { get; private set; }
+        public DepartmentId? ParentId { get; private set; }
 
         public Department Parent { get; private set; }
 
@@ -64,7 +64,7 @@ namespace DirectoryService.Domain.Departments
         public Result<Department> Create(
             DepartmentName name,
             DepartmentIdentifier identifier,
-            Guid parentId,
+            DepartmentId parentId,
             IEnumerable<Department> childs,
             DepartmentPath path,
             IReadOnlyCollection<DepartmentLocation> locations,
@@ -72,10 +72,11 @@ namespace DirectoryService.Domain.Departments
         {
             if (locations.Count < 1)
             {
-                return Result.Failure<Department>("У подразделения должна быть хотя бы одна локация");
+                return "У подразделения должна быть хотя бы одна локация";
             }
 
-            return new Department(name, identifier, parentId, childs, path, locations, positions);
+            var newDeptId = DepartmentId.Create();
+            return new Department(newDeptId, name, identifier, parentId, childs, path, locations, positions);
         }
     }
 }
