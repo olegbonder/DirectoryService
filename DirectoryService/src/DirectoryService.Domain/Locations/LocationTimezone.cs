@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.Shared;
+﻿using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
@@ -13,14 +13,16 @@ namespace DirectoryService.Domain.Locations
 
         public static Result<LocationTimezone> Create(string timeZone)
         {
+            string property = "location.timezone";
+
             if (string.IsNullOrWhiteSpace(timeZone))
             {
-                return "Свойство \"Timezone\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty(property, "Часовой пояс");
             }
 
             if(TimeZoneInfo.TryFindSystemTimeZoneById(timeZone, out TimeZoneInfo? tz) == false)
             {
-                return "Указанное значение не является часовым поясом!";
+                return Error.Validation(property, "Указанное значение не является часовым поясом!");
             }
 
             return new LocationTimezone(timeZone);

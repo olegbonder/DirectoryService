@@ -1,17 +1,16 @@
-﻿using DirectoryService.Contracts.Locations;
-using DirectoryService.Domain.Shared;
+﻿using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
     public class LocationAddress
     {
-        private LocationAddress(AddressDTO dto)
+        private LocationAddress(string country, string city, string street, string houseNumber, string? flatNumber)
         {
-            Country = dto.Country;
-            City = dto.City;
-            Street = dto.Street;
-            HouseNumber = dto.House;
-            FlatNumber = dto.FlatNumber;
+            Country = country;
+            City = city;
+            Street = street;
+            HouseNumber = houseNumber;
+            FlatNumber = flatNumber;
         }
 
         public string FullAddress => $"{Country} {City} {Street} {HouseNumber} {FlatNumber}";
@@ -26,29 +25,29 @@ namespace DirectoryService.Domain.Locations
 
         public string? FlatNumber { get; }
 
-        public static Result<LocationAddress> Create(AddressDTO dto)
+        public static Result<LocationAddress> Create(string country, string city, string street, string houseNumber, string? flatNumber)
         {
-            if (string.IsNullOrWhiteSpace(dto.Country))
+            if (string.IsNullOrWhiteSpace(country))
             {
-                return $"Свойство \"{nameof(Country)}\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty("location.address.country", "Страна");
             }
 
-            if (string.IsNullOrWhiteSpace(dto.City))
+            if (string.IsNullOrWhiteSpace(city))
             {
-                return $"Свойство \"{nameof(City)}\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty("location.address.city", "Город");
             }
 
-            if (string.IsNullOrWhiteSpace(dto.Street))
+            if (string.IsNullOrWhiteSpace(street))
             {
-                return $"Свойство \"{nameof(Street)}\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty("location.address.street", "Улица");
             }
 
-            if (string.IsNullOrWhiteSpace(dto.House))
+            if (string.IsNullOrWhiteSpace(houseNumber))
             {
-                return $"Свойство \"{nameof(HouseNumber)}\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty("location.address.house", "Дом");
             }
 
-            return new LocationAddress(dto);
+            return new LocationAddress(country, city, street, houseNumber, flatNumber);
         }
     }
 }

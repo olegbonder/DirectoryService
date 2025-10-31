@@ -1,16 +1,19 @@
 ﻿using DirectoryService.Application.Locations;
 using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.Shared;
+using Microsoft.Extensions.Logging;
+using Shared.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.Locations
 {
     public class LocationsRepository : ILocationsRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<LocationsRepository> _logger;
 
-        public LocationsRepository(ApplicationDbContext context)
+        public LocationsRepository(ApplicationDbContext context, ILogger<LocationsRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken)
@@ -22,7 +25,9 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             }
             catch (Exception ex)
             {
-                return ex.InnerException?.Message ?? ex.Message;
+                var message = ex.InnerException?.Message ?? ex.Message;
+                _logger.LogError(message);
+                return Error.Failure("db.add.location.is.failed", message);
             }
 
             return location.Id.Value;

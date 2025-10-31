@@ -1,4 +1,6 @@
 ﻿using DirectoryService.Application;
+using DirectoryService.Presenters.EndpointResult;
+using Shared.Result;
 
 namespace DirectoryService.Web
 {
@@ -16,7 +18,25 @@ namespace DirectoryService.Web
         private static IServiceCollection AddWebDependencies(this IServiceCollection services)
         {
             services.AddControllers();
-            services.AddOpenApi();
+            services.AddOpenApi(options =>
+            {
+                options.AddSchemaTransformer((schema, context, _) =>
+                {
+                    if (context.JsonTypeInfo.Type == typeof(Envelope<Error>))
+                    {
+                        if (schema.Properties.TryGetValue("error", out var errorsProp))
+                        {
+                            errorsProp.Items.Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.Schema,
+                                Id = "Error",
+                            };
+                        }
+                    }
+
+                    return Task.CompletedTask;
+                });
+            });
 
             return services;
         }
