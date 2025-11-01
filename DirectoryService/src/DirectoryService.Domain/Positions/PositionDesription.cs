@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.Shared;
+﻿using Shared.Result;
 
 namespace DirectoryService.Domain.Positions
 {
@@ -13,9 +13,12 @@ namespace DirectoryService.Domain.Positions
 
         public static Result<PositionDesription> Create(string? desription)
         {
-            if (string.IsNullOrWhiteSpace(desription) == false && desription.Length > LengthConstants.LENGTH_1000)
+            var max = LengthConstants.LENGTH_1000;
+            if (string.IsNullOrWhiteSpace(desription) == false && desription.Length > max)
             {
-                return $"Свойство \"Description\" не должно быть быть больше {LengthConstants.LENGTH_1000} символов";
+                return Error.Validation(
+                    "position.desription.must.be.less",
+                    $"Свойство 'Описание' не должно быть быть больше {max} символов");
             }
 
             return new PositionDesription(desription);

@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.Shared;
+﻿using Shared.Result;
 
 namespace DirectoryService.Domain.Departments
 {
@@ -13,14 +13,17 @@ namespace DirectoryService.Domain.Departments
 
         public static Result<DepartmentName> Create(string name)
         {
+            string property = "department.name";
             if (string.IsNullOrWhiteSpace(name))
             {
-                return "Свойство \"Name\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty(property);
             }
 
-            if (name.Length < LengthConstants.LENGTH_3 || name.Length > LengthConstants.LENGTH_150)
+            var min = LengthConstants.LENGTH_3;
+            var max = LengthConstants.LENGTH_150;
+            if (name.Length < min || name.Length > max)
             {
-                return $"Свойство \"Name\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов";
+                return GeneralErrors.PropertyOutOfRange(property, min, max);
             }
 
             return new DepartmentName(name);

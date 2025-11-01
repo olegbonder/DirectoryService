@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.Shared;
+﻿using Shared.Result;
 
 namespace DirectoryService.Domain.Departments
 {

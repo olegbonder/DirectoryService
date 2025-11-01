@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.Shared;
+﻿using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
@@ -13,14 +13,18 @@ namespace DirectoryService.Domain.Locations
 
         public static Result<LocationName> Create(string name)
         {
+            string property = "location.name";
+
             if (string.IsNullOrWhiteSpace(name))
             {
-                return "Свойство \"Name\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty(property);
             }
 
-            if (name.Length < LengthConstants.LENGTH_3 || name.Length > LengthConstants.LENGTH_120)
+            var min = LengthConstants.LENGTH_3;
+            var max = LengthConstants.LENGTH_120;
+            if (name.Length < min || name.Length > max)
             {
-                return $"Свойство \"Name\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов";
+                return GeneralErrors.PropertyOutOfRange(property, min, max);
             }
 
             return new LocationName(name);

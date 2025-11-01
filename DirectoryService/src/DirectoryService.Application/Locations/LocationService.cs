@@ -1,7 +1,7 @@
 ﻿using DirectoryService.Contracts.Locations;
 using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.Shared;
 using Microsoft.Extensions.Logging;
+using Shared.Result;
 
 namespace DirectoryService.Application.Locations
 {
@@ -21,16 +21,16 @@ namespace DirectoryService.Application.Locations
             var locNameRes = LocationName.Create(locationDTO.Name);
             if (locNameRes.IsFailure)
             {
-                return locNameRes.Error!;
+                return locNameRes.Error;
             }
 
             var locAdr = locationDTO.Address;
             if (locAdr == null)
             {
-                return "Адрес не может быть пустым";
+                return GeneralErrors.PropertyIsEmpty("location.address", "Адрес");
             }
 
-            var locAddressRes = LocationAddress.Create(locAdr);
+            var locAddressRes = LocationAddress.Create(locAdr.Country, locAdr.City, locAdr.Street, locAdr.House, locAdr.FlatNumber);
             if (locAddressRes.IsFailure)
             {
                 return locAddressRes.Error!;

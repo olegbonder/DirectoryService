@@ -1,5 +1,5 @@
-﻿using DirectoryService.Domain.Shared;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using Shared.Result;
 
 namespace DirectoryService.Domain.Departments
 {
@@ -16,19 +16,25 @@ namespace DirectoryService.Domain.Departments
 
         public static Result<DepartmentIdentifier> Create(string identifier)
         {
+            string property = "department.identifier";
+            string name = "Идентификатор";
             if (string.IsNullOrWhiteSpace(identifier))
             {
-                return "Свойство \"Identifier\" не должно быть пустым";
+                return GeneralErrors.PropertyIsEmpty(property, name);
             }
 
-            if (identifier.Length < LengthConstants.LENGTH_3 || identifier.Length > LengthConstants.LENGTH_150)
+            var min = LengthConstants.LENGTH_3;
+            var max = LengthConstants.LENGTH_150;
+            if (identifier.Length < min || identifier.Length > max)
             {
-                return $"Свойство \"Identifier\" не должно быть меньше {LengthConstants.LENGTH_3} или больше {LengthConstants.LENGTH_150} символов";
+                return GeneralErrors.PropertyOutOfRange(property, min, max, name);
             }
 
             if (Regex.IsMatch(identifier, ONLY_LATIN_REGEX) == false)
             {
-                return "Свойство \"Identifier\" должно содержать латинские буквы";
+                return Error.Validation(
+                    "department.identifier.length.must.be.latin",
+                    "Свойство \"Identifier\" должно содержать латинские буквы");
             }
 
             return new DepartmentIdentifier(identifier);
