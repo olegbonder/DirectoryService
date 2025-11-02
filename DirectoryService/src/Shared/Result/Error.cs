@@ -65,6 +65,6 @@ namespace Shared.Result
         /// <summary>
         /// Ошибка авторизации
         /// </summary>
-        Authorization
+        Authorization,
     }
 }

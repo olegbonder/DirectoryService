@@ -20,9 +20,9 @@ namespace DirectoryService.Domain.Positions
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public PositionName Name { get; private set; }
+        public PositionName Name { get; private set; } = null!;
 
-        public PositionDesription Description { get; private set; }
+        public PositionDesription Description { get; private set; } = null!;
 
         public bool IsActive { get; private set; }
 

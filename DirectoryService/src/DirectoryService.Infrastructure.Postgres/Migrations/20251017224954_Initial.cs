@@ -23,7 +23,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                     depth = table.Column<short>(type: "smallint", nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -46,7 +46,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    address = table.Column<string>(type: "jsonb", nullable: false)
+                    address = table.Column<string>(type: "jsonb", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -62,7 +62,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                     description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -74,7 +74,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                 columns: table => new
                 {
                     department_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    location_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    location_id = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -92,7 +92,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                 columns: table => new
                 {
                     department_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    position_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    position_id = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {

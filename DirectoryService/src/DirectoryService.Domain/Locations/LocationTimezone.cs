@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Locations
 {
-    public class LocationTimezone
+    public sealed class LocationTimezone
     {
         public LocationTimezone(string value)
         {

@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Locations
 {
-    public class LocationName
+    public sealed class LocationName
     {
         private LocationName(string value)
         {

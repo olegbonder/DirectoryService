@@ -1,6 +1,6 @@
 ﻿namespace DirectoryService.Domain.Departments
 {
-    public record DepartmentId
+    public sealed record DepartmentId
     {
         private DepartmentId(Guid value)
         {

@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Departments
 {
-    public class DepartmentPath
+    public sealed class DepartmentPath
     {
         private const char SEPARATOR = '.';
 
@@ -13,8 +13,9 @@ namespace DirectoryService.Domain.Departments
 
         public string Value { get; }
 
-        public static Result<DepartmentPath> Create(string value, Department? parentDept)
+        public static Result<DepartmentPath> Create(DepartmentIdentifier identifier, Department? parentDept)
         {
+            var value = identifier.Value;
             value = parentDept == null ? value : $"{parentDept.Path}{SEPARATOR}{value}";
             return new DepartmentPath(value);
         }
