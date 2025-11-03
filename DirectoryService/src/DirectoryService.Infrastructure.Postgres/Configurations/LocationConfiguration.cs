@@ -48,11 +48,11 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     .HasColumnName("flatNumber");
             });
 
-            builder.OwnsOne(l => l.Timezone, lb =>
+            builder.ComplexProperty(l => l.Timezone, lb =>
             {
                 lb.Property(t => t.Value)
-                .IsRequired()
-                .HasColumnName("timezone");
+                    .IsRequired()
+                    .HasColumnName("timezone");
             });
 
             builder.Property(l => l.IsActive)

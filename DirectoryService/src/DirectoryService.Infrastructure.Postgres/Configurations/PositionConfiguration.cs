@@ -28,13 +28,13 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                 nb.HasIndex(p => p.Value).IsUnique();
             });
 
-            builder.Property(p => p.Description)
-                .HasConversion(
-                    p => p.Value,
-                    description => PositionDesription.Create(description).Value)
-                .IsRequired(false)
-                .HasMaxLength(LengthConstants.LENGTH_1000)
-                .HasColumnName("description");
+            builder.ComplexProperty(p => p.Description, pb =>
+            {
+                pb.Property(pd => pd.Value)
+                    .IsRequired(false)
+                    .HasMaxLength(LengthConstants.LENGTH_1000)
+                    .HasColumnName("description");
+            });
 
             builder.Property(p => p.IsActive)
                 .IsRequired()

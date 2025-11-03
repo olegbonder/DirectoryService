@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Departments
 {
-    public record DepartmentName
+    public sealed record DepartmentName
     {
         private DepartmentName(string value)
         {

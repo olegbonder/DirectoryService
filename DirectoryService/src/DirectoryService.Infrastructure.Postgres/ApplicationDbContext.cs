@@ -17,14 +17,14 @@ namespace DirectoryService.Infrastructure.Postgres
             optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
         }
 
-        private ILoggerFactory CreateLoggerFactory()
-        {
-            return LoggerFactory.Create(builder => builder.AddConsole());
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        }
+
+        private ILoggerFactory CreateLoggerFactory()
+        {
+            return LoggerFactory.Create(builder => builder.AddConsole());
         }
 
         public DbSet<Department> Departments => Set<Department>();

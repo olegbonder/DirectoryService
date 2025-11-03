@@ -3,7 +3,7 @@ using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
-    public class Location : Entity<LocationId>
+    public sealed class Location : Entity<LocationId>
     {
         // EF Core
         private Location(LocationId id)
@@ -21,11 +21,11 @@ namespace DirectoryService.Domain.Locations
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public LocationName Name { get; private set; }
+        public LocationName Name { get; private set; } = null!;
 
-        public LocationAddress Address { get; private set; }
+        public LocationAddress Address { get; private set; } = null!;
 
-        public LocationTimezone Timezone { get; private set; }
+        public LocationTimezone Timezone { get; private set; } = null!;
 
         public bool IsActive { get; private set; }
 

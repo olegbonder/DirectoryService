@@ -3,7 +3,7 @@ using Shared.Result;
 
 namespace DirectoryService.Domain.Departments
 {
-    public class DepartmentIdentifier
+    public sealed class DepartmentIdentifier
     {
         public const string ONLY_LATIN_REGEX = @"^[a-z]+$";
 

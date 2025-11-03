@@ -3,7 +3,7 @@ using Shared.Result;
 
 namespace DirectoryService.Domain.Departments
 {
-    public class Department : Entity<DepartmentId>
+    public sealed class Department : Entity<DepartmentId>
     {
         private IReadOnlyCollection<Department> _children = [];
         private IReadOnlyCollection<DepartmentLocation> _locations = [];
@@ -38,13 +38,11 @@ namespace DirectoryService.Domain.Departments
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public DepartmentName Name { get; private set; }
+        public DepartmentName Name { get; private set; } = null!;
 
-        public DepartmentIdentifier Identifier { get; private set; }
+        public DepartmentIdentifier Identifier { get; private set; } = null!;
 
-        public DepartmentId? ParentId { get; private set; }
-
-        public Department Parent { get; private set; }
+        public DepartmentId? ParentId { get; private set; } = null!;
 
         public IReadOnlyCollection<Department> Children => _children;
 
@@ -52,7 +50,7 @@ namespace DirectoryService.Domain.Departments
 
         public IReadOnlyCollection<DepartmentPosition> DepartmentPositions => _positions;
 
-        public DepartmentPath Path { get; private set; }
+        public DepartmentPath Path { get; private set; } = null!;
 
         public short Depth { get; private set; }
 

@@ -38,18 +38,12 @@ namespace DirectoryService.Web.Middlewares
 
                 NotFoundException => (StatusCodes.Status404NotFound, JsonSerializer.Deserialize<Error[]>(exception.Message)),
 
-                _ => (StatusCodes.Status500InternalServerError, [Error.Failure(null, "Something went wrong")])
+                _ => (StatusCodes.Status500InternalServerError, [Error.Failure("web.app", "Something went wrong")])
             };
 
             context.Response.StatusCode = code;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(errors);
         }
-    }
-
-    public static class ExceptionMiddlewareExtension
-    {
-        public static IApplicationBuilder UseExceptionMiddleware(this WebApplication app) =>
-            app.UseMiddleware<ExceptionMiddleware>();
     }
 }

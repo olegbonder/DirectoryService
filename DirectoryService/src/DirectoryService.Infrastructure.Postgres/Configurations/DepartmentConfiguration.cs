@@ -17,7 +17,7 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                 .HasConversion(d => d.Value, id => DepartmentId.Current(id))
                 .HasColumnName("id");
 
-            builder.OwnsOne(d => d.Name, db =>
+            builder.ComplexProperty(d => d.Name, db =>
             {
                 db.Property(d => d.Value)
                     .IsRequired()
@@ -25,7 +25,7 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     .HasColumnName("name");
             });
 
-            builder.OwnsOne(d => d.Identifier, db =>
+            builder.ComplexProperty(d => d.Identifier, db =>
             {
                 db.Property(d => d.Value)
                     .IsRequired()
@@ -33,7 +33,7 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     .HasColumnName("identifier");
             });
 
-            builder.OwnsOne(d => d.Path, db =>
+            builder.ComplexProperty(d => d.Path, db =>
             {
                 db.Property(p => p.Value)
                     .IsRequired()
@@ -57,7 +57,8 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                 .HasColumnName("updated_at");
 
             builder.HasMany(d => d.Children)
-                .WithOne(d => d.Parent)
+                .WithOne()
+                .IsRequired(false)
                 .HasForeignKey(d => d.ParentId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_parent_id");
