@@ -1,23 +1,33 @@
 ﻿using DirectoryService.Infrastructure.Postgres;
-using DirectoryService.Web;
-using DirectoryService.Web.Middlewares;
+using DirectoryService.Web.Configuration;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddProgramDependencies();
-
-builder.Services.AddInfrastructure(builder.Configuration);
-
-var app = builder.Build();
-
-app.UseExceptionMiddleware();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
-    app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DirectoryService.Web"));
+    Log.Information("Starting web application");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddProgramDependencies(builder.Configuration);
+
+    builder.Services.AddInfrastructure(builder.Configuration);
+
+    var app = builder.Build();
+
+    app.ConfigureApp();
+
+    app.Run();
 }
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
