@@ -21,13 +21,13 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             try
             {
                 await _context.AddAsync(location, cancellationToken);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
                 var message = ex.InnerException?.Message ?? ex.Message;
-                _logger.LogError(message);
-                return Error.Failure("db.add.location.is.failed", message);
+                _logger.LogError(ex, message);
+                return Error.Failure("db.add.location.is.failed", "Ошибка сохранения локации");
             }
 
             return location.Id.Value;

@@ -1,14 +1,18 @@
 ﻿using DirectoryService.Application;
+using DirectoryService.Application.Locations;
 using DirectoryService.Presenters.EndpointResult;
+using Serilog;
+using Serilog.Exceptions;
 using Shared.Result;
 
-namespace DirectoryService.Web
+namespace DirectoryService.Web.Configuration
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddProgramDependencies(this IServiceCollection services)
+        public static IServiceCollection AddProgramDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services
+                .AddSerilogLogging(configuration)
                 .AddWebDependencies()
                 .AddApplication();
 
@@ -38,6 +42,17 @@ namespace DirectoryService.Web
                 });
             });
 
+            return services;
+        }
+
+        private static IServiceCollection AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSerilog((serviceProvider, lo) => lo
+                .ReadFrom.Configuration(configuration)
+                .ReadFrom.Services(serviceProvider)
+                .Enrich.FromLogContext()
+                .Enrich.WithExceptionDetails()
+                .Enrich.WithProperty("ServiceName", nameof(LocationService)));
             return services;
         }
     }
