@@ -1,5 +1,7 @@
-﻿using DirectoryService.Application.Locations;
+﻿using System.Linq.Expressions;
+using DirectoryService.Application.Locations;
 using DirectoryService.Domain.Locations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
 
@@ -22,6 +24,8 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             {
                 await _context.AddAsync(location, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("Локация с id = {id} сохранена в БД", location.Id);
             }
             catch (Exception ex)
             {
@@ -31,6 +35,17 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             }
 
             return location.Id.Value;
+        }
+
+        public async Task<Result<bool>> ExistsByAsync(Expression<Func<Location, bool>> predicate, CancellationToken cancellationToken)
+        {
+            var isExist = await _context.Locations.AnyAsync(predicate, cancellationToken);
+            if (isExist)
+            {
+                return GeneralErrors.AllreadyExists("location.address");
+            }
+
+            return false;
         }
     }
 }

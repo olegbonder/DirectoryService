@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Locations
 {
-    public sealed class LocationAddress
+    public sealed record LocationAddress
     {
         private LocationAddress(string country, string city, string street, string houseNumber, string? flatNumber)
         {

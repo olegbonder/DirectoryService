@@ -4,11 +4,14 @@ namespace Shared.Result
 {
     public record Error
     {
-        private Error(string code, string message, ErrorType type)
+
+        private const string SEPARATOR = "||";
+        private Error(string code, string message, ErrorType type, string? invalidField = null)
         {
             Code = code;
             Message = message;
             Type = type;
+            InvalidField = invalidField;
         }
 
         public string Code { get; }
@@ -16,10 +19,11 @@ namespace Shared.Result
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ErrorType Type { get; }
+        public string? InvalidField { get; }
 
         public static Error None = new(string.Empty, string.Empty, ErrorType.None);
-        public static Error Validation(string code, string message)
-            => new(code, message, ErrorType.Validation);
+        public static Error Validation(string code, string message, string? invalidField = null)
+            => new(code, message, ErrorType.Validation, invalidField);
         public static Error NotFound(string code, string message)
             => new(code, message, ErrorType.NotFound);
         public static Error Conflict(string code, string message)
@@ -28,6 +32,23 @@ namespace Shared.Result
             => new(code, message, ErrorType.Failure);
 
         public Errors ToErrors() => new([this]);
+        public string Serialize() => string.Join(SEPARATOR, Code, Message, Type);
+        public static Error Deserialize(string serialized)
+        {
+            string[] parts = serialized.Split(SEPARATOR);
+
+            if (parts.Length < 3)
+            {
+                throw new ArgumentException("Invalid serialized format");
+            }
+
+            if (Enum.TryParse<ErrorType>(parts[2], out var type) == false)
+            {
+                throw new ArgumentException("Invalid serialized format");
+            }
+
+            return new(parts[0], parts[1], type);
+        }
     }
 
     public enum ErrorType

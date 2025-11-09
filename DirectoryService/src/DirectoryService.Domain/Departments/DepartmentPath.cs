@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Departments
 {
-    public sealed class DepartmentPath
+    public sealed record DepartmentPath
     {
         private const char SEPARATOR = '.';
 

@@ -269,7 +269,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("LocationId");
 
-                            b1.ToTable("locations");
+                            b1.ToTable("locations", (string)null);
 
                             b1.ToJson("address");
 
@@ -293,7 +293,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("locations");
+                            b1.ToTable("locations", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("LocationId");
@@ -324,7 +324,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("positions");
+                            b1.ToTable("positions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("PositionId");
