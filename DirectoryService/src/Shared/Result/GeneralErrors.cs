@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Shared.Result
+﻿namespace Shared.Result
 {
     public static class GeneralErrors
     {

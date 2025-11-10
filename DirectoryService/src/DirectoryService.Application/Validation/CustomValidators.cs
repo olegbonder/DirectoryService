@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text.Json;
+using FluentValidation;
 using Shared.Result;
 
 namespace DirectoryService.Application.Validation
@@ -18,13 +19,13 @@ namespace DirectoryService.Application.Validation
                     return;
                 }
 
-                context.AddFailure(result.Error.Serialize());
+                context.AddFailure(JsonSerializer.Serialize(result.Errors));
             });
         }
 
         public static IRuleBuilderOptions<T, TProperty> WithError<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, Error error)
         {
-            return rule.WithMessage(error.Serialize());
+            return rule.WithMessage(JsonSerializer.Serialize(error.ToErrors()));
         }
     }
 }

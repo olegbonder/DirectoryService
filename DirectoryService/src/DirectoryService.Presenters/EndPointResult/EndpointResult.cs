@@ -14,7 +14,7 @@ namespace DirectoryService.Presenters.EndpointResult
         {
             _result = result.IsSuccess
                 ? new SuccessResult<TValue>(result.Value)
-                : new ErrorsResult(result.Error);
+                : new ErrorsResult(result.Errors);
         }
 
         public static implicit operator EndpointResult<TValue>(Result<TValue> result) => new(result);

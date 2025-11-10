@@ -1,7 +1,5 @@
-﻿using System.Linq.Expressions;
-using DirectoryService.Application.Locations;
+﻿using DirectoryService.Application.Locations;
 using DirectoryService.Domain.Locations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
 
@@ -35,17 +33,6 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             }
 
             return location.Id.Value;
-        }
-
-        public async Task<Result<bool>> ExistsByAsync(Expression<Func<Location, bool>> predicate, CancellationToken cancellationToken)
-        {
-            var isExist = await _context.Locations.AnyAsync(predicate, cancellationToken);
-            if (isExist)
-            {
-                return GeneralErrors.AllreadyExists("location.address");
-            }
-
-            return false;
         }
     }
 }

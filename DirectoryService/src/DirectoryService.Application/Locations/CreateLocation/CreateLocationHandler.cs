@@ -28,8 +28,7 @@ namespace DirectoryService.Application.Locations.CreateLocation
             var validResult = await _validator.ValidateAsync(command, cancellationToken);
             if (validResult.IsValid == false)
             {
-                var errMessages = validResult.Errors.Select(x => x.ErrorMessage);
-                return Error.Validation("location", string.Join(';', errMessages));
+                return validResult.ToList();
             }
 
             var locName = LocationName.Create(command.Request.Name).Value;
@@ -43,27 +42,14 @@ namespace DirectoryService.Application.Locations.CreateLocation
             var locationRes = Location.Create(locName, locAddress, locTimeZone);
             if (locationRes.IsFailure)
             {
-                return locationRes.Error!;
+                return locationRes.Errors!;
             }
 
-            /*Бизнес валидация
-              поиск по существующему адресу */
-            var existLocationByAddressRes = await _locationsRepository.ExistsByAsync(
-                l =>
-                l.Address.Country == locAddress.Country &&
-                l.Address.City == locAddress.City &&
-                l.Address.Street == locAddress.Street &&
-                l.Address.HouseNumber == locAddress.HouseNumber &&
-                l.Address.FlatNumber == locAddress.FlatNumber, cancellationToken);
-            if (existLocationByAddressRes.IsFailure)
-            {
-                return existLocationByAddressRes.Error!;
-            }
-
+            // Бизнес валидация
             var addLocationRes = await _locationsRepository.AddAsync(locationRes.Value, cancellationToken);
             if (addLocationRes.IsFailure)
             {
-                return addLocationRes.Error!;
+                return addLocationRes.Errors!;
             }
 
             _logger.LogInformation("Location с {id} добавлен", addLocationRes.Value);

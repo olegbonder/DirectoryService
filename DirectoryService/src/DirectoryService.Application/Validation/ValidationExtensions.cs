@@ -1,4 +1,5 @@
-﻿using FluentValidation.Results;
+﻿using System.Text.Json;
+using FluentValidation.Results;
 using Shared.Result;
 
 namespace DirectoryService.Application.Validation
@@ -9,12 +10,12 @@ namespace DirectoryService.Application.Validation
         {
             var validationErrors = validationResult.Errors;
 
-            IEnumerable<Error> errors = from validationError in validationErrors
+            IEnumerable<IEnumerable<Error>> errors = from validationError in validationErrors
                          let errorMessage = validationError.ErrorMessage
-                         let error = Error.Deserialize(errorMessage)
-                         select Error.Validation(error.Code, error.Message, validationError.PropertyName);
+                         let error = JsonSerializer.Deserialize<IEnumerable<Error>>(errorMessage)
+                         select error;
 
-            return errors.ToArray();
+            return new Errors(errors.SelectMany(e => e));
         }
     }
 }
