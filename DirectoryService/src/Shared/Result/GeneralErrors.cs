@@ -33,5 +33,10 @@
             var label = entity ?? "record";
             return Error.Validation($"{label}.already.exist", "Запись уже существует");
         }
+
+        public static Error OperationCancelled(string property)
+        {
+            return Error.Failure($"{property}.operation.canceled", "Операция была отменена");
+        }
     }
 }
