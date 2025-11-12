@@ -71,7 +71,7 @@ namespace DirectoryService.Domain.Departments
         {
             if (locations.Count < 1)
             {
-                return Error.Validation("department.has.not.locatios", "У подразделения должна быть хотя бы одна локация");
+                return Error.Validation("department.has.not.locations", "У подразделения должна быть хотя бы одна локация");
             }
 
             var newDeptId = DepartmentId.Create();

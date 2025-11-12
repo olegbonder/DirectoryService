@@ -1,5 +1,6 @@
 ﻿using DirectoryService.Application;
 using DirectoryService.Application.Locations;
+using DirectoryService.Application.Locations.CreateLocation;
 using DirectoryService.Presenters.EndpointResult;
 using Serilog;
 using Serilog.Exceptions;
@@ -52,7 +53,7 @@ namespace DirectoryService.Web.Configuration
                 .ReadFrom.Services(serviceProvider)
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionDetails()
-                .Enrich.WithProperty("ServiceName", nameof(LocationService)));
+                .Enrich.WithProperty("HandlerName", nameof(CreateLocationHandler)));
             return services;
         }
     }

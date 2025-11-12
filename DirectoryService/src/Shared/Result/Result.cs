@@ -5,16 +5,22 @@
         protected Result()
         {
             IsSuccess = true;
-            Error = Error.None;
+            Errors = Error.None;
         }
 
         protected Result(Error error)
         {
             IsSuccess = false;
-            Error = error;
+            Errors = error;
         }
 
-        public Error Error { get; set; }
+        protected Result(Errors errors)
+        {
+            IsSuccess = false;
+            Errors = errors;
+        }
+
+        public Errors Errors { get; set; }
 
         public bool IsSuccess { get; }
 
@@ -24,6 +30,10 @@
 
         public static Result Failure(Error error) => new(error);
 
+        public static Result Failure(Errors errors) => new(errors);
+
         public static implicit operator Result(Error error) => Failure(error);
+
+        public static implicit operator Result(Errors errors) => Failure(errors);
     }
 }

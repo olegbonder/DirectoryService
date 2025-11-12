@@ -1,4 +1,5 @@
-﻿using DirectoryService.Application.Locations;
+﻿using DirectoryService.Application.Abstractions;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DirectoryService.Application
@@ -7,7 +8,14 @@ namespace DirectoryService.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<ILocationService, LocationService>();
+            var assembly = typeof(DependencyInjection).Assembly;
+            services.AddValidatorsFromAssembly(assembly);
+
+            // Поищет в текущей сборке все реализации для ICommandHandler
+            services.Scan(scan => scan.FromAssemblies(assembly)
+                .AddClasses(classes => classes.AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>)))
+                .AsSelfWithInterfaces()
+                .WithScopedLifetime());
 
             return services;
         }

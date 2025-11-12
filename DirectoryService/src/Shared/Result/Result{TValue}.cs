@@ -9,6 +9,11 @@
         {
         }
 
+        private Result(Errors errors)
+            : base(errors)
+        {
+        }
+
         private readonly TValue _value;
 
         public TValue Value => IsSuccess
@@ -19,9 +24,13 @@
 
         public static new Result<TValue> Failure(Error error) => new(error);
 
+        public static new Result<TValue> Failure(Errors errors) => new(errors);
+
         public static implicit operator Result<TValue>(TValue value) => new(value);
 
         public static implicit operator Result<TValue>(Error error) => new(error);
+
+        public static implicit operator Result<TValue>(Errors errors) => new(errors);
 
         public static implicit operator TValue(Result<TValue> value) => value._value;
     }

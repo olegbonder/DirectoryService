@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Locations
 {
-    public sealed class LocationTimezone
+    public sealed record LocationTimezone
     {
         public LocationTimezone(string value)
         {
@@ -22,7 +22,7 @@ namespace DirectoryService.Domain.Locations
 
             if(TimeZoneInfo.TryFindSystemTimeZoneById(timeZone, out TimeZoneInfo? tz) == false)
             {
-                return Error.Validation(property, "Указанное значение не является часовым поясом!");
+                return Error.Validation(property, "Указанное значение не является часовым поясом!", "timezone");
             }
 
             return new LocationTimezone(timeZone);

@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Positions
 {
-    public class PositionDesription
+    public sealed record PositionDesription
     {
         private PositionDesription(string? value)
         {

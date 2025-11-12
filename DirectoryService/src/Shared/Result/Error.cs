@@ -4,11 +4,13 @@ namespace Shared.Result
 {
     public record Error
     {
-        private Error(string code, string message, ErrorType type)
+        [JsonConstructor]
+        private Error(string code, string message, ErrorType type, string? invalidField = null)
         {
             Code = code;
             Message = message;
             Type = type;
+            InvalidField = invalidField;
         }
 
         public string Code { get; }
@@ -16,10 +18,11 @@ namespace Shared.Result
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ErrorType Type { get; }
+        public string? InvalidField { get; }
 
         public static Error None = new(string.Empty, string.Empty, ErrorType.None);
-        public static Error Validation(string code, string message)
-            => new(code, message, ErrorType.Validation);
+        public static Error Validation(string code, string message, string? invalidField = null)
+            => new(code, message, ErrorType.Validation, invalidField);
         public static Error NotFound(string code, string message)
             => new(code, message, ErrorType.NotFound);
         public static Error Conflict(string code, string message)

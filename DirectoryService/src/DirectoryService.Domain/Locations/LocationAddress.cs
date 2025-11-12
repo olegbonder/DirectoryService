@@ -2,7 +2,7 @@
 
 namespace DirectoryService.Domain.Locations
 {
-    public sealed class LocationAddress
+    public sealed record LocationAddress
     {
         private LocationAddress(string country, string city, string street, string houseNumber, string? flatNumber)
         {
@@ -27,24 +27,30 @@ namespace DirectoryService.Domain.Locations
 
         public static Result<LocationAddress> Create(string country, string city, string street, string houseNumber, string? flatNumber)
         {
+            var errors = new List<Error>();
             if (string.IsNullOrWhiteSpace(country))
             {
-                return GeneralErrors.PropertyIsEmpty("location.address.country", "Страна");
+                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.country", "Страна"));
             }
 
             if (string.IsNullOrWhiteSpace(city))
             {
-                return GeneralErrors.PropertyIsEmpty("location.address.city", "Город");
+                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.city", "Город"));
             }
 
             if (string.IsNullOrWhiteSpace(street))
             {
-                return GeneralErrors.PropertyIsEmpty("location.address.street", "Улица");
+                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.street", "Улица"));
             }
 
             if (string.IsNullOrWhiteSpace(houseNumber))
             {
-                return GeneralErrors.PropertyIsEmpty("location.address.house", "Дом");
+                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.house", "Дом"));
+            }
+
+            if (errors.Any())
+            {
+                return new Errors(errors);
             }
 
             return new LocationAddress(country, city, street, houseNumber, flatNumber);
