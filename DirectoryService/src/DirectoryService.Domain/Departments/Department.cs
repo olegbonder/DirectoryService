@@ -5,7 +5,7 @@ namespace DirectoryService.Domain.Departments
 {
     public sealed class Department : Entity<DepartmentId>
     {
-        private IReadOnlyCollection<Department> _children = [];
+        private List<Department> _children = [];
         private IReadOnlyCollection<DepartmentLocation> _locations = [];
         private IReadOnlyCollection<DepartmentPosition> _positions = [];
 
@@ -17,22 +17,20 @@ namespace DirectoryService.Domain.Departments
 
         private Department(
             DepartmentId id,
+            DepartmentId? parentId,
             DepartmentName name,
             DepartmentIdentifier identifier,
-            DepartmentId parentId,
-            IEnumerable<Department> childs,
             DepartmentPath path,
-            IReadOnlyCollection<DepartmentLocation> locations,
-            IReadOnlyCollection<DepartmentPosition> positions)
+            int depth,
+            IReadOnlyCollection<DepartmentLocation> locations)
             : base(id)
         {
             Name = name;
             Identifier = identifier;
             ParentId = parentId;
-            _children = childs.ToList();
             _locations = locations;
-            _positions = positions;
             Path = path;
+            Depth = depth;
             IsActive = true;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
@@ -44,7 +42,7 @@ namespace DirectoryService.Domain.Departments
 
         public DepartmentId? ParentId { get; private set; } = null!;
 
-        public IReadOnlyCollection<Department> Children => _children;
+        public List<Department> Children => _children;
 
         public IReadOnlyCollection<DepartmentLocation> DepartmentLocations => _locations;
 
@@ -52,7 +50,7 @@ namespace DirectoryService.Domain.Departments
 
         public DepartmentPath Path { get; private set; } = null!;
 
-        public short Depth { get; private set; }
+        public int Depth { get; private set; }
 
         public bool IsActive { get; private set; }
 
@@ -60,22 +58,21 @@ namespace DirectoryService.Domain.Departments
 
         public DateTime UpdatedAt { get; private set; }
 
-        public Result<Department> Create(
+        public static Result<Department> Create(
+            DepartmentId id,
+            DepartmentId? parentId,
             DepartmentName name,
             DepartmentIdentifier identifier,
-            DepartmentId parentId,
-            IEnumerable<Department> childs,
             DepartmentPath path,
-            IReadOnlyCollection<DepartmentLocation> locations,
-            IReadOnlyCollection<DepartmentPosition> positions)
+            int depth,
+            IReadOnlyCollection<DepartmentLocation> locations)
         {
             if (locations.Count < 1)
             {
                 return Error.Validation("department.has.not.locations", "У подразделения должна быть хотя бы одна локация");
             }
 
-            var newDeptId = DepartmentId.Create();
-            return new Department(newDeptId, name, identifier, parentId, childs, path, locations, positions);
+            return new Department(id, parentId, name, identifier, path, depth, locations);
         }
     }
 }
