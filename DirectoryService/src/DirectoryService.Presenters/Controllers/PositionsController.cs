@@ -1,5 +1,5 @@
-﻿using DirectoryService.Application.Features.Locations.CreateLocation;
-using DirectoryService.Contracts.Locations;
+﻿using DirectoryService.Application.Features.Positions.CreatePosition;
+using DirectoryService.Contracts.Positions;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +7,7 @@ namespace DirectoryService.Presenters.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class LocationsController: ControllerBase
+    public class PositionsController: ControllerBase
     {
         [HttpPost]
         [ProducesResponseType<Envelope<Guid>>(200)]
@@ -16,11 +16,11 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
         public async Task<EndpointResult<Guid>> Create(
-            [FromBody] CreateLocationRequest request,
-            [FromServices] CreateLocationHandler handler,
+            [FromBody] CreatePositionRequest request,
+            [FromServices] CreatePositionHandler handler,
             CancellationToken cancellationToken)
         {
-            var command = new CreateLocationCommand(request);
+            var command = new CreatePositionCommand(request);
             return await handler.Handle(command, cancellationToken);
         }
     }

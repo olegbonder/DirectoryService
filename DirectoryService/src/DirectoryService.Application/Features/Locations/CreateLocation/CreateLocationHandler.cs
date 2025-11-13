@@ -1,11 +1,12 @@
 ﻿using DirectoryService.Application.Abstractions;
+using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
 
-namespace DirectoryService.Application.Locations.CreateLocation
+namespace DirectoryService.Application.Features.Locations.CreateLocation
 {
     public sealed class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
     {

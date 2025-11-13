@@ -16,7 +16,7 @@ namespace DirectoryService.Domain.Departments
         public static Result<DepartmentPath> Create(DepartmentIdentifier identifier, Department? parentDept)
         {
             var value = identifier.Value;
-            value = parentDept == null ? value : $"{parentDept.Path}{SEPARATOR}{value}";
+            value = parentDept == null ? value : $"{parentDept.Path.Value}{SEPARATOR}{value}";
             return new DepartmentPath(value);
         }
     }

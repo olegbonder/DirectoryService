@@ -1,0 +1,95 @@
+﻿using DirectoryService.Application.Abstractions;
+using DirectoryService.Application.Features.Departments;
+using DirectoryService.Application.Features.Departments.CreateDepartment;
+using DirectoryService.Application.Validation;
+using DirectoryService.Domain;
+using DirectoryService.Domain.Departments;
+using DirectoryService.Domain.Locations;
+using DirectoryService.Domain.Shared;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
+using Shared.Result;
+
+namespace DirectoryService.Application.Features.Locations.CreateDepartment
+{
+    public sealed class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCommand>
+    {
+        private readonly IDepartmentsRepository _departmentsRepository;
+        private readonly ILocationsRepository _locationsRepository;
+        private readonly IValidator<CreateDepartmentCommand> _validator;
+        private readonly ILogger<CreateDepartmentHandler> _logger;
+
+        public CreateDepartmentHandler(
+            IDepartmentsRepository departmentsRepository,
+            ILocationsRepository locationsRepository,
+            IValidator<CreateDepartmentCommand> validator,
+            ILogger<CreateDepartmentHandler> logger)
+        {
+            _departmentsRepository = departmentsRepository;
+            _locationsRepository = locationsRepository;
+            _validator = validator;
+            _logger = logger;
+        }
+
+        public async Task<Result<Guid>> Handle(CreateDepartmentCommand command, CancellationToken cancellationToken)
+        {
+            var validResult = await _validator.ValidateAsync(command, cancellationToken);
+            if (validResult.IsValid == false)
+            {
+                return validResult.ToList();
+            }
+
+            var request = command.Request;
+
+            var newDeptId = DepartmentId.Create();
+
+            var deptName = DepartmentName.Create(request.Name).Value;
+
+            var deptIdentifier = DepartmentIdentifier.Create(request.Identifier).Value;
+
+            var parentId = request.ParentId;
+            Department? parentDepartment = null;
+            DepartmentId? parentDepartmentId = null;
+            int depth = 0;
+            if (parentId.HasValue)
+            {
+                parentDepartmentId = DepartmentId.Current(parentId.Value);
+                parentDepartment = await _departmentsRepository.GetBy(d => d.Id == parentDepartmentId, cancellationToken);
+                if (parentDepartment == null)
+                {
+                    return DepartmentErrors.NotFound(parentId.Value);
+                }
+
+                depth = parentDepartment.Depth + 1;
+            }
+
+            var deptPath = DepartmentPath.Create(deptIdentifier, parentDepartment).Value;
+
+            var locationIds = request.LocationIds.Select(LocationId.Current).ToList();
+            var getLocationsRes = await _locationsRepository.GetLocationByIds(locationIds, cancellationToken);
+            if (getLocationsRes.IsFailure)
+            {
+                return getLocationsRes.Errors;
+            }
+
+            var locations = getLocationsRes.Value;
+            var locationDepartments = locations.Select(l => new DepartmentLocation(newDeptId, l.Id)).ToList();
+
+            var departmentRes = Department.Create(newDeptId, parentDepartmentId, deptName, deptIdentifier, deptPath, depth, locationDepartments);
+            if (departmentRes.IsFailure)
+            {
+                return departmentRes.Errors!;
+            }
+
+            var addDepartmentRes = await _departmentsRepository.AddAsync(departmentRes.Value, cancellationToken);
+            if (addDepartmentRes.IsFailure)
+            {
+                return addDepartmentRes.Errors!;
+            }
+
+            _logger.LogInformation("Подразделение с {id} добавлен", addDepartmentRes.Value);
+
+            return addDepartmentRes.Value;
+        }
+    }
+}

@@ -1,4 +1,5 @@
-﻿using Shared.Result;
+﻿using DirectoryService.Domain.Shared;
+using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
@@ -30,22 +31,22 @@ namespace DirectoryService.Domain.Locations
             var errors = new List<Error>();
             if (string.IsNullOrWhiteSpace(country))
             {
-                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.country", "Страна"));
+                errors.Add(LocationErrors.CountryIsEmpty());
             }
 
             if (string.IsNullOrWhiteSpace(city))
             {
-                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.city", "Город"));
+                errors.Add(LocationErrors.CityIsEmpty());
             }
 
             if (string.IsNullOrWhiteSpace(street))
             {
-                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.street", "Улица"));
+                errors.Add(LocationErrors.StreetIsEmpty());
             }
 
             if (string.IsNullOrWhiteSpace(houseNumber))
             {
-                errors.Add(GeneralErrors.PropertyIsEmpty("location.address.house", "Дом"));
+                errors.Add(LocationErrors.HouseNumberIsEmpty());
             }
 
             if (errors.Any())

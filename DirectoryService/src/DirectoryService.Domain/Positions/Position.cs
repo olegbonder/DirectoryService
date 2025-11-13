@@ -5,17 +5,25 @@ namespace DirectoryService.Domain.Positions
 {
     public class Position : Entity<PositionId>
     {
+        private List<DepartmentPosition> _departments = [];
+
         // EF Core
         private Position(PositionId id)
             : base(id)
         {
         }
 
-        private Position(PositionId id,  PositionName name, PositionDesription desription)
+        private Position(
+            PositionId id,
+            PositionName name,
+            PositionDesription desription,
+            IReadOnlyCollection<DepartmentPosition> departmentPositions)
             : base(id)
         {
             Name = name;
             Description = desription;
+            _departments = departmentPositions.ToList();
+            IsActive = true;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
@@ -24,16 +32,26 @@ namespace DirectoryService.Domain.Positions
 
         public PositionDesription Description { get; private set; } = null!;
 
+        public IReadOnlyCollection<DepartmentPosition> DepartmentPositions => _departments;
+
         public bool IsActive { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
 
-        public static Result<Position> Create(PositionName name, PositionDesription desription)
+        public static Result<Position> Create(
+            PositionId id,
+            PositionName name,
+            PositionDesription desription,
+            IReadOnlyCollection<DepartmentPosition> departmentPositions)
         {
-            var newPositionId = PositionId.Create();
-            return new Position(newPositionId, name, desription);
+            if (departmentPositions.Count < 1)
+            {
+                return PositionErrors.PositionMustHaveMoreOneDepartment();
+            }
+
+            return new Position(id, name, desription, departmentPositions);
         }
     }
 }

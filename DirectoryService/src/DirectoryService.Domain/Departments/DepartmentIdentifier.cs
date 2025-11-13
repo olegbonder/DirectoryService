@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using DirectoryService.Domain.Shared;
 using Shared.Result;
 
 namespace DirectoryService.Domain.Departments
@@ -16,25 +17,21 @@ namespace DirectoryService.Domain.Departments
 
         public static Result<DepartmentIdentifier> Create(string identifier)
         {
-            string property = "department.identifier";
-            string name = "Идентификатор";
             if (string.IsNullOrWhiteSpace(identifier))
             {
-                return GeneralErrors.PropertyIsEmpty(property, name);
+                return DepartmentErrors.IdentifierIsEmpty();
             }
 
             var min = LengthConstants.LENGTH_3;
             var max = LengthConstants.LENGTH_150;
             if (identifier.Length < min || identifier.Length > max)
             {
-                return GeneralErrors.PropertyOutOfRange(property, min, max, name);
+                return DepartmentErrors.IdentifierLengthOutOfRange(min, max);
             }
 
             if (Regex.IsMatch(identifier, ONLY_LATIN_REGEX) == false)
             {
-                return Error.Validation(
-                    "department.identifier.length.must.be.latin",
-                    "Свойство \"Identifier\" должно содержать латинские буквы");
+                return DepartmentErrors.IdentifierMustBeLatin();
             }
 
             return new DepartmentIdentifier(identifier);
