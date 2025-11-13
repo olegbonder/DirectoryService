@@ -64,10 +64,10 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
         public async Task<Result<IReadOnlyCollection<Location>>> GetLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
         {
             var locations = await _context.Locations.Where(l => locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
-            var notFoundLocations = locations.Where(l => !locationIds.Contains(l.Id));
-            if (notFoundLocations.Any())
+            var notFoundLocationIds = locationIds.Except(locations.Select(l => l.Id));
+            if (notFoundLocationIds.Any())
             {
-                var errors = notFoundLocations.Select(l => GeneralErrors.NotFound("location", l.Id.Value));
+                var errors = notFoundLocationIds.Select(l => LocationErrors.NotFound(l.Value));
 
                 return new Errors(errors);
             }

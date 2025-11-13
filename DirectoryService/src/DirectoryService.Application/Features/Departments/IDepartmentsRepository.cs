@@ -8,6 +8,8 @@ namespace DirectoryService.Application.Features.Departments
     {
         Task<Result<Guid>> AddAsync(Department department, CancellationToken cancellationToken);
 
-        Task<Department> GetBy(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken);
+        Task<Department?> GetBy(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken);
+
+        Task<Result<IReadOnlyCollection<Department>>> GetDepartmentByIds(List<DepartmentId> departmentIds, CancellationToken cancellationToken);
     }
 }

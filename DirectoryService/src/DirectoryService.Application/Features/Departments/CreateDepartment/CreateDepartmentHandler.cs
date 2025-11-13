@@ -5,6 +5,7 @@ using DirectoryService.Application.Validation;
 using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
+using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
@@ -56,7 +57,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 parentDepartment = await _departmentsRepository.GetBy(d => d.Id == parentDepartmentId, cancellationToken);
                 if (parentDepartment == null)
                 {
-                    return GeneralErrors.NotFound("department", parentId.Value);
+                    return DepartmentErrors.NotFound(parentId.Value);
                 }
 
                 depth = parentDepartment.Depth + 1;
@@ -86,7 +87,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 return addDepartmentRes.Errors!;
             }
 
-            _logger.LogInformation("Department с {id} добавлен", addDepartmentRes.Value);
+            _logger.LogInformation("Подразделение с {id} добавлен", addDepartmentRes.Value);
 
             return addDepartmentRes.Value;
         }

@@ -69,8 +69,8 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<short>("Depth")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Depth")
+                        .HasColumnType("integer")
                         .HasColumnName("depth");
 
                     b.Property<bool>("IsActive")
@@ -213,14 +213,14 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("DirectoryService.Domain.DepartmentPosition", b =>
                 {
                     b.HasOne("DirectoryService.Domain.Departments.Department", null)
-                        .WithMany("DepartmentPositions")
+                        .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_department_positions_department_id");
 
                     b.HasOne("DirectoryService.Domain.Positions.Position", null)
-                        .WithMany()
+                        .WithMany("DepartmentPositions")
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -250,10 +250,8 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                             b1.Property<string>("Country")
                                 .IsRequired()
-                                .ValueGeneratedOnAddOrUpdate()
                                 .HasColumnType("text")
-                                .HasColumnName("country")
-                                .HasComputedColumnSql("address->>'Country'", true);
+                                .HasColumnName("country");
 
                             b1.Property<string>("FlatNumber")
                                 .HasColumnType("text")
@@ -270,9 +268,6 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                                 .HasColumnName("street");
 
                             b1.HasKey("LocationId");
-
-                            b1.HasIndex("Country")
-                                .IsUnique();
 
                             b1.ToTable("locations");
 
@@ -344,7 +339,10 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                     b.Navigation("Children");
 
                     b.Navigation("DepartmentLocations");
+                });
 
+            modelBuilder.Entity("DirectoryService.Domain.Positions.Position", b =>
+                {
                     b.Navigation("DepartmentPositions");
                 });
 #pragma warning restore 612, 618

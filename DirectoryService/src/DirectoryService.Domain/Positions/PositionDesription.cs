@@ -1,4 +1,5 @@
-﻿using Shared.Result;
+﻿using DirectoryService.Domain.Shared;
+using Shared.Result;
 
 namespace DirectoryService.Domain.Positions
 {
@@ -16,9 +17,7 @@ namespace DirectoryService.Domain.Positions
             var max = LengthConstants.LENGTH_1000;
             if (string.IsNullOrWhiteSpace(desription) == false && desription.Length > max)
             {
-                return Error.Validation(
-                    "position.desription.must.be.less",
-                    $"Свойство 'Описание' не должно быть быть больше {max} символов");
+                return PositionErrors.DescriptionLengthOutOfRange(max);
             }
 
             return new PositionDesription(desription);

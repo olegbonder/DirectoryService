@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DirectoryService.Infrastructure.Postgres.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251102131333_test")]
-    partial class test
+    [Migration("20251113212802_DepthChangeFieldType")]
+    partial class DepthChangeFieldType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,8 +72,8 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<short>("Depth")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Depth")
+                        .HasColumnType("integer")
                         .HasColumnName("depth");
 
                     b.Property<bool>("IsActive")
@@ -216,14 +216,14 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("DirectoryService.Domain.DepartmentPosition", b =>
                 {
                     b.HasOne("DirectoryService.Domain.Departments.Department", null)
-                        .WithMany("DepartmentPositions")
+                        .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_department_positions_department_id");
 
                     b.HasOne("DirectoryService.Domain.Positions.Position", null)
-                        .WithMany()
+                        .WithMany("DepartmentPositions")
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -342,7 +342,10 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                     b.Navigation("Children");
 
                     b.Navigation("DepartmentLocations");
+                });
 
+            modelBuilder.Entity("DirectoryService.Domain.Positions.Position", b =>
+                {
                     b.Navigation("DepartmentPositions");
                 });
 #pragma warning restore 612, 618

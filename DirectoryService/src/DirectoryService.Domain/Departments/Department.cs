@@ -7,7 +7,6 @@ namespace DirectoryService.Domain.Departments
     {
         private List<Department> _children = [];
         private IReadOnlyCollection<DepartmentLocation> _locations = [];
-        private IReadOnlyCollection<DepartmentPosition> _positions = [];
 
         // EF Core
         private Department(DepartmentId id)
@@ -46,8 +45,6 @@ namespace DirectoryService.Domain.Departments
 
         public IReadOnlyCollection<DepartmentLocation> DepartmentLocations => _locations;
 
-        public IReadOnlyCollection<DepartmentPosition> DepartmentPositions => _positions;
-
         public DepartmentPath Path { get; private set; } = null!;
 
         public int Depth { get; private set; }
@@ -69,7 +66,7 @@ namespace DirectoryService.Domain.Departments
         {
             if (locations.Count < 1)
             {
-                return Error.Validation("department.has.not.locations", "У подразделения должна быть хотя бы одна локация");
+                return DepartmentErrors.DepartmentMustHaveMoreOneLocation();
             }
 
             return new Department(id, parentId, name, identifier, path, depth, locations);
