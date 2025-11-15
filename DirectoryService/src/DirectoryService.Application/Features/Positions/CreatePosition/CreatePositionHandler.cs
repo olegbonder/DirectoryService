@@ -45,11 +45,11 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
             var positionName = PositionName.Create(request.Name).Value;
 
             var activeWithTheSameNamePosition = await _positionsRepository
-                .GetBy(p => p.Name.Value == request.Name, cancellationToken);
+                .GetBy(p => p.IsActive && p.Name == positionName, cancellationToken);
 
             if (activeWithTheSameNamePosition != null)
             {
-                return PositionErrors.ActivePositionHaveSameName();
+                return PositionErrors.ActivePositionHaveSameName(positionName.Value);
             }
 
             var positionDesription = PositionDesription.Create(request.Description).Value;

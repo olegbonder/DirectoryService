@@ -20,7 +20,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                 (address->>'HouseNumber'),
 	            COALESCE(address->>'FlatNumber', '')
             );
-        ");
+            ");
         }
 
         /// <inheritdoc />

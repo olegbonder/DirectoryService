@@ -5,7 +5,7 @@ namespace DirectoryService.Domain.Positions
 {
     public sealed record PositionName
     {
-        private PositionName(string value)
+        public PositionName(string value)
         {
             Value = value;
         }

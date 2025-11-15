@@ -173,6 +173,12 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -189,6 +195,9 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_positions");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("positions", (string)null);
                 });
@@ -269,6 +278,9 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("LocationId");
 
+                            b1.HasIndex("Country", "City", "Street", "HouseNumber", "FlatNumber")
+                                .IsUnique();
+
                             b1.ToTable("locations");
 
                             b1.ToJson("address");
@@ -301,34 +313,6 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
-
-                    b.Navigation("Name")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("DirectoryService.Domain.Positions.Position", b =>
-                {
-                    b.OwnsOne("DirectoryService.Domain.Positions.PositionName", "Name", b1 =>
-                        {
-                            b1.Property<Guid>("PositionId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
-                                .HasColumnName("name");
-
-                            b1.HasKey("PositionId");
-
-                            b1.HasIndex("Value")
-                                .IsUnique();
-
-                            b1.ToTable("positions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PositionId");
-                        });
 
                     b.Navigation("Name")
                         .IsRequired();

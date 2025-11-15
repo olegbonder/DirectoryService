@@ -46,6 +46,7 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                 lb.Property(a => a.FlatNumber)
                     .IsRequired(false)
                     .HasColumnName("flatNumber");
+                lb.HasIndex(la => new { la.Country, la.City, la.Street, la.HouseNumber, la.FlatNumber }).IsUnique();
             });
 
             builder.ComplexProperty(l => l.Timezone, lb =>

@@ -19,14 +19,14 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     id => PositionId.Current(id))
                 .HasColumnName("id");
 
-            builder.OwnsOne(p => p.Name, nb =>
-            {
-                nb.Property(d => d.Value)
-                    .IsRequired()
-                    .HasMaxLength(LengthConstants.LENGTH_100)
-                    .HasColumnName("name");
-                nb.HasIndex(p => p.Value).IsUnique();
-            });
+            builder.HasIndex(p => p.Name).IsUnique();
+            builder.Property(d => d.Name)
+                .IsRequired()
+                .HasMaxLength(LengthConstants.LENGTH_100)
+                .HasConversion(
+                    p => p.Value,
+                    name => new PositionName(name))
+                .HasColumnName("name");
 
             builder.ComplexProperty(p => p.Description, pb =>
             {

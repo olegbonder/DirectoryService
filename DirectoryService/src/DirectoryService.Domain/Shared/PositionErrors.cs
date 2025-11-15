@@ -41,9 +41,9 @@ namespace DirectoryService.Domain.Shared
             return Error.Validation("position.has.not.departments", "У позиции должно быть хотя бы одно подразделение");
         }
 
-        public static Error ActivePositionHaveSameName()
+        public static Error ActivePositionHaveSameName(string name)
         {
-            return Error.Conflict("position.name.is.conflict", "активная должность с данным наименованием уже существует");
+            return Error.Conflict("position.name.is.conflict", $"Активная должность с наименованием {name} уже существует");
         }
     }
 }
