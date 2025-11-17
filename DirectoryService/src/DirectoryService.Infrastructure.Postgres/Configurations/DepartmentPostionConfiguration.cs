@@ -30,12 +30,12 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                 .HasColumnName("department_id");
 
             builder.HasOne<Department>()
-                .WithMany(dp => dp.DepartmentPositions)
+                .WithMany()
                 .HasForeignKey(d => d.DepartmentId)
                 .HasConstraintName("fk_department_positions_department_id");
 
             builder.HasOne<Position>()
-                .WithMany()
+                .WithMany(dp => dp.DepartmentPositions)
                 .HasForeignKey(dl => dl.PositionId)
                 .HasConstraintName("fk_department_positions_position_id");
         }

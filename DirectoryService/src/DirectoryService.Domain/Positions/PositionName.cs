@@ -1,10 +1,11 @@
-﻿using Shared.Result;
+﻿using DirectoryService.Domain.Shared;
+using Shared.Result;
 
 namespace DirectoryService.Domain.Positions
 {
     public sealed record PositionName
     {
-        private PositionName(string value)
+        public PositionName(string value)
         {
             Value = value;
         }
@@ -13,17 +14,16 @@ namespace DirectoryService.Domain.Positions
 
         public static Result<PositionName> Create(string name)
         {
-            string property = "position.name";
             if (string.IsNullOrWhiteSpace(name))
             {
-                return GeneralErrors.PropertyIsEmpty(property);
+                return PositionErrors.NameIsEmpty();
             }
 
             var min = LengthConstants.LENGTH_3;
             var max = LengthConstants.LENGTH_100;
             if (name.Length < min || name.Length > max)
             {
-                return GeneralErrors.PropertyOutOfRange(property, min, max);
+                return PositionErrors.NameLengthOutOfRange(min, max);
             }
 
             return new PositionName(name);

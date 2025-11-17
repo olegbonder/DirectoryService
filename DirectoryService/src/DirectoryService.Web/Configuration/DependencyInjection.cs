@@ -1,6 +1,5 @@
 ﻿using DirectoryService.Application;
-using DirectoryService.Application.Locations;
-using DirectoryService.Application.Locations.CreateLocation;
+using DirectoryService.Application.Features.Locations.CreateLocation;
 using DirectoryService.Presenters.EndpointResult;
 using Serilog;
 using Serilog.Exceptions;
