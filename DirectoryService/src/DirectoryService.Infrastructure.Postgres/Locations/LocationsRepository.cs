@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Features.Locations;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,19 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
         public async Task<Result<IReadOnlyCollection<Location>>> GetLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
         {
             var locations = await _context.Locations.Where(l => locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
+            var result = CheckLocationsByIds(locationIds, locations);
+            return result;
+        }
+
+        public async Task<Result<IReadOnlyCollection<Location>>> GetActiveLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
+        {
+            var locations = await _context.Locations.Where(l => l.IsActive && locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
+            var result = CheckLocationsByIds(locationIds, locations);
+            return result;
+        }
+
+        private Result<IReadOnlyCollection<Location>> CheckLocationsByIds(List<LocationId> locationIds, List<Location> locations)
+        {
             var notFoundLocationIds = locationIds.Except(locations.Select(l => l.Id));
             if (notFoundLocationIds.Any())
             {

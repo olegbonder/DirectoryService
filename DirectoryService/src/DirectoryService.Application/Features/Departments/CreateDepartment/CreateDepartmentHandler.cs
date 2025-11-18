@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Departments.CreateDepartment;
 using DirectoryService.Application.Validation;
@@ -14,17 +15,20 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
 {
     public sealed class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateDepartmentCommand> _validator;
         private readonly ILogger<CreateDepartmentHandler> _logger;
 
         public CreateDepartmentHandler(
+            ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
             ILocationsRepository locationsRepository,
             IValidator<CreateDepartmentCommand> validator,
             ILogger<CreateDepartmentHandler> logger)
         {
+            _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _validator = validator;

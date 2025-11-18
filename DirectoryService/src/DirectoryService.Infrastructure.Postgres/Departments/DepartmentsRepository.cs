@@ -59,5 +59,17 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
 
             return departments;
         }
+
+        public async Task<Result> DeleteLocationsByDepartment(DepartmentId deptId, CancellationToken cancellationToken)
+        {
+            await _context.DepartmentLocations.Where(d => d.DepartmentId == deptId).ExecuteDeleteAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
+        public async Task SaveChanges(CancellationToken cancellationToken)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }
