@@ -51,6 +51,14 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
 
             var deptIdentifier = DepartmentIdentifier.Create(request.Identifier).Value;
 
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Errors;
+            }
+
+            using var transactionScope = transactionScopeResult.Value;
+
             var parentId = request.ParentId;
             Department? parentDepartment = null;
             DepartmentId? parentDepartmentId = null;
@@ -61,6 +69,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 parentDepartment = await _departmentsRepository.GetBy(d => d.Id == parentDepartmentId, cancellationToken);
                 if (parentDepartment == null)
                 {
+                    transactionScope.RollBack();
                     return DepartmentErrors.NotFound(parentId.Value);
                 }
 
@@ -73,6 +82,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var getLocationsRes = await _locationsRepository.GetLocationByIds(locationIds, cancellationToken);
             if (getLocationsRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return getLocationsRes.Errors;
             }
 
@@ -82,6 +92,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var departmentRes = Department.Create(newDeptId, parentDepartmentId, deptName, deptIdentifier, deptPath, depth, locationDepartments);
             if (departmentRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return departmentRes.Errors!;
             }
 
@@ -91,7 +102,13 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 return addDepartmentRes.Errors!;
             }
 
-            _logger.LogInformation("Подразделение с {id} добавлен", addDepartmentRes.Value);
+            var commitResult = transactionScope.Commit();
+            if (commitResult.IsFailure)
+            {
+                return commitResult.Errors!;
+            }
+
+            _logger.LogInformation("Подразделение с id = {id} сохранена в БД", addDepartmentRes.Value);
 
             return addDepartmentRes.Value;
         }

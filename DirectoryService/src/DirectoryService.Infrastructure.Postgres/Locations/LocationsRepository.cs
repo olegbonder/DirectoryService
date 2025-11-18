@@ -1,5 +1,4 @@
 ﻿using DirectoryService.Application.Features.Locations;
-using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -27,8 +26,6 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             {
                 await _context.AddAsync(location, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
-
-                _logger.LogInformation("Локация с id = {id} сохранена в БД", location.Id);
 
                 return location.Id.Value;
             }

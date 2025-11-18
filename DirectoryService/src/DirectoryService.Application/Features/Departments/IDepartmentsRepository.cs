@@ -13,6 +13,5 @@ namespace DirectoryService.Application.Features.Departments
         Task<Result<IReadOnlyCollection<Department>>> GetDepartmentByIds(List<DepartmentId> departmentIds, CancellationToken cancellationToken);
 
         Task<Result> DeleteLocationsByDepartment(DepartmentId deptId, CancellationToken cancellationToken);
-        Task SaveChanges(CancellationToken cancellationToken);
     }
 }

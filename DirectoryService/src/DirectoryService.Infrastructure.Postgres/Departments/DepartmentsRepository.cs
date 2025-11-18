@@ -27,8 +27,6 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
                 await _context.Departments.AddAsync(department, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                _logger.LogInformation("Подразделение с id = {id} сохранена в БД", department.Id.Value);
-
                 return department.Id.Value;
             }
             catch(OperationCanceledException ex)

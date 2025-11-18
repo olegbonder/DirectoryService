@@ -43,11 +43,21 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 return validResult.ToList();
             }
 
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Errors;
+            }
+
+            using var transactionScope = transactionScopeResult.Value;
+
             var deptId = command.DepartmentId;
             var departmentId = DepartmentId.Current(deptId);
+
             var department = await _departmentsRepository.GetBy(d => d.Id == departmentId && d.IsActive, cancellationToken);
             if (department == null)
             {
+                transactionScope.RollBack();
                 return DepartmentErrors.NotFound(deptId);
             }
 
@@ -57,6 +67,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var getLocationssResult = await _locationsRepository.GetActiveLocationByIds(locationIds, cancellationToken);
             if (getLocationssResult.IsFailure)
             {
+                transactionScope.RollBack();
                 return getLocationssResult.Errors;
             }
 
@@ -66,26 +77,35 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var deleteLocationsResult = await _departmentsRepository.DeleteLocationsByDepartment(departmentId, cancellationToken);
             if (deleteLocationsResult.IsFailure)
             {
+                transactionScope.RollBack();
                 return deleteLocationsResult.Errors!;
             }
 
             var updLocationsResult = department.UpdateLocations(locationDepartments);
             if (updLocationsResult.IsFailure)
             {
+                transactionScope.RollBack();
                 return updLocationsResult.Errors!;
             }
 
             try
             {
-                await _departmentsRepository.SaveChanges(cancellationToken);
+                await _transactionManager.SaveChanges(cancellationToken);
             }
             catch (Exception ex)
             {
+                transactionScope.RollBack();
                 _logger.LogError(ex, "Ошибка обновления локаций у подразделения с {id}", deptId);
                 return DepartmentErrors.DatabaseUpdateLOcationsError(deptId);
             }
 
-            _logger.LogInformation("Локации обновлены для подразделения с {id} добавлен", deptId);
+            var commitResult = transactionScope.Commit();
+            if (commitResult.IsFailure)
+            {
+                return commitResult.Errors!;
+            }
+
+            _logger.LogInformation("Локации обновлены для подразделения с {id}", deptId);
 
             return deptId;
         }

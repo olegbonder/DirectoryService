@@ -29,7 +29,6 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
                 await _context.SaveChangesAsync(cancellationToken);
 
                 var positionId = position.Id.Value;
-                _logger.LogInformation("Позиция с id = {id} сохранена в БД", positionId);
 
                 return positionId;
             }
