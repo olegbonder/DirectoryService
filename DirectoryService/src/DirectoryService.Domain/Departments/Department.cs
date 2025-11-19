@@ -71,5 +71,17 @@ namespace DirectoryService.Domain.Departments
 
             return new Department(id, parentId, name, identifier, path, depth, locations);
         }
+
+        public Result UpdateLocations(IReadOnlyCollection<DepartmentLocation> locations)
+        {
+            if (locations.Count < 1)
+            {
+                return DepartmentErrors.DepartmentMustHaveMoreOneLocation();
+            }
+
+            _locations = locations;
+
+            return Result.Success();
+        }
     }
 }

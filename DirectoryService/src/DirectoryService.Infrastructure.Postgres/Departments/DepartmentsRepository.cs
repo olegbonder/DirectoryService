@@ -27,8 +27,6 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
                 await _context.Departments.AddAsync(department, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                _logger.LogInformation("Подразделение с id = {id} сохранена в БД", department.Id.Value);
-
                 return department.Id.Value;
             }
             catch(OperationCanceledException ex)
@@ -58,6 +56,18 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
             }
 
             return departments;
+        }
+
+        public async Task<Result> DeleteLocationsByDepartment(DepartmentId deptId, CancellationToken cancellationToken)
+        {
+            await _context.DepartmentLocations.Where(d => d.DepartmentId == deptId).ExecuteDeleteAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
+        public async Task SaveChanges(CancellationToken cancellationToken)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Departments.CreateDepartment;
 using DirectoryService.Application.Validation;
@@ -14,17 +15,20 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
 {
     public sealed class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateDepartmentCommand> _validator;
         private readonly ILogger<CreateDepartmentHandler> _logger;
 
         public CreateDepartmentHandler(
+            ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
             ILocationsRepository locationsRepository,
             IValidator<CreateDepartmentCommand> validator,
             ILogger<CreateDepartmentHandler> logger)
         {
+            _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _validator = validator;
@@ -47,6 +51,14 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
 
             var deptIdentifier = DepartmentIdentifier.Create(request.Identifier).Value;
 
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Errors;
+            }
+
+            using var transactionScope = transactionScopeResult.Value;
+
             var parentId = request.ParentId;
             Department? parentDepartment = null;
             DepartmentId? parentDepartmentId = null;
@@ -57,6 +69,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 parentDepartment = await _departmentsRepository.GetBy(d => d.Id == parentDepartmentId, cancellationToken);
                 if (parentDepartment == null)
                 {
+                    transactionScope.RollBack();
                     return DepartmentErrors.NotFound(parentId.Value);
                 }
 
@@ -69,6 +82,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var getLocationsRes = await _locationsRepository.GetLocationByIds(locationIds, cancellationToken);
             if (getLocationsRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return getLocationsRes.Errors;
             }
 
@@ -78,6 +92,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var departmentRes = Department.Create(newDeptId, parentDepartmentId, deptName, deptIdentifier, deptPath, depth, locationDepartments);
             if (departmentRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return departmentRes.Errors!;
             }
 
@@ -87,7 +102,13 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 return addDepartmentRes.Errors!;
             }
 
-            _logger.LogInformation("Подразделение с {id} добавлен", addDepartmentRes.Value);
+            var commitResult = transactionScope.Commit();
+            if (commitResult.IsFailure)
+            {
+                return commitResult.Errors!;
+            }
+
+            _logger.LogInformation("Подразделение с id = {id} сохранена в БД", addDepartmentRes.Value);
 
             return addDepartmentRes.Value;
         }

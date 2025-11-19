@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain;
@@ -13,17 +14,20 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
 {
     public sealed class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly IPositionsRepository _positionsRepository;
         private readonly IValidator<CreatePositionCommand> _validator;
         private readonly ILogger<CreatePositionHandler> _logger;
 
         public CreatePositionHandler(
+            ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
             IPositionsRepository positionsRepository,
             IValidator<CreatePositionCommand> validator,
             ILogger<CreatePositionHandler> logger)
         {
+            _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _positionsRepository = positionsRepository;
             _validator = validator;
@@ -38,6 +42,14 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
                 return validResult.ToList();
             }
 
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Errors;
+            }
+
+            using var transactionScope = transactionScopeResult.Value;
+
             var request = command.Request;
 
             var newPositionId = PositionId.Create();
@@ -49,6 +61,7 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
 
             if (activeWithTheSameNamePosition != null)
             {
+                transactionScope.RollBack();
                 return PositionErrors.ActivePositionHaveSameName(positionName.Value);
             }
 
@@ -58,6 +71,7 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
             var getDepartmentsRes = await _departmentsRepository.GetDepartmentByIds(departmentIds, cancellationToken);
             if (getDepartmentsRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return getDepartmentsRes.Errors;
             }
 
@@ -67,6 +81,7 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
             var positionRes = Position.Create(newPositionId, positionName, positionDesription, departmentPositions);
             if (positionRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return positionRes.Errors!;
             }
 
@@ -74,10 +89,17 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
             var addPositionRes = await _positionsRepository.AddAsync(position, cancellationToken);
             if (addPositionRes.IsFailure)
             {
+                transactionScope.RollBack();
                 return addPositionRes.Errors!;
             }
 
-            _logger.LogInformation("Позиция с {id} добавлена", addPositionRes.Value);
+            var commitResult = transactionScope.Commit();
+            if (commitResult.IsFailure)
+            {
+                return commitResult.Errors!;
+            }
+
+            _logger.LogInformation("Позиция с id = {id} сохранена в БД", addPositionRes.Value);
 
             return addPositionRes.Value;
         }

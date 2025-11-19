@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Features.Departments.CreateDepartment;
+using DirectoryService.Application.Features.Departments.UpdateDepartmentLocations;
 using DirectoryService.Application.Features.Locations.CreateDepartment;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Presenters.EndpointResult;
@@ -21,6 +22,21 @@ namespace DirectoryService.Presenters.Controllers
             CancellationToken cancellationToken)
         {
             var command = new CreateDepartmentCommand(request);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpPut("{departmentId:guid}/locations")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<Guid>> UpdateDeaprtmentLocations(
+            [FromQuery] Guid departmentId,
+            [FromBody] UpdateDepartmentLocationsRequest request,
+            [FromServices] UpdateDepartmentLocationsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new UpdateLocationsCommand(departmentId, request);
             return await handler.Handle(command, cancellationToken);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
@@ -10,15 +11,18 @@ namespace DirectoryService.Application.Features.Locations.CreateLocation
 {
     public sealed class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateLocationCommand> _validator;
         private readonly ILogger<CreateLocationHandler> _logger;
 
         public CreateLocationHandler(
+            ITransactionManager transactionManager,
             ILocationsRepository locationsRepository,
             IValidator<CreateLocationCommand> validator,
             ILogger<CreateLocationHandler> logger)
         {
+            _transactionManager = transactionManager;
             _locationsRepository = locationsRepository;
             _validator = validator;
             _logger = logger;
@@ -32,6 +36,14 @@ namespace DirectoryService.Application.Features.Locations.CreateLocation
                 return validResult.ToList();
             }
 
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Errors;
+            }
+
+            using var transactionScope = transactionScopeResult.Value;
+
             var locName = LocationName.Create(command.Request.Name).Value;
 
             var locAdr = command.Request.Address;
@@ -40,22 +52,30 @@ namespace DirectoryService.Application.Features.Locations.CreateLocation
 
             var locTimeZone = LocationTimezone.Create(command.Request.TimeZone).Value;
 
-            var locationRes = Location.Create(locName, locAddress, locTimeZone);
-            if (locationRes.IsFailure)
+            var locationResult = Location.Create(locName, locAddress, locTimeZone);
+            if (locationResult.IsFailure)
             {
-                return locationRes.Errors!;
+                transactionScope.RollBack();
+                return locationResult.Errors!;
             }
 
             // Бизнес валидация
-            var addLocationRes = await _locationsRepository.AddAsync(locationRes.Value, cancellationToken);
-            if (addLocationRes.IsFailure)
+            var addLocationResult = await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
+            if (addLocationResult.IsFailure)
             {
-                return addLocationRes.Errors!;
+                transactionScope.RollBack();
+                return addLocationResult.Errors!;
             }
 
-            _logger.LogInformation("Location с {id} добавлен", addLocationRes.Value);
+            var commitResult = transactionScope.Commit();
+            if (commitResult.IsFailure)
+            {
+                return commitResult.Errors!;
+            }
 
-            return addLocationRes.Value;
+            _logger.LogInformation("Локация с id = {id} сохранена в БД", addLocationResult.Value);
+
+            return addLocationResult.Value;
         }
     }
 }

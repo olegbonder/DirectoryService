@@ -27,8 +27,6 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
                 await _context.AddAsync(location, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                _logger.LogInformation("Локация с id = {id} сохранена в БД", location.Id);
-
                 return location.Id.Value;
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
@@ -64,6 +62,19 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
         public async Task<Result<IReadOnlyCollection<Location>>> GetLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
         {
             var locations = await _context.Locations.Where(l => locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
+            var result = CheckLocationsByIds(locationIds, locations);
+            return result;
+        }
+
+        public async Task<Result<IReadOnlyCollection<Location>>> GetActiveLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
+        {
+            var locations = await _context.Locations.Where(l => l.IsActive && locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
+            var result = CheckLocationsByIds(locationIds, locations);
+            return result;
+        }
+
+        private Result<IReadOnlyCollection<Location>> CheckLocationsByIds(List<LocationId> locationIds, List<Location> locations)
+        {
             var notFoundLocationIds = locationIds.Except(locations.Select(l => l.Id));
             if (notFoundLocationIds.Any())
             {

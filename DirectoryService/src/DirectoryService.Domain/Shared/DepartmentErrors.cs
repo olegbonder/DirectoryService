@@ -1,5 +1,4 @@
 ﻿using Shared.Result;
-using System.Xml.Linq;
 
 namespace DirectoryService.Domain.Shared
 {
@@ -8,6 +7,11 @@ namespace DirectoryService.Domain.Shared
         public static Error DatabaseError()
         {
             return Error.Failure("department.database.error", "Ошибка сохранения подразделения");
+        }
+
+        public static Error DatabaseUpdateLOcationsError(Guid id)
+        {
+            return Error.Failure("department.locations.database.error", $"Ошибка обновления локаций у подразделения {id}");
         }
 
         public static Error OperationCancelled()
