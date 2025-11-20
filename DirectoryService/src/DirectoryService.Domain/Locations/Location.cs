@@ -17,6 +17,7 @@ namespace DirectoryService.Domain.Locations
             Name = name;
             Address = address;
             Timezone = timezone;
+            IsActive = true;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
