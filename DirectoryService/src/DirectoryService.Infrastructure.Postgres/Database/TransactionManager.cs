@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using DirectoryService.Application.Abstractions.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
@@ -22,11 +23,11 @@ namespace DirectoryService.Infrastructure.Postgres.Database
             _loggerFactory = loggerFactory;
         }
 
-        public async Task<Result<ITransactionScope>> BeginTransaction(CancellationToken cancellationToken)
+        public async Task<Result<ITransactionScope>> BeginTransaction(IsolationLevel? level = null, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+                var transaction = await _dbContext.Database.BeginTransactionAsync(level ?? IsolationLevel.ReadCommitted, cancellationToken);
 
                 var transactionScopeLogger = _loggerFactory.CreateLogger<TransactionScope>();
                 var transactionScope = new TransactionScope(transaction.GetDbTransaction(), transactionScopeLogger);

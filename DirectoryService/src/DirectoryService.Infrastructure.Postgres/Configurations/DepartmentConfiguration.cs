@@ -33,11 +33,13 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     .HasColumnName("identifier");
             });
 
-            builder.ComplexProperty(d => d.Path, db =>
+            builder.OwnsOne(d => d.Path, db =>
             {
                 db.Property(p => p.Value)
                     .IsRequired()
+                    .HasColumnType("ltree")
                     .HasColumnName("path");
+                db.HasIndex(d => d.Value).HasMethod("gist");
             });
 
             builder.Property(d => d.Depth)

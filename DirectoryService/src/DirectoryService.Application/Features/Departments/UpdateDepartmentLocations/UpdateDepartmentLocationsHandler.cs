@@ -43,7 +43,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
                 return transactionScopeResult.Errors;

@@ -51,7 +51,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
 
             var deptIdentifier = DepartmentIdentifier.Create(request.Identifier).Value;
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
                 return transactionScopeResult.Errors;

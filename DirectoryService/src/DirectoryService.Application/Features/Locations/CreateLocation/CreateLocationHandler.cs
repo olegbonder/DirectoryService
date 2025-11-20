@@ -36,7 +36,7 @@ namespace DirectoryService.Application.Features.Locations.CreateLocation
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
                 return transactionScopeResult.Errors;
