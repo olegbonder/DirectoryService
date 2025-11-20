@@ -9,9 +9,19 @@ namespace DirectoryService.Domain.Shared
             return Error.Failure("department.database.error", "Ошибка сохранения подразделения");
         }
 
-        public static Error DatabaseUpdateLOcationsError(Guid id)
+        public static Error DatabaseUpdateLocationsError(Guid id)
         {
             return Error.Failure("department.locations.database.error", $"Ошибка обновления локаций у подразделения {id}");
+        }
+
+        public static Error ParentIdConflict()
+        {
+            return Error.Failure("department.parent_id.conflict", $"Идентификатор родителя не должен совпадать с идентификатором подразделение");
+        }
+
+        public static Error ParentIdAsChildConflict(Guid id)
+        {
+            return Error.Failure("department.parent_id.as.child.conflict", $"Нельзя выбрать родителем своё \"дочернее\" подразделение.id={id}");
         }
 
         public static Error OperationCancelled()

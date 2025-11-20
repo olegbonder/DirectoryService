@@ -69,5 +69,31 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<Result<Department?>> GetByIdWithLock(DepartmentId departmentId, CancellationToken cancellationToken)
+        {
+            var id = departmentId.Value;
+            var department = await _context.Departments.FromSql(
+                $"""
+                SELECT 
+                    id,
+                    parent_id,
+                    name,
+                    identifier,
+                    path,
+                    depth,
+                    is_active,
+                    created_at,
+                    updated_at 
+                FROM departments WHERE id = {id} AND is_active FOR UPDATE
+                """).FirstOrDefaultAsync(cancellationToken);
+
+            return department;
+        }
+
+        public async Task<bool> IsExistsChildForParent(DepartmentId id, DepartmentId parentId, CancellationToken cancellationToken) =>
+            await _context.Departments.AnyAsync(
+                d => d.Id == id &&
+                   d.Children.Any(c => c.Id == parentId), cancellationToken);
     }
 }

@@ -96,7 +96,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             {
                 transactionScope.RollBack();
                 _logger.LogError(ex, "Ошибка обновления локаций у подразделения с {id}", deptId);
-                return DepartmentErrors.DatabaseUpdateLOcationsError(deptId);
+                return DepartmentErrors.DatabaseUpdateLocationsError(deptId);
             }
 
             var commitResult = transactionScope.Commit();
