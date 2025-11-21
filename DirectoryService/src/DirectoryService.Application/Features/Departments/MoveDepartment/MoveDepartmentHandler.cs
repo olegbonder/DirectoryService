@@ -1,9 +1,7 @@
 ﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Validation;
-using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -42,7 +40,9 @@ namespace DirectoryService.Application.Features.Departments.MoveDepartment
             var departmentId = DepartmentId.Current(deptId);
 
             var newParentId = command.Request.ParentId;
-            DepartmentId? newParentDeptId = null;
+            Department? newParentDepartment = null;
+
+            // Проверяем, что идентификаторы с родителем - разные
             if (newParentId.HasValue && newParentId.Value == deptId)
             {
                 return DepartmentErrors.ParentIdConflict();
@@ -58,35 +58,49 @@ namespace DirectoryService.Application.Features.Departments.MoveDepartment
 
             if (newParentId.HasValue)
             {
-                newParentDeptId = DepartmentId.Current(newParentId.Value);
+                var newParentDeptId = DepartmentId.Current(newParentId.Value);
 
                 // поиск среди дочерних подразделений
-                var hasDepartmentChild = await _departmentsRepository.IsExistsChildForParent(departmentId, newParentDeptId, cancellationToken);
-                if (hasDepartmentChild)
+                var hasChildDepartments = await _departmentsRepository.IsExistsChildForParent(departmentId, newParentDeptId, cancellationToken);
+                if (hasChildDepartments)
                 {
                     transactionScope.RollBack();
                     return DepartmentErrors.ParentIdAsChildConflict(newParentId.Value);
                 }
 
                 // поиск активного родителя
-                var parentDepartment = await _departmentsRepository.GetBy(d => d.IsActive && d.Id == newParentDeptId, cancellationToken);
-                if (parentDepartment == null)
+                newParentDepartment = await _departmentsRepository.GetBy(d => d.IsActive && d.Id == newParentDeptId, cancellationToken);
+                if (newParentDepartment == null)
                 {
                     transactionScope.RollBack();
                     return DepartmentErrors.NotFound(newParentId.Value);
                 }
             }
 
+            // Выбираем подразделение для пессимистичной блокировки
             var departmentResult = await _departmentsRepository.GetByIdWithLock(departmentId, cancellationToken);
             if (departmentResult.IsFailure)
             {
                 transactionScope.RollBack();
-                return DepartmentErrors.NotFound(deptId);
+                return departmentResult.Errors;
             }
 
             var depatment = departmentResult.Value!;
+            var oldDepartmentPath = depatment.Path;
 
-            depatment.MoveDepartment(newParentDeptId);
+            // Выбираем дочерние подразделения для пессимистичной блокировки
+            var childDepartments = await _departmentsRepository.GetChildrensWithLock(depatment.Path, cancellationToken);
+
+            // Перемещаем только подразделение
+            depatment.MoveDepartment(newParentDepartment);
+
+            // Обновляем данные дочерних сущностей
+            var updateChildrensResult = await _departmentsRepository.UpdateChildrensForMove(oldDepartmentPath, depatment, cancellationToken);
+            if (updateChildrensResult.IsFailure)
+            {
+                transactionScope.RollBack();
+                return updateChildrensResult.Errors;
+            }
 
             try
             {

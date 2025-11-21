@@ -72,9 +72,20 @@ namespace DirectoryService.Domain.Departments
             return new Department(id, parentId, name, identifier, path, depth, locations);
         }
 
-        public void MoveDepartment(DepartmentId? newParentDeptId)
+        public void MoveDepartment(Department? newParentDepartment)
         {
-            ParentId = newParentDeptId;
+            if (newParentDepartment == null)
+            {
+                Depth = 0;
+                Path = DepartmentPath.Create(Identifier);
+            }
+            else
+            {
+                Depth = newParentDepartment.Depth + 1;
+                Path = DepartmentPath.Create(Identifier, newParentDepartment);
+            }
+
+            ParentId = newParentDepartment?.Id;
             UpdatedAt = DateTime.UtcNow;
         }
 

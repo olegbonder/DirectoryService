@@ -32,7 +32,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
         public async Task<EndpointResult<Guid>> UpdateDeaprtmentLocations(
-            [FromQuery] Guid departmentId,
+            [FromRoute] Guid departmentId,
             [FromBody] UpdateDepartmentLocationsRequest request,
             [FromServices] UpdateDepartmentLocationsHandler handler,
             CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
         public async Task<EndpointResult<Guid>> MoveDeaprtment(
-            [FromQuery] Guid departmentId,
+            [FromRoute] Guid departmentId,
             [FromBody] MoveDepartmentRequest request,
             [FromServices] MoveDepartmentHandler handler,
             CancellationToken cancellationToken)
