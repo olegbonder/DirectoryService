@@ -14,6 +14,11 @@ namespace DirectoryService.Domain.Shared
             return Error.Failure("department.locations.database.error", $"Ошибка обновления локаций у подразделения {id}");
         }
 
+        public static Error DatabaseUpdateChildrenError(Guid id)
+        {
+            return Error.Failure("department.children.database.error", $"Ошибка обновления детей у подразделения {id}");
+        }
+
         public static Error ParentIdConflict()
         {
             return Error.Failure("department.parent_id.conflict", $"Идентификатор родителя не должен совпадать с идентификатором подразделение");

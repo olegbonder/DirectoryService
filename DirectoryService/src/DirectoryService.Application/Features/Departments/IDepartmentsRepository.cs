@@ -17,5 +17,9 @@ namespace DirectoryService.Application.Features.Departments
         Task<Result> DeleteLocationsByDepartment(DepartmentId deptId, CancellationToken cancellationToken);
 
         Task<Result<Department?>> GetByIdWithLock(DepartmentId departmentId, CancellationToken cancellationToken);
+
+        Task<IReadOnlyList<Department>> GetChildrensWithLock(DepartmentPath parentPath, CancellationToken cancellationToken);
+
+        Task<Result> UpdateChildrensForMove(DepartmentPath oldDepartmentPath, Department depatment, CancellationToken cancellationToken);
     }
 }
