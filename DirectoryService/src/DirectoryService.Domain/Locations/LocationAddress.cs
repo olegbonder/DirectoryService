@@ -26,7 +26,7 @@ namespace DirectoryService.Domain.Locations
 
         public string? FlatNumber { get; }
 
-        public static Result<LocationAddress> Create(string country, string city, string street, string houseNumber, string? flatNumber)
+        public static Result<LocationAddress> Create(string country, string city, string street, string houseNumber, string? flatNumber = null)
         {
             var errors = new List<Error>();
             if (string.IsNullOrWhiteSpace(country))

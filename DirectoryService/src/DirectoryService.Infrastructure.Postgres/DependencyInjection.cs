@@ -13,9 +13,12 @@ namespace DirectoryService.Infrastructure.Postgres
 {
     public static class DependencyInjection
     {
+        private const string DATABASE_CONNECTIONSTRING = "DirectoryServiceDb";
+
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped(s => new ApplicationDbContext(configuration));
+            var connectionString = configuration.GetConnectionString(DATABASE_CONNECTIONSTRING);
+            services.AddScoped(s => new ApplicationDbContext(connectionString!));
             services.AddScoped<ITransactionManager, TransactionManager>();
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();

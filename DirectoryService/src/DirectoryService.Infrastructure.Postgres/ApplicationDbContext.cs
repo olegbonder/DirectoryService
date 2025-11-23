@@ -3,18 +3,15 @@ using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DirectoryService.Infrastructure.Postgres
 {
-    public class ApplicationDbContext(IConfiguration configuration): DbContext
+    public class ApplicationDbContext(string connectionString): DbContext
     {
-        private const string DATABASE_CONNECTIONSTRING = "DirectoryServiceDb";
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(configuration.GetConnectionString(DATABASE_CONNECTIONSTRING));
+            optionsBuilder.UseNpgsql(connectionString);
             optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
         }
 
