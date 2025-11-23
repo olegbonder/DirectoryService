@@ -21,6 +21,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                 .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DirectoryService.Domain.DepartmentLocation", b =>
@@ -105,16 +106,6 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                                 .HasMaxLength(150)
                                 .HasColumnType("character varying(150)")
                                 .HasColumnName("name");
-                        });
-
-                    b.ComplexProperty<Dictionary<string, object>>("Path", "DirectoryService.Domain.Departments.Department.Path#DepartmentPath", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("path");
                         });
 
                     b.HasKey("Id")
@@ -243,6 +234,31 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_parent_id");
+
+                    b.OwnsOne("DirectoryService.Domain.Departments.DepartmentPath", "Path", b1 =>
+                        {
+                            b1.Property<Guid>("DepartmentId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("ltree")
+                                .HasColumnName("path");
+
+                            b1.HasKey("DepartmentId");
+
+                            b1.HasIndex("Value");
+
+                            NpgsqlIndexBuilderExtensions.HasMethod(b1.HasIndex("Value"), "gist");
+
+                            b1.ToTable("departments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DepartmentId");
+                        });
+
+                    b.Navigation("Path")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DirectoryService.Domain.Locations.Location", b =>

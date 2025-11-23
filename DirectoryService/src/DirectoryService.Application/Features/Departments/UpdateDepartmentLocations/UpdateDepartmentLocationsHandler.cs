@@ -43,7 +43,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
                 return transactionScopeResult.Errors;
@@ -96,7 +96,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             {
                 transactionScope.RollBack();
                 _logger.LogError(ex, "Ошибка обновления локаций у подразделения с {id}", deptId);
-                return DepartmentErrors.DatabaseUpdateLOcationsError(deptId);
+                return DepartmentErrors.DatabaseUpdateLocationsError(deptId);
             }
 
             var commitResult = transactionScope.Commit();

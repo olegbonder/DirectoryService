@@ -42,7 +42,7 @@ namespace DirectoryService.Application.Features.Positions.CreatePosition
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken);
+            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
                 return transactionScopeResult.Errors;

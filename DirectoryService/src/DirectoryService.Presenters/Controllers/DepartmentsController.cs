@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Features.Departments.CreateDepartment;
+using DirectoryService.Application.Features.Departments.MoveDepartment;
 using DirectoryService.Application.Features.Departments.UpdateDepartmentLocations;
 using DirectoryService.Application.Features.Locations.CreateDepartment;
 using DirectoryService.Contracts.Departments;
@@ -31,12 +32,27 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
         public async Task<EndpointResult<Guid>> UpdateDeaprtmentLocations(
-            [FromQuery] Guid departmentId,
+            [FromRoute] Guid departmentId,
             [FromBody] UpdateDepartmentLocationsRequest request,
             [FromServices] UpdateDepartmentLocationsHandler handler,
             CancellationToken cancellationToken)
         {
             var command = new UpdateLocationsCommand(departmentId, request);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpPut("{departmentId:guid}/parent")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<Guid>> MoveDeaprtment(
+            [FromRoute] Guid departmentId,
+            [FromBody] MoveDepartmentRequest request,
+            [FromServices] MoveDepartmentHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new MoveDepartmentCommand(departmentId, request);
             return await handler.Handle(command, cancellationToken);
         }
     }

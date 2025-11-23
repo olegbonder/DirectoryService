@@ -13,7 +13,7 @@ namespace DirectoryService.Domain.Departments
 
         public string Value { get; }
 
-        public static Result<DepartmentPath> Create(DepartmentIdentifier identifier, Department? parentDept)
+        public static Result<DepartmentPath> Create(DepartmentIdentifier identifier, Department? parentDept = null)
         {
             var value = identifier.Value;
             value = parentDept == null ? value : $"{parentDept.Path.Value}{SEPARATOR}{value}";

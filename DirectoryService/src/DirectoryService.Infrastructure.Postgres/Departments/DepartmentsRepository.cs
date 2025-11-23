@@ -65,9 +65,81 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
             return Result.Success();
         }
 
-        public async Task SaveChanges(CancellationToken cancellationToken)
+        public async Task<Result<Department?>> GetByIdWithLock(DepartmentId departmentId, CancellationToken cancellationToken)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            var id = departmentId.Value;
+            var department = await _context.Departments.FromSql(
+                $"""
+                SELECT 
+                    id,
+                    parent_id,
+                    name,
+                    identifier,
+                    path,
+                    depth,
+                    is_active,
+                    created_at,
+                    updated_at 
+                FROM departments WHERE id = {id} AND is_active FOR UPDATE
+                """).FirstOrDefaultAsync(cancellationToken);
+
+            if (department == null)
+            {
+                return DepartmentErrors.NotFound(id);
+            }
+
+            return department;
+        }
+
+        public async Task<IReadOnlyList<Department>> GetChildrensWithLock(DepartmentPath parentPath, CancellationToken cancellationToken)
+        {
+            var parentPathValue = parentPath.Value;
+            var childrens = await _context.Departments.FromSql(
+                $"""
+                SELECT 
+                    id,
+                    parent_id,
+                    name,
+                    identifier,
+                    path,
+                    depth,
+                    is_active,
+                    created_at,
+                    updated_at 
+                FROM departments WHERE path <@ {parentPathValue}::ltree FOR UPDATE
+                """).ToListAsync(cancellationToken);
+
+            return childrens;
+        }
+
+        public async Task<bool> IsExistsChildForParent(DepartmentId id, DepartmentId parentId, CancellationToken cancellationToken) =>
+            await _context.Departments.AnyAsync(
+                d => d.Id == id &&
+                   d.Children.Any(c => c.Id == parentId), cancellationToken);
+
+        public async Task<Result> UpdateChildrensForMove(DepartmentPath oldDepartmentPath, Department depatment, CancellationToken cancellationToken)
+        {
+            var oldDepartmentPathValue = oldDepartmentPath.Value;
+            var newDepatmentPathValue = depatment.Path.Value;
+            var newDepatmentDepth = depatment.Depth;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                    $"""
+                    UPDATE departments
+                    SET depth = {newDepatmentDepth} + nlevel(subpath(path, nlevel({oldDepartmentPathValue}::ltree), nlevel(path::ltree))),
+                    path = ({newDepatmentPathValue}::ltree || subpath(path, nlevel({oldDepartmentPathValue}::ltree), nlevel(path::ltree)))
+                    WHERE path <@ {oldDepartmentPathValue}::ltree
+                    and path != {oldDepartmentPathValue}::ltree
+                    """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                var deptId = depatment.Id.Value;
+                _logger.LogError(ex, "Отмена операции обновления дочерних подразделений у родителя {deptId}", deptId);
+                return DepartmentErrors.DatabaseUpdateChildrenError(deptId);
+            }
         }
     }
 }

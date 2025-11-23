@@ -17,7 +17,7 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                 .HasConversion(d => d.Value, id => DepartmentId.Current(id))
                 .HasColumnName("id");
 
-            builder.ComplexProperty(d => d.Name, db =>
+            builder.OwnsOne(d => d.Name, db =>
             {
                 db.Property(d => d.Value)
                     .IsRequired()
@@ -25,7 +25,7 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     .HasColumnName("name");
             });
 
-            builder.ComplexProperty(d => d.Identifier, db =>
+            builder.OwnsOne(d => d.Identifier, db =>
             {
                 db.Property(d => d.Value)
                     .IsRequired()
@@ -33,11 +33,13 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     .HasColumnName("identifier");
             });
 
-            builder.ComplexProperty(d => d.Path, db =>
+            builder.OwnsOne(d => d.Path, db =>
             {
                 db.Property(p => p.Value)
                     .IsRequired()
+                    .HasColumnType("ltree")
                     .HasColumnName("path");
+                db.HasIndex(d => d.Value).HasMethod("gist");
             });
 
             builder.Property(d => d.Depth)
