@@ -32,7 +32,7 @@ namespace DirectoryService.Domain.Positions
 
         public PositionDesription Description { get; private set; } = null!;
 
-        public IReadOnlyCollection<DepartmentPosition> DepartmentPositions => _departments;
+        public List<DepartmentPosition> DepartmentPositions => _departments;
 
         public bool IsActive { get; private set; }
 

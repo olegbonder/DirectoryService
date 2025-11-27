@@ -24,17 +24,6 @@ namespace DirectoryService.IntegrationTests.Infrasructure
         private Respawner _respawner = null!;
         private DbConnection _dbConnection = null!;
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.ConfigureTestServices(services =>
-            {
-                services.RemoveAll<ApplicationDbContext>();
-
-                services.AddScoped(_ =>
-                    new ApplicationDbContext(_dbContainer.GetConnectionString()));
-            });
-        }
-
         public async Task InitializeAsync()
         {
             await _dbContainer.StartAsync();
@@ -46,7 +35,6 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             await dbContext.Database.EnsureCreatedAsync();
 
             _dbConnection = new NpgsqlConnection(_dbContainer.GetConnectionString());
-            await _dbConnection.OpenAsync();
 
             await InitializeRespawner();
         }
@@ -65,8 +53,20 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             await _respawner.ResetAsync(_dbConnection);
         }
 
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services.RemoveAll<ApplicationDbContext>();
+
+                services.AddScoped(_ =>
+                    new ApplicationDbContext(_dbContainer.GetConnectionString()));
+            });
+        }
+
         private async Task InitializeRespawner()
         {
+            await _dbConnection.OpenAsync();
             _respawner = await Respawner.CreateAsync(
                 _dbConnection,
                 new RespawnerOptions

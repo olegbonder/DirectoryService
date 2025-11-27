@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Validation;
+using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Shared.Result;
 
@@ -10,11 +11,12 @@ namespace DirectoryService.Application.Features.Departments.MoveDepartment
         {
             RuleFor(l => l.DepartmentId)
                 .NotNull()
+                .WithError(DepartmentErrors.DepartmentIdNotBeNull())
                 .NotEmpty()
-                .WithError(GeneralErrors.ValueIsRequired("departmentId"));
+                .WithError(DepartmentErrors.DepartmentIdNotBeEmpty());
             RuleFor(l => l.Request)
                 .NotNull()
-                .WithError(GeneralErrors.ValueIsRequired("request"));
+                .WithError(GeneralErrors.RequestIsNull());
         }
     }
 }
