@@ -1,14 +1,9 @@
-﻿using DirectoryService.Application.Features.Departments.CreateDepartment;
-using DirectoryService.Application.Features.Departments.MoveDepartment;
-using DirectoryService.Application.Features.Locations.CreateDepartment;
+﻿using DirectoryService.Application.Features.Departments.MoveDepartment;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Locations;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Shared.Result;
-using System;
 
 namespace DirectoryService.IntegrationTests.Departments
 {
