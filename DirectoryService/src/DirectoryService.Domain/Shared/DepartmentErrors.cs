@@ -66,6 +66,31 @@ namespace DirectoryService.Domain.Shared
             return Error.Validation("department.has.not.locations", "У подразделения должна быть хотя бы одна локация");
         }
 
+        public static Error LocationIdsNotBeNull()
+        {
+            return GeneralErrors.ValueIsRequired("department.locationIds");
+        }
+
+        public static Error LocationIdsNotBeEmpty()
+        {
+            return Error.Validation("department.locationIds.not.empty", "Список локаций не может быть пустым");
+        }
+
+        public static Error LocationIdsMustBeUnique()
+        {
+            return Error.Validation("department.locationIds.must.be.unique", "Список локаций должен быть уникальным");
+        }
+
+        public static Error DepartmentIdNotBeNull()
+        {
+            return GeneralErrors.ValueIsRequired("departmentId");
+        }
+
+        public static Error DepartmentIdNotBeEmpty()
+        {
+            return GeneralErrors.PropertyIsEmpty("departmentId", "Подразделение");
+        }
+
         public static Error NotFound(Guid id)
         {
             return GeneralErrors.NotFound("department", id);

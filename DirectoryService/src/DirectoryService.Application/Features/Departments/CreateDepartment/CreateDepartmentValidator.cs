@@ -1,5 +1,6 @@
 ﻿using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
+using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Shared.Result;
 
@@ -11,16 +12,16 @@ namespace DirectoryService.Application.Features.Departments.CreateDepartment
         {
             RuleFor(l => l.Request)
                 .NotNull()
-                .WithError(GeneralErrors.ValueIsRequired("request"));
+                .WithError(GeneralErrors.RequestIsNull());
             RuleFor(l => l.Request.Name).MustBeValueObject(DepartmentName.Create);
             RuleFor(l => l.Request.Identifier).MustBeValueObject(DepartmentIdentifier.Create);
             RuleFor(l => l.Request.LocationIds)
                 .NotNull()
-                .WithError(GeneralErrors.ValueIsRequired("department.locationIds"))
+                .WithError(DepartmentErrors.LocationIdsNotBeNull())
                 .NotEmpty()
-                .WithError(Error.Validation("department.locationIds.not.empty", "Список локаций не может быть пустым"))
+                .WithError(DepartmentErrors.LocationIdsNotBeEmpty())
                 .Must(l => l != null && l.Distinct().Count() == l.Count())
-                .WithError(Error.Validation("department.locationIds.must.be.unique", "Список локаций должен быть уникальным"));
+                .WithError(DepartmentErrors.LocationIdsMustBeUnique());
         }
     }
 }

@@ -10,11 +10,11 @@ namespace DirectoryService.Application.Features.Departments
 
         Task<Department?> GetBy(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken);
 
+        Task<Department?> GetByWithLocations(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken);
+
         Task<bool> IsExistsChildForParent(DepartmentId id, DepartmentId parentId, CancellationToken cancellationToken);
 
         Task<Result<IReadOnlyCollection<Department>>> GetDepartmentByIds(List<DepartmentId> departmentIds, CancellationToken cancellationToken);
-
-        Task<Result> DeleteLocationsByDepartment(DepartmentId deptId, CancellationToken cancellationToken);
 
         Task<Result<Department?>> GetByIdWithLock(DepartmentId departmentId, CancellationToken cancellationToken);
 

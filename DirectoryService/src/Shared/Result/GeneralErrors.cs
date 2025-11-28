@@ -38,5 +38,10 @@
         {
             return Error.Failure($"{property}.operation.canceled", "Операция была отменена");
         }
+
+        public static Error RequestIsNull()
+        {
+            return Error.Validation($"request.is.null", $"Запрос не может быть пустым!");
+        }
     }
 }

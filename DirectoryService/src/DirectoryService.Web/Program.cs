@@ -5,7 +5,7 @@ using Serilog;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
-    .CreateBootstrapLogger();
+    .CreateLogger();
 
 try
 {
@@ -30,4 +30,9 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+namespace DirectoryService.Web
+{
+    public partial class Program;
 }

@@ -6,7 +6,7 @@ namespace DirectoryService.Domain.Departments
     public sealed class Department : Entity<DepartmentId>
     {
         private List<Department> _children = [];
-        private IReadOnlyCollection<DepartmentLocation> _locations = [];
+        private List<DepartmentLocation> _locations = [];
 
         // EF Core
         private Department(DepartmentId id)
@@ -27,7 +27,7 @@ namespace DirectoryService.Domain.Departments
             Name = name;
             Identifier = identifier;
             ParentId = parentId;
-            _locations = locations;
+            _locations = locations.ToList();
             Path = path;
             Depth = depth;
             IsActive = true;
@@ -43,7 +43,7 @@ namespace DirectoryService.Domain.Departments
 
         public List<Department> Children => _children;
 
-        public IReadOnlyCollection<DepartmentLocation> DepartmentLocations => _locations;
+        public List<DepartmentLocation> DepartmentLocations => _locations;
 
         public DepartmentPath Path { get; private set; } = null!;
 
@@ -89,14 +89,14 @@ namespace DirectoryService.Domain.Departments
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public Result UpdateLocations(IReadOnlyCollection<DepartmentLocation> locations)
+        public Result UpdateLocations(IEnumerable<DepartmentLocation> locations)
         {
-            if (locations.Count < 1)
+            if (locations.Count() < 1)
             {
                 return DepartmentErrors.DepartmentMustHaveMoreOneLocation();
             }
 
-            _locations = locations;
+            _locations = locations.ToList();
 
             return Result.Success();
         }

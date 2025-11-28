@@ -54,7 +54,7 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
             var deptId = command.DepartmentId;
             var departmentId = DepartmentId.Current(deptId);
 
-            var department = await _departmentsRepository.GetBy(d => d.Id == departmentId && d.IsActive, cancellationToken);
+            var department = await _departmentsRepository.GetByWithLocations(d => d.Id == departmentId && d.IsActive, cancellationToken);
             if (department == null)
             {
                 transactionScope.RollBack();
@@ -73,13 +73,6 @@ namespace DirectoryService.Application.Features.Locations.CreateDepartment
 
             var locations = getLocationssResult.Value;
             var locationDepartments = locations.Select(l => new DepartmentLocation(departmentId, l.Id)).ToList();
-
-            var deleteLocationsResult = await _departmentsRepository.DeleteLocationsByDepartment(departmentId, cancellationToken);
-            if (deleteLocationsResult.IsFailure)
-            {
-                transactionScope.RollBack();
-                return deleteLocationsResult.Errors!;
-            }
 
             var updLocationsResult = department.UpdateLocations(locationDepartments);
             if (updLocationsResult.IsFailure)

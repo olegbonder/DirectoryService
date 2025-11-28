@@ -44,6 +44,9 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
         public async Task<Department?> GetBy(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken) =>
             await _context.Departments.FirstOrDefaultAsync(predicate, cancellationToken);
 
+        public async Task<Department?> GetByWithLocations(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken) =>
+            await _context.Departments.Include(d => d.DepartmentLocations).FirstOrDefaultAsync(predicate, cancellationToken);
+
         public async Task<Result<IReadOnlyCollection<Department>>> GetDepartmentByIds(List<DepartmentId> departmentIds, CancellationToken cancellationToken)
         {
             var departments = await _context.Departments.Where(d => departmentIds.Contains(d.Id)).ToListAsync(cancellationToken);
@@ -56,13 +59,6 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
             }
 
             return departments;
-        }
-
-        public async Task<Result> DeleteLocationsByDepartment(DepartmentId deptId, CancellationToken cancellationToken)
-        {
-            await _context.DepartmentLocations.Where(d => d.DepartmentId == deptId).ExecuteDeleteAsync(cancellationToken);
-
-            return Result.Success();
         }
 
         public async Task<Result<Department?>> GetByIdWithLock(DepartmentId departmentId, CancellationToken cancellationToken)
