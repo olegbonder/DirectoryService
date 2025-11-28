@@ -1,7 +1,8 @@
-﻿using DirectoryService.Application.Features.Departments.CreateDepartment;
-using DirectoryService.Application.Features.Departments.MoveDepartment;
+﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
+using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
+using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
+using DirectoryService.Application.Features.Departments.CreateDepartment;
 using DirectoryService.Application.Features.Departments.UpdateDepartmentLocations;
-using DirectoryService.Application.Features.Locations.CreateDepartment;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;

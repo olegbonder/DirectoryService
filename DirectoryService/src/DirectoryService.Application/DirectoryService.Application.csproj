@@ -2,6 +2,7 @@
   
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
     <PackageReference Include="Scrutor" Version="6.1.0" />
@@ -10,6 +11,10 @@
   <ItemGroup>
     <ProjectReference Include="..\DirectoryService.Contracts\DirectoryService.Contracts.csproj" />
     <ProjectReference Include="..\DirectoryService.Domain\DirectoryService.Domain.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Features\Departments\Queries\" />
   </ItemGroup>
   
 </Project>

@@ -3,7 +3,7 @@ using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Shared.Result;
 
-namespace DirectoryService.Application.Features.Departments.MoveDepartment
+namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartment
 {
     public sealed class MoveDepartmentValidator : AbstractValidator<MoveDepartmentCommand>
     {

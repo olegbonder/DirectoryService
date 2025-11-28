@@ -1,4 +1,4 @@
-﻿using DirectoryService.Application.Features.Locations.CreateLocation;
+﻿using DirectoryService.Application.Features.Locations.Commands.CreateLocation;
 using DirectoryService.Contracts.Locations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using DirectoryService.Application.Features.Departments.MoveDepartment;
+﻿using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
