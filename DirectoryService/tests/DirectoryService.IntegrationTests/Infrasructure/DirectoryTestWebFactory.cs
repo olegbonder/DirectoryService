@@ -59,12 +59,16 @@ namespace DirectoryService.IntegrationTests.Infrasructure
         {
             builder.ConfigureTestServices(services =>
             {
+                services.RemoveAll<IReadDbContext>();
                 services.RemoveAll<ApplicationDbContext>();
                 services.RemoveAll<IDBConnectionFactory>();
 
                 var connectionString = _dbContainer.GetConnectionString();
                 services.AddScoped(_ =>
                     new ApplicationDbContext(connectionString));
+                services.AddScoped<IReadDbContext, ApplicationDbContext>(_ =>
+                    new ApplicationDbContext(connectionString));
+
                 services.AddSingleton<IDBConnectionFactory, NpgsqlConnectionFactory>(s =>
                     new NpgsqlConnectionFactory(connectionString!));
             });
