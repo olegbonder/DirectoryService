@@ -1,5 +1,6 @@
-﻿using System.Data.Common;
+﻿using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Infrastructure.Postgres;
+using DirectoryService.Infrastructure.Postgres.Database;
 using DirectoryService.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using Respawn;
+using System.Data.Common;
 using Testcontainers.PostgreSql;
 
 namespace DirectoryService.IntegrationTests.Infrasructure
@@ -58,9 +60,13 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             builder.ConfigureTestServices(services =>
             {
                 services.RemoveAll<ApplicationDbContext>();
+                services.RemoveAll<IDBConnectionFactory>();
 
+                var connectionString = _dbContainer.GetConnectionString();
                 services.AddScoped(_ =>
-                    new ApplicationDbContext(_dbContainer.GetConnectionString()));
+                    new ApplicationDbContext(connectionString));
+                services.AddSingleton<IDBConnectionFactory, NpgsqlConnectionFactory>(s =>
+                    new NpgsqlConnectionFactory(connectionString!));
             });
         }
 

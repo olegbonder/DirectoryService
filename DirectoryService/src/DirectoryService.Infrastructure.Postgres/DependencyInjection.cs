@@ -19,6 +19,10 @@ namespace DirectoryService.Infrastructure.Postgres
         {
             var connectionString = configuration.GetConnectionString(DATABASE_CONNECTIONSTRING);
             services.AddScoped(s => new ApplicationDbContext(connectionString!));
+            services.AddScoped<IReadDbContext, ApplicationDbContext>(s => new ApplicationDbContext(connectionString!));
+            services.AddSingleton<IDBConnectionFactory, NpgsqlConnectionFactory>(s => new NpgsqlConnectionFactory(connectionString!));
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             services.AddScoped<ITransactionManager, TransactionManager>();
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();
