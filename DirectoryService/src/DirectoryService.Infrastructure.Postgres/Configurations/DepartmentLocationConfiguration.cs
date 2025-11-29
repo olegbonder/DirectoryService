@@ -29,12 +29,12 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     departmentId => DepartmentId.Current(departmentId))
                 .HasColumnName("department_id");
 
-            builder.HasOne<Department>()
-                .WithMany(dl => dl.DepartmentLocations)
+            builder.HasOne(dl => dl.Department)
+                .WithMany(d => d.DepartmentLocations)
                 .HasForeignKey(dl => dl.DepartmentId)
                 .HasConstraintName("fk_department_locations_department_id");
 
-            builder.HasOne<Location>()
+            builder.HasOne(dl => dl.Location)
                 .WithMany()
                 .HasForeignKey(dl => dl.LocationId)
                 .HasConstraintName("fk_department_locations_location_id");

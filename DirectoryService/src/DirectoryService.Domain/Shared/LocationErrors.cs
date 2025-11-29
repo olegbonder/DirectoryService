@@ -9,6 +9,11 @@ namespace DirectoryService.Domain.Shared
             return Error.Failure("location.database.error", "Ошибка сохранения локации");
         }
 
+        public static Error DatabaseGetError()
+        {
+            return Error.Failure("get.location.database.error", "Ошибка получения списка локаций");
+        }
+
         public static Error NameConflict(string name)
         {
             return Error.Conflict("location.title.conflict", $"Локация с наименованием {name} уже существует");

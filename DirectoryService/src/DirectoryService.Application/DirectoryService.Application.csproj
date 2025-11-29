@@ -14,8 +14,4 @@
     <ProjectReference Include="..\DirectoryService.Domain\DirectoryService.Domain.csproj" />
   </ItemGroup>
   
-  <ItemGroup>
-    <Folder Include="Features\Departments\Queries\" />
-  </ItemGroup>
-  
 </Project>
