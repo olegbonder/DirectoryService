@@ -1,22 +1,20 @@
 ﻿using DirectoryService.Application.Validation;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Shared.Result;
 
-namespace DirectoryService.Application.Features.Departments.UpdateDepartmentLocations
+namespace DirectoryService.Application.Features.Departments.Commands.CreateDepartment
 {
-    public class UpdateDepartmentLocationsValidator : AbstractValidator<UpdateLocationsCommand>
+    public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentCommand>
     {
-        public UpdateDepartmentLocationsValidator()
+        public CreateDepartmentValidator()
         {
-            RuleFor(l => l.DepartmentId)
-                .NotNull()
-                .WithError(DepartmentErrors.DepartmentIdNotBeNull())
-                .NotEmpty()
-                .WithError(DepartmentErrors.DepartmentIdNotBeEmpty());
             RuleFor(l => l.Request)
                 .NotNull()
                 .WithError(GeneralErrors.RequestIsNull());
+            RuleFor(l => l.Request.Name).MustBeValueObject(DepartmentName.Create);
+            RuleFor(l => l.Request.Identifier).MustBeValueObject(DepartmentIdentifier.Create);
             RuleFor(l => l.Request.LocationIds)
                 .NotNull()
                 .WithError(DepartmentErrors.LocationIdsNotBeNull())

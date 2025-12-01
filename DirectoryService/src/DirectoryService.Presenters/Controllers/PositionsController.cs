@@ -1,4 +1,4 @@
-﻿using DirectoryService.Application.Features.Positions.CreatePosition;
+﻿using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
 using DirectoryService.Contracts.Positions;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;

@@ -6,6 +6,7 @@ using DirectoryService.Infrastructure.Postgres.Database;
 using DirectoryService.Infrastructure.Postgres.Departments;
 using DirectoryService.Infrastructure.Postgres.Locations;
 using DirectoryService.Infrastructure.Postgres.Positions;
+using DirectoryService.Infrastructure.Postgres.Seeding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,10 +20,16 @@ namespace DirectoryService.Infrastructure.Postgres
         {
             var connectionString = configuration.GetConnectionString(DATABASE_CONNECTIONSTRING);
             services.AddScoped(s => new ApplicationDbContext(connectionString!));
+            services.AddScoped<IReadDbContext, ApplicationDbContext>(s => new ApplicationDbContext(connectionString!));
+            services.AddSingleton<IDBConnectionFactory, NpgsqlConnectionFactory>(s => new NpgsqlConnectionFactory(connectionString!));
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             services.AddScoped<ITransactionManager, TransactionManager>();
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();
             services.AddScoped<IPositionsRepository, PositionsRepository>();
+
+            services.AddScoped<ISeeder, Seeder>();
 
             return services;
         }

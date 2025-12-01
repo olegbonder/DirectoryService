@@ -1,7 +1,4 @@
-﻿using DirectoryService.Application.Features.Departments.CreateDepartment;
-using DirectoryService.Application.Features.Locations.CreateDepartment;
-using DirectoryService.Contracts.Departments;
-using DirectoryService.Domain.Departments;
+﻿using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
@@ -28,14 +25,10 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new CreateDepartmentCommand(new CreateDepartmentRequest("Подразделение", "main", null, locationIdValues));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await TestData.CreateDepartment("Подразделение", "main", null, locationIdValues, cancellationToken);
 
             // assert
-            await ExecuteInDb(async dbContext =>
+            await TestData.ExecuteInDb(async dbContext =>
             {
                 var createdDepartment = await dbContext.Departments
                     .Include(d => d.DepartmentLocations)
@@ -67,14 +60,10 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new CreateDepartmentCommand(new CreateDepartmentRequest("Подразделение", "dev", parentDepartmentId.Value, locationIdValues));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await TestData.CreateDepartment("Подразделение", "dev", parentDepartmentId.Value, locationIdValues, cancellationToken);
 
             // assert
-            await ExecuteInDb(async dbContext =>
+            await TestData.ExecuteInDb(async dbContext =>
             {
                 var department = await dbContext.Departments
                     .FirstAsync(d => d.Id == DepartmentId.Current(result.Value), cancellationToken);
@@ -102,11 +91,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new CreateDepartmentCommand(new CreateDepartmentRequest(string.Empty, string.Empty, null, []));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await TestData.CreateDepartment(string.Empty, string.Empty, null, [], cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -129,11 +114,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new CreateDepartmentCommand(new CreateDepartmentRequest("Подразделение", "main", null, [locationId.Value]));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await TestData.CreateDepartment("Подразделение", "main", null, [locationId.Value], cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -157,11 +138,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new CreateDepartmentCommand(new CreateDepartmentRequest("Подразделение", "main", parentDepartmentId.Value, [locationId.Value]));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await TestData.CreateDepartment("Подразделение", "main", parentDepartmentId.Value, [locationId.Value], cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -172,8 +149,5 @@ namespace DirectoryService.IntegrationTests.Departments
             Assert.Equal("department.not.found", error.Code);
             Assert.Equal(ErrorType.NotFound, error.Type);
         }
-
-        private async Task<T> ExecuteHandler<T>(Func<CreateDepartmentHandler, Task<T>> action) =>
-            await base.ExecuteHandler(action);
     }
 }

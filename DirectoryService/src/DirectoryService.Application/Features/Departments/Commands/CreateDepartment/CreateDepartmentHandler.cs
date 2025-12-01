@@ -1,7 +1,7 @@
 ﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
-using DirectoryService.Application.Features.Departments.CreateDepartment;
+using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
@@ -11,7 +11,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
 
-namespace DirectoryService.Application.Features.Locations.CreateDepartment
+namespace DirectoryService.Application.Features.Departments.Commands.CreateDepartment
 {
     public sealed class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCommand>
     {

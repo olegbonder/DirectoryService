@@ -1,5 +1,4 @@
-﻿using DirectoryService.Application.Features.Departments.UpdateDepartmentLocations;
-using DirectoryService.Application.Features.Locations.CreateDepartment;
+﻿using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
@@ -26,21 +25,21 @@ namespace DirectoryService.IntegrationTests.Departments
             var locations = await TestData.CreateLocations(locationCount);
             var oldLocations = locations.Take(oldLocationCount);
             var oldLocationIds = TestData.GetLocationIds(oldLocations);
+            var oldLocationIdValues = TestData.GetLocationIdValues(oldLocationIds);
 
             var newLocations = locations.TakeLast(newLocationCount);
             var newLocationIds = TestData.GetLocationIds(newLocations);
             var newLocationIdValues = TestData.GetLocationIdValues(newLocationIds);
 
-            var department = await TestData.CreateParentDepartment("Головное подразделение", "main", oldLocations);
-            var departmentId = department.Id;
-
             var cancellationToken = CancellationToken.None;
+            var departmentIdValue = await TestData.CreateDepartment("Головное подразделение", "main", null, oldLocationIdValues, cancellationToken);
+            var departmentId = DepartmentId.Current(departmentIdValue);
 
             // act
             var result = await UpdateDepartmentLocations(departmentId.Value, newLocationIdValues, cancellationToken);
 
             // assert
-            await ExecuteInDb(async dbContext =>
+            await TestData.ExecuteInDb(async dbContext =>
             {
                 var updateDepartment = await dbContext.Departments
                     .Include(d => d.DepartmentLocations)
@@ -106,13 +105,12 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task UpdateDepartmentLocations_with_not_exist_newlocation_should_failed()
         {
             // arrange
-            var locations = await TestData.CreateLocations(2);
-            var department = await TestData.CreateParentDepartment("Головное подразделение", "main", locations);
-            var departmentId = department.Id;
+            var cancellationToken = CancellationToken.None;
+
+            var departments = await TestData.CreateDepartments([2]);
+            var departmentId = departments.First().Id;
 
             var newLocationId = LocationId.Create();
-
-            var cancellationToken = CancellationToken.None;
 
             // act
             var result = await UpdateDepartmentLocations(departmentId.Value, [newLocationId.Value], cancellationToken);
@@ -132,7 +130,7 @@ namespace DirectoryService.IntegrationTests.Departments
             List<Guid> locationsIds,
             CancellationToken cancellationToken)
         {
-            var result = await ExecuteHandler(async (UpdateDepartmentLocationsHandler sut) =>
+            var result = await TestData.ExecuteHandler(async (UpdateDepartmentLocationsHandler sut) =>
             {
                 var command = new UpdateLocationsCommand(departmentId, new UpdateDepartmentLocationsRequest(locationsIds));
                 return await sut.Handle(command, cancellationToken);

@@ -13,7 +13,7 @@ namespace DirectoryService.Application
 
             // Поищет в текущей сборке все реализации для ICommandHandler
             services.Scan(scan => scan.FromAssemblies(assembly)
-                .AddClasses(classes => classes.AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>)))
+                .AddClasses(classes => classes.AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>), typeof(IQueryHandler<,>)))
                 .AsSelfWithInterfaces()
                 .WithScopedLifetime());
 

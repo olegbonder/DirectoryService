@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Infrastructure.Postgres;
+using DirectoryService.Infrastructure.Postgres.Seeding;
 using DirectoryService.Web.Configuration;
 using Serilog;
 
@@ -20,6 +21,14 @@ try
     var app = builder.Build();
 
     app.ConfigureApp();
+
+    if (app.Environment.IsDevelopment())
+    {
+        if (args.Contains("--seeding"))
+        {
+            await app.Services.RunSeeding();
+        }
+    }
 
     app.Run();
 }

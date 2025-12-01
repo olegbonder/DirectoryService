@@ -1,4 +1,4 @@
-﻿using DirectoryService.Application.Features.Departments.MoveDepartment;
+﻿using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
@@ -18,7 +18,8 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_valid_data_move_to_root_path_should_suceed()
         {
             // arrange
-            var departments = await TestData.CreateDepartments(4);
+            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartment = departments[2];
             var moveDepartmentId = moveDepartment.Id;
             var moveDepartmentIdentifier = moveDepartment.Identifier;
@@ -28,14 +29,10 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(moveDepartmentId.Value, new MoveDepartmentRequest(null));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(moveDepartmentId.Value, null, cancellationToken);
 
             // assert
-            await ExecuteInDb(async dbContext =>
+            await TestData.ExecuteInDb(async dbContext =>
             {
                 var movedDepartment = await dbContext.Departments
                     .FirstAsync(d => d.Id == moveDepartmentId, cancellationToken);
@@ -61,7 +58,8 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_valid_data_move_to_child_path_should_suceed()
         {
             // arrange
-            var departments = await TestData.CreateDepartments(5);
+            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartment = departments[3];
             var moveDepartmentId = moveDepartment.Id;
             var moveDepartmentIdentifier = moveDepartment.Identifier;
@@ -73,14 +71,10 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(moveDepartmentId.Value, new MoveDepartmentRequest(parentDeptId.Value));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(moveDepartmentId.Value, parentDeptId.Value, cancellationToken);
 
             // assert
-            await ExecuteInDb(async dbContext =>
+            await TestData.ExecuteInDb(async dbContext =>
             {
                 var parentDepartment = await dbContext.Departments
                     .FirstAsync(d => d.Id == parentDeptId, cancellationToken);
@@ -113,11 +107,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(Guid.Empty, new MoveDepartmentRequest(null));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(Guid.Empty, null, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -137,11 +127,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(departmentId.Value, new MoveDepartmentRequest(departmentId.Value));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(departmentId.Value, departmentId.Value, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -157,18 +143,15 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_move_to_parent_id_as_child_should_failed()
         {
             // arrange
-            var departments = await TestData.CreateDepartments(5);
+            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartmentId = departments[2].Id;
 
             var parentAsChildDeptId = departments[3].Id;
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(moveDepartmentId.Value, new MoveDepartmentRequest(parentAsChildDeptId.Value));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(moveDepartmentId.Value, parentAsChildDeptId.Value, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -184,7 +167,8 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_not_exist_parent_department_should_failed()
         {
             // arrange
-            var departments = await TestData.CreateDepartments(3);
+            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartmentId = departments[1].Id;
 
             var parentDepartmentId = DepartmentId.Create();
@@ -192,11 +176,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(moveDepartmentId.Value, new MoveDepartmentRequest(parentDepartmentId.Value));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(moveDepartmentId.Value, parentDepartmentId.Value, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -212,18 +192,15 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_not_exist_department_should_failed()
         {
             // arrange
-            var departments = await TestData.CreateDepartments(4);
+            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartmentId = DepartmentId.Create();
             var parentDepartmentId = departments[1].Id;
 
             var cancellationToken = CancellationToken.None;
 
             // act
-            var result = await ExecuteHandler(async (sut) =>
-            {
-                var command = new MoveDepartmentCommand(moveDepartmentId.Value, new MoveDepartmentRequest(parentDepartmentId.Value));
-                return await sut.Handle(command, cancellationToken);
-            });
+            var result = await MoveDepartment(moveDepartmentId.Value, parentDepartmentId.Value, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -235,7 +212,18 @@ namespace DirectoryService.IntegrationTests.Departments
             Assert.Equal(ErrorType.NotFound, error.Type);
         }
 
-        private async Task<T> ExecuteHandler<T>(Func<MoveDepartmentHandler, Task<T>> action) =>
-            await base.ExecuteHandler(action);
+        private async Task<Result<Guid>> MoveDepartment(
+            Guid departmentId,
+            Guid? parentDepartmentId,
+            CancellationToken cancellationToken)
+        {
+            var result = await TestData.ExecuteHandler(async (MoveDepartmentHandler sut) =>
+            {
+                var command = new MoveDepartmentCommand(departmentId, new MoveDepartmentRequest(parentDepartmentId));
+                return await sut.Handle(command, cancellationToken);
+            });
+
+            return result;
+        }
     }
 }
