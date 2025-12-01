@@ -3,6 +3,7 @@ using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Locations;
 using DirectoryService.Domain.Departments;
+using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -25,60 +26,45 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
 
         public async Task<Result<GetLocationsResponse>> Handle(GetLocationsRequest request, CancellationToken cancellationToken)
         {
-            var query = _readDbContext.LocationsRead;
-
             int totalCount = 0;
             var departmentIdValues = request.DepartmentIds;
-            if (departmentIdValues != null && departmentIdValues.Any())
-            {
-                var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
-                query = _readDbContext.DepartmentsRead
-                        .Where(d => departmentIds.Contains(d.Id))
-                        .SelectMany(d => d.DepartmentLocations.Select(dl => dl.Location))
-                        .OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
-
-                try
-                {
-                    totalCount = await query.CountAsync(cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Ошибка получения данных о локациях с запросом {JsonSerializer.Serialize(request)}");
-                    return LocationErrors.DatabaseGetError();
-                }
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(request.Search) == false)
-                {
-                    query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
-                }
-
-                if (request.IsActive.HasValue)
-                {
-                    query = query.Where(l => l.IsActive == request.IsActive);
-                }
-
-                var pagination = request.Pagination;
-                query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
-
-                try
-                {
-                    totalCount = await query.CountAsync(cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Ошибка получения данных о локациях с запросом {JsonSerializer.Serialize(request)}");
-                    return LocationErrors.DatabaseGetError();
-                }
-
-                query = query.Skip((pagination.Page - 1) * pagination.PageSize)
-                    .Take(pagination.PageSize);
-
-            }
 
             try
             {
+                IQueryable<Location> query;
+                if (departmentIdValues != null && departmentIdValues.Any())
+                {
+                    var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
+                    query = _readDbContext.DepartmentsRead
+                            .Where(d => departmentIds.Contains(d.Id))
+                            .SelectMany(d => d.DepartmentLocations.Select(dl => dl.Location))
+                            .OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
+
+                    totalCount = await query.CountAsync(cancellationToken);
+                }
+                else
+                {
+                    query = _readDbContext.LocationsRead;
+                    if (string.IsNullOrWhiteSpace(request.Search) == false)
+                    {
+                        query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
+                    }
+
+                    if (request.IsActive.HasValue)
+                    {
+                        query = query.Where(l => l.IsActive == request.IsActive);
+                    }
+
+                    var pagination = request.Pagination;
+                    query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
+
+                    totalCount = await query.CountAsync(cancellationToken);
+
+                    query = query.Skip((pagination.Page - 1) * pagination.PageSize)
+                        .Take(pagination.PageSize);
+
+                }
+
                 var locations = await query.Select(l => new LocationDTO
                 {
                     Id = l.Id.Value,
@@ -99,8 +85,8 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Ошибка получения данных о локациях с запросом {JsonSerializer.Serialize(request)}");
-                return LocationErrors.DatabaseGetError();
+                _logger.LogError(ex, $"Ошибка получения данных о локациях с запросом {request}");
+                return new GetLocationsResponse([], totalCount);
             }
         }
     }
