@@ -2,12 +2,9 @@
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Locations;
 using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Locations;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Tsp;
 using Shared.Result;
-using System.Linq;
 
 namespace DirectoryService.IntegrationTests.Locations
 {
