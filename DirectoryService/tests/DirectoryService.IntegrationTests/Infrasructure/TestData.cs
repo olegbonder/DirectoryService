@@ -1,8 +1,13 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
+using DirectoryService.Application.Features.Locations.Commands.CreateLocation;
+using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
 using DirectoryService.Contracts.Departments;
+using DirectoryService.Contracts.Locations;
+using DirectoryService.Contracts.Positions;
 using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
+using DirectoryService.Domain.Positions;
 using DirectoryService.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,20 +52,30 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             return await action(sut);
         }
 
+        public async Task<Result<Guid>> CreateLocation(
+            string name,
+            AddressDTO address,
+            string timezone,
+            CancellationToken cancellationToken)
+        {
+            var result = await ExecuteHandler(async (CreateLocationHandler sut) =>
+            {
+                var command = new CreateLocationCommand(new CreateLocationRequest(name, address, timezone));
+                return await sut.Handle(command, cancellationToken);
+            });
+
+            return result;
+        }
+
         public async Task<Location> CreateLocation(string name, string houseNumber = "10")
         {
-            return await ExecuteInDb(async dbContext =>
-            {
-                var location = Location.Create(
-                    LocationName.Create(name),
-                    LocationAddress.Create("Нижний Новгород", "улица", "10", houseNumber, null),
-                    LocationTimezone.Create("Europe/Moscow"));
+            var addressDto = new AddressDTO("Россия", "Нижний Новгород", "улица", "10", houseNumber);
+            string timeZone = "Europe/Moscow";
 
-                dbContext.Locations.Add(location);
-                await dbContext.SaveChangesAsync();
+            var locationIdResult = await CreateLocation(name, addressDto, timeZone, default);
+            var location = await GetLocation(locationIdResult.Value);
 
-                return location.Value;
-            });
+            return location!;
         }
 
         public async Task<List<Location>> CreateLocations(int newLocationCount = 2)
@@ -68,8 +83,11 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             var list = new List<Location>();
             for (int i = 0; i < newLocationCount; i++)
             {
-                var location = await CreateLocation($"Location {i}", $"{i}");
-                list.Add(location);
+                var addressDto = new AddressDTO("Россиия", "Нижний Новгород", "улица", "10", i.ToString());
+                string timeZone = "Europe/Moscow";
+                var locationIdRes = await CreateLocation($"Location {i}", addressDto, timeZone, default);
+                var location = await GetLocation(locationIdRes.Value);
+                list.Add(location!);
             }
 
             return list;
@@ -101,29 +119,6 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             });
 
             return result;
-        }
-
-        public async Task<Department> CreateParentDepartment(string name, string identifier, IEnumerable<Location> locations)
-        {
-            return await ExecuteInDb(async dbcontext =>
-            {
-                var departmentId = DepartmentId.Create();
-                var departmentIdentifier = DepartmentIdentifier.Create(identifier);
-                var locationDepartments = locations.Select(l => new DepartmentLocation(departmentId, l.Id)).ToList();
-                var department = Department.Create(
-                    departmentId,
-                    null,
-                    DepartmentName.Create(name),
-                    departmentIdentifier,
-                    DepartmentPath.Create(departmentIdentifier),
-                    0,
-                    locationDepartments);
-
-                dbcontext.Departments.Add(department);
-                await dbcontext.SaveChangesAsync();
-
-                return department.Value;
-            });
         }
 
         public async Task<List<Department>> CreateDepartments(int[] deptAndLocations)
@@ -167,16 +162,42 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             return departments;
         }
 
-        private async Task<Department?> GetDepartment(Guid departmentId)
+        public async Task<Result<Guid>> CreatePosition(
+            string name,
+            string? description,
+            List<Guid> departmentIds,
+            CancellationToken cancellationToken)
+        {
+            var result = await ExecuteHandler(async (CreatePositionHandler sut) =>
+            {
+                var command = new CreatePositionCommand(new CreatePositionRequest(name, description, departmentIds));
+                return await sut.Handle(command, cancellationToken);
+            });
+
+            return result;
+        }
+
+        private async Task<Department> GetDepartment(Guid departmentId)
         {
             return await ExecuteInDb(async dbcontext =>
             {
                 var department = await dbcontext.Departments
                     .Include(d => d.DepartmentLocations)
                     .ThenInclude(dl => dl.Location)
-                    .FirstOrDefaultAsync(d => d.Id == DepartmentId.Current(departmentId));
+                    .FirstAsync(d => d.Id == DepartmentId.Current(departmentId));
 
                 return department;
+            });
+        }
+
+        private async Task<Location> GetLocation(Guid locationId)
+        {
+            return await ExecuteInDb(async dbcontext =>
+            {
+                var location = await dbcontext.Locations
+                    .FirstAsync(d => d.Id == LocationId.Current(locationId));
+
+                return location;
             });
         }
     }

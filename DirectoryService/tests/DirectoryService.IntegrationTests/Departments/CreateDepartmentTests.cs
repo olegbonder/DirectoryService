@@ -1,4 +1,5 @@
-﻿using DirectoryService.Domain.Departments;
+﻿using DirectoryService.Domain;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,7 @@ namespace DirectoryService.IntegrationTests.Departments
             var locationIds = TestData.GetLocationIds(locations);
             var locationIdValues = TestData.GetLocationIdValues(locationIds);
 
-            var parentDepartment = await TestData.CreateParentDepartment("Головное подразделение", "main", locations);
+            var parentDepartment = await CreateParentDepartment("Головное подразделение", "main", locations);
             var parentDepartmentId = parentDepartment.Id;
             var cancellationToken = CancellationToken.None;
 
@@ -148,6 +149,29 @@ namespace DirectoryService.IntegrationTests.Departments
             var error = result.Errors.First();
             Assert.Equal("department.not.found", error.Code);
             Assert.Equal(ErrorType.NotFound, error.Type);
+        }
+
+        private async Task<Department> CreateParentDepartment(string name, string identifier, IEnumerable<Location> locations)
+        {
+            return await TestData.ExecuteInDb(async dbcontext =>
+            {
+                var departmentId = DepartmentId.Create();
+                var departmentIdentifier = DepartmentIdentifier.Create(identifier);
+                var locationDepartments = locations.Select(l => new DepartmentLocation(departmentId, l.Id)).ToList();
+                var department = Department.Create(
+                    departmentId,
+                    null,
+                    DepartmentName.Create(name),
+                    departmentIdentifier,
+                    DepartmentPath.Create(departmentIdentifier),
+                    0,
+                    locationDepartments);
+
+                dbcontext.Departments.Add(department);
+                await dbcontext.SaveChangesAsync();
+
+                return department.Value;
+            });
         }
     }
 }

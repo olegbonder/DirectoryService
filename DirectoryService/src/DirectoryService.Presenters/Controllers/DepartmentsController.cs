@@ -1,6 +1,7 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
 using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
+using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
 using DirectoryService.Contracts.Departments;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +54,19 @@ namespace DirectoryService.Presenters.Controllers
         {
             var command = new MoveDepartmentCommand(departmentId, request);
             return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpGet("top-positions")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<GetTopDepartmentsResponse>> GetTopDepartments(
+            [FromQuery] GetTopDepartmentsRequest request,
+            [FromServices] GetTopDepartmentsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            return await handler.Handle(request, cancellationToken);
         }
     }
 }

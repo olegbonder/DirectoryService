@@ -45,5 +45,20 @@ namespace DirectoryService.Domain.Shared
         {
             return Error.Conflict("position.name.is.conflict", $"Активная должность с наименованием {name} уже существует");
         }
+
+        public static Error DepartmentIdsNotBeNull()
+        {
+            return GeneralErrors.ValueIsRequired("position.locationIds");
+        }
+
+        public static Error DepartmentIdsNotBeEmpty()
+        {
+            return Error.Validation("position.departmentIds.not.empty", "Список подразделений не может быть пустым");
+        }
+
+        public static Error DepartmentIdsMustBeUnique()
+        {
+            return Error.Validation("position.departmentIds.must.be.unique", "Список подразделений должен быть уникальным");
+        }
     }
 }
