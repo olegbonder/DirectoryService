@@ -1,6 +1,7 @@
 ﻿using DirectoryService.Application.Features.Locations.Queries.GetLocations;
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Locations;
+using DirectoryService.Contracts.Locations.GetLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;

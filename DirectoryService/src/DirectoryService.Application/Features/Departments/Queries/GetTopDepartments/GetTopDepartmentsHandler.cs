@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Contracts.Departments;
+using DirectoryService.Contracts.Departments.GetTopDepartments;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
 

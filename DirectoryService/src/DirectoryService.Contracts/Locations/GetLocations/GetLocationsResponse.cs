@@ -1,4 +1,4 @@
-﻿namespace DirectoryService.Contracts.Locations
+﻿namespace DirectoryService.Contracts.Locations.GetLocations
 {
     public record GetLocationsResponse(List<LocationDTO> Locations, long TotalCount);
 }

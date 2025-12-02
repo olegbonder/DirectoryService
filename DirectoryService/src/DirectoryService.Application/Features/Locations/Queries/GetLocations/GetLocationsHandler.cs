@@ -1,10 +1,8 @@
-﻿using System.Text.Json;
-using DirectoryService.Application.Abstractions;
+﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Contracts.Locations;
+using DirectoryService.Contracts.Locations.GetLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
