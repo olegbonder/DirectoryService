@@ -1,5 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
-using DirectoryService.Contracts.Positions;
+using DirectoryService.Contracts.Positions.CreatePosition;
 
 namespace DirectoryService.Application.Features.Positions.Commands.CreatePosition
 {

@@ -1,5 +1,7 @@
 ﻿using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
 using DirectoryService.Contracts.Departments;
+using DirectoryService.Contracts.Departments.CreateDepartment;
+using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
 using Shared.Result;

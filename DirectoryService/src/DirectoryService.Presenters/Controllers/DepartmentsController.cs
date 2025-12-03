@@ -1,8 +1,14 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
 using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
+using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
-using DirectoryService.Contracts.Departments;
+using DirectoryService.Contracts.Departments.CreateDepartment;
+using DirectoryService.Contracts.Departments.GetChildDepartments;
+using DirectoryService.Contracts.Departments.GetRootDepartments;
+using DirectoryService.Contracts.Departments.GetTopDepartments;
+using DirectoryService.Contracts.Departments.MoveDepartment;
+using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
 
@@ -67,6 +73,30 @@ namespace DirectoryService.Presenters.Controllers
             CancellationToken cancellationToken)
         {
             return await handler.Handle(request, cancellationToken);
+        }
+
+        [HttpGet("roots")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<GetRootDepartmentsResponse>> GetRootDepartments(
+            [FromQuery] GetRootDepartmentsRequest request,
+            [FromServices] GetRootDepartmentsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            return await handler.Handle(request, cancellationToken);
+        }
+
+        [HttpGet("{parentId:guid}/children")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<GetChildDepartmentsResponse>> GetChildDepartments(
+            [FromRoute] Guid parentId,
+            [FromQuery] GetChildDepartmentsRequest request,
+            [FromServices] GetChildDepartmentsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetChildDepartmentsQuery(parentId, request);
+            return await handler.Handle(query, cancellationToken);
         }
     }
 }
