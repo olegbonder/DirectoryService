@@ -1,6 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain;
@@ -79,7 +78,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
             var deptPath = DepartmentPath.Create(deptIdentifier, parentDepartment).Value;
 
             var locationIds = request.LocationIds.Select(LocationId.Current).ToList();
-            var getLocationsRes = await _locationsRepository.GetLocationByIds(locationIds, cancellationToken);
+            var getLocationsRes = await _locationsRepository.GetLocationsByIds(locationIds, cancellationToken);
             if (getLocationsRes.IsFailure)
             {
                 transactionScope.RollBack();
@@ -93,19 +92,19 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
             if (departmentRes.IsFailure)
             {
                 transactionScope.RollBack();
-                return departmentRes.Errors!;
+                return departmentRes.Errors;
             }
 
             var addDepartmentRes = await _departmentsRepository.AddAsync(departmentRes.Value, cancellationToken);
             if (addDepartmentRes.IsFailure)
             {
-                return addDepartmentRes.Errors!;
+                return addDepartmentRes.Errors;
             }
 
             var commitResult = transactionScope.Commit();
             if (commitResult.IsFailure)
             {
-                return commitResult.Errors!;
+                return commitResult.Errors;
             }
 
             _logger.LogInformation("Подразделение с id = {id} сохранена в БД", addDepartmentRes.Value);

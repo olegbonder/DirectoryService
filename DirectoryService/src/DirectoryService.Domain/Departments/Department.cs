@@ -32,7 +32,7 @@ namespace DirectoryService.Domain.Departments
             Depth = depth;
             IsActive = true;
             CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = CreatedAt;
         }
 
         public DepartmentName Name { get; private set; } = null!;
@@ -54,6 +54,8 @@ namespace DirectoryService.Domain.Departments
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
+
+        public DateTime? DeletedAt { get; private set; }
 
         public static Result<Department> Create(
             DepartmentId id,
@@ -99,6 +101,14 @@ namespace DirectoryService.Domain.Departments
             _locations = locations.ToList();
 
             return Result.Success();
+        }
+
+        public void SoftDelete()
+        {
+            IsActive = false;
+            DeletedAt = DateTime.UtcNow;
+            UpdatedAt = DeletedAt.Value;
+            Path = DepartmentPath.CreateForSoftDelete(Identifier);
         }
     }
 }

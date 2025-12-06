@@ -1,5 +1,4 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
-using DirectoryService.Contracts.Departments;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
@@ -9,20 +8,16 @@ using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments
 {
-    public class UpdateDepartmentLocationsTests : DirectoryBaseTests
+    public class UpdateDepartmentLocationsTests(DirectoryTestWebFactory factory)
+        : DirectoryBaseTests(factory)
     {
-        public UpdateDepartmentLocationsTests(DirectoryTestWebFactory factory)
-            : base(factory)
-        {
-        }
-
         [Fact]
         public async Task UpdateDepartmentLocations_with_valid_data_should_suceed()
         {
             // arrange
-            var locationCount = 4;
-            var oldLocationCount = 1;
-            var newLocationCount = locationCount - oldLocationCount;
+            int locationCount = 4;
+            int oldLocationCount = 1;
+            int newLocationCount = locationCount - oldLocationCount;
             var locations = await TestData.CreateLocations(locationCount);
             var oldLocations = locations.Take(oldLocationCount);
             var oldLocationIds = TestData.GetLocationIds(oldLocations);

@@ -1,6 +1,4 @@
 ﻿using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
-using DirectoryService.Contracts.Departments;
-using DirectoryService.Contracts.Departments.CreateDepartment;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
@@ -8,44 +6,40 @@ using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
 
-public class GetTopDepartmentsTests : DirectoryBaseTests
+public class GetTopDepartmentsTests(DirectoryTestWebFactory factory)
+    : DirectoryBaseTests(factory)
 {
-    public GetTopDepartmentsTests(DirectoryTestWebFactory factory)
-        : base(factory)
-    {
-    }
-
     [Fact]
     public async Task GetTopDepartments_with_top_limit_should_suceed()
     {
          // arrange
          var cancellationToken = CancellationToken.None;
 
-         var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+         int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
          var departments = await TestData.CreateDepartments(deptAndLocations);
          var departmentIds = TestData.GetDepartmentIds(departments);
          var departmentIdValues = TestData.GetDepartmentIdValues(departmentIds);
 
-         var postionRes1 = await TestData.CreatePosition(
+         var positionRes1 = await TestData.CreatePosition(
              "test1",
              string.Empty,
              departmentIdValues,
              cancellationToken);
-         var position1Id = postionRes1.Value;
+         var position1Id = positionRes1.Value;
 
-         var postionRes2 = await TestData.CreatePosition(
+         var positionRes2 = await TestData.CreatePosition(
              "test2",
              string.Empty,
              departmentIdValues.Take(4).ToList(),
              cancellationToken);
-         var position2Id = postionRes2.Value;
+         var position2Id = positionRes2.Value;
 
-         var postionRes3 = await TestData.CreatePosition(
+         var positionRes3 = await TestData.CreatePosition(
              "test3",
              string.Empty,
              departmentIdValues.Take(2).ToList(),
              cancellationToken);
-         var position3Id = postionRes3.Value;
+         var position3Id = positionRes3.Value;
 
          // act
          var result = await GetTopDepartments(cancellationToken: cancellationToken);
@@ -68,15 +62,15 @@ public class GetTopDepartmentsTests : DirectoryBaseTests
                  .OrderByDescending(d => d.PositionsCount)
                  .ToListAsync(cancellationToken);
 
-             var departmentsCount = await dbContext.DepartmentsRead.CountAsync(cancellationToken);
+             int departmentsCount = await dbContext.DepartmentsRead.CountAsync(cancellationToken);
 
              Assert.True(result.IsSuccess);
              Assert.NotNull(result.Value);
              Assert.NotEmpty(result.Value.Departments);
              Assert.Equal(departmentsCount, result.Value.TotalCount);
              Assert.Equivalent(
-                 getDepartments.Select(d => new { Id = d.Id, Count = d.PositionsCount }),
-                 result.Value.Departments.Select(d => new { Id = d.Id, Count = d.PositionsCount }));
+                 getDepartments.Select(d => new { d.Id, Count = d.PositionsCount }),
+                 result.Value.Departments.Select(d => new { d.Id, Count = d.PositionsCount }));
          });
     }
 

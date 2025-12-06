@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DirectoryService.Application.Features.Positions;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -59,5 +60,29 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
 
         public async Task<Position?> GetBy(Expression<Func<Position, bool>> predicate, CancellationToken cancellationToken) =>
             await _context.Positions.FirstOrDefaultAsync(predicate, cancellationToken);
+
+        public async Task<Result> DeactivatePositionsByDepartment(
+            DepartmentId departmentId, CancellationToken cancellationToken)
+        {
+            var deptId = departmentId.Value;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                    $"""
+                     UPDATE positions
+                     SET is_active = false,
+                         updated_at = now()
+                     WHERE is_active = true 
+                       AND id in 
+                           (SELECT position_id FROM department_positions WHERE department_id = {deptId})
+                     """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Отмена операции обновления позиций у подразделения с id={deptId}", deptId);
+                return DepartmentErrors.DatabaseUpdatePositionsError(deptId);
+            }
+        }
     }
 }

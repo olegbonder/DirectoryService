@@ -61,7 +61,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
                 var newParentDeptId = DepartmentId.Current(newParentId.Value);
 
                 // поиск среди дочерних подразделений
-                var hasChildDepartments = await _departmentsRepository.IsExistsChildForParent(departmentId, newParentDeptId, cancellationToken);
+                bool hasChildDepartments = await _departmentsRepository.IsExistsChildForParent(departmentId, newParentDeptId, cancellationToken);
                 if (hasChildDepartments)
                 {
                     transactionScope.RollBack();
@@ -85,21 +85,21 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
                 return departmentResult.Errors;
             }
 
-            var depatment = departmentResult.Value!;
-            var oldDepartmentPath = depatment.Path;
+            var department = departmentResult.Value!;
+            var oldDepartmentPath = department.Path;
 
             // Выбираем дочерние подразделения для пессимистичной блокировки
-            var childDepartments = await _departmentsRepository.GetChildrensWithLock(depatment.Path, cancellationToken);
+            await _departmentsRepository.GetChildrensWithLock(department.Path, cancellationToken);
 
             // Перемещаем только подразделение
-            depatment.MoveDepartment(newParentDepartment);
+            department.MoveDepartment(newParentDepartment);
 
             // Обновляем данные дочерних сущностей
-            var updateChildrensResult = await _departmentsRepository.UpdateChildrensForMove(oldDepartmentPath, depatment, cancellationToken);
-            if (updateChildrensResult.IsFailure)
+            var updateChildrenResult = await _departmentsRepository.UpdateChildrensForMove(oldDepartmentPath, department, cancellationToken);
+            if (updateChildrenResult.IsFailure)
             {
                 transactionScope.RollBack();
-                return updateChildrensResult.Errors;
+                return updateChildrenResult.Errors;
             }
 
             try
@@ -116,7 +116,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
             var commitResult = transactionScope.Commit();
             if (commitResult.IsFailure)
             {
-                return commitResult.Errors!;
+                return commitResult.Errors;
             }
 
             _logger.LogInformation("Подразделениe с {id} успешно перемещено", deptId);

@@ -1,6 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain;
@@ -64,7 +63,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
             var request = command.Request;
 
             var locationIds = request.LocationIds.Select(LocationId.Current).ToList();
-            var getLocationssResult = await _locationsRepository.GetActiveLocationByIds(locationIds, cancellationToken);
+            var getLocationssResult = await _locationsRepository.GetActiveLocationsByIds(locationIds, cancellationToken);
             if (getLocationssResult.IsFailure)
             {
                 transactionScope.RollBack();

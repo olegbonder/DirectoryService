@@ -1,5 +1,4 @@
 ﻿using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
@@ -8,12 +7,16 @@ using Microsoft.Extensions.Logging;
 
 namespace DirectoryService.Infrastructure.Postgres
 {
-    public class ApplicationDbContext(string connectionString): DbContext, IReadDbContext
+    public class ApplicationDbContext(
+        string connectionString): DbContext, IReadDbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(connectionString);
             optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
+            optionsBuilder.EnableSensitiveDataLogging();
+
+            // optionsBuilder.AddInterceptors(new SoftDeleteInterceptor());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
