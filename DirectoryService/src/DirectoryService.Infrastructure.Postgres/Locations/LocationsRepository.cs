@@ -86,12 +86,18 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             {
                 await _context.Database.ExecuteSqlAsync(
                     $"""
+                     WITH lock_locations AS (SELECT dl.location_id 
+                                             FROM department_locations dl
+                                             JOIN locations l ON dl.location_id = l.id
+                                             WHERE dl.department_id = {deptId}
+                                                AND l.is_active = true 
+                                             FOR UPDATE)
+                     
                      UPDATE locations
                      SET is_active = false,
                          updated_at = now()
-                     WHERE is_active = true 
-                       AND id in 
-                           (SELECT location_id FROM department_locations WHERE department_id = {deptId})
+                     WHERE id in 
+                           (SELECT location_id FROM lock_locations)
                      """, cancellationToken);
                 return Result.Success();
             }
