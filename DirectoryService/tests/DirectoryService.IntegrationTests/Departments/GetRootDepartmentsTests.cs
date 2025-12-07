@@ -6,20 +6,16 @@ using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
 
-public class GetRootDepartmentsTests : DirectoryBaseTests
+public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
+    : DirectoryBaseTests(factory)
 {
-    public GetRootDepartmentsTests(DirectoryTestWebFactory factory)
-        : base(factory)
-    {
-    }
-
     [Fact]
     public async Task GetRootDepartmentsTests_with_valid_request_should_suceed()
     {
          // arrange
          var cancellationToken = CancellationToken.None;
 
-         var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+         int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
          var departments = await TestData.CreateDepartments(deptAndLocations);
          var location = await TestData.CreateLocation("Test", "12");
          var secondChildDeparment = await TestData.CreateDepartment("Test", "tst",
@@ -51,10 +47,10 @@ public class GetRootDepartmentsTests : DirectoryBaseTests
         // arrange
         var cancellationToken = CancellationToken.None;
 
-        var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+        int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
         var departments = await TestData.CreateDepartments(deptAndLocations);
         var location = await TestData.CreateLocation("Test", "12");
-        var secondChildDeparment = await TestData.CreateDepartment("Test", "tst",
+        await TestData.CreateDepartment("Test", "tst",
             departments[0].Id.Value, [location.Id.Value], cancellationToken);
 
         // act
@@ -80,8 +76,8 @@ public class GetRootDepartmentsTests : DirectoryBaseTests
     public async Task GetRootDepartmentsTests_with_second_page_should_suceed()
     {
          // arrange
-         var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
-         var departments = await TestData.CreateDepartments(deptAndLocations);
+         int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
+         await TestData.CreateDepartments(deptAndLocations);
 
          var cancellationToken = CancellationToken.None;
 
@@ -100,7 +96,7 @@ public class GetRootDepartmentsTests : DirectoryBaseTests
         // arrange
         var cancellationToken = CancellationToken.None;
 
-        var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+        int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
         await TestData.CreateDepartments(deptAndLocations);
         var location = await TestData.CreateLocation("Test", "12");
         var secondParentDeparmentResult = await TestData.CreateDepartment("Test", "tst",
@@ -123,7 +119,6 @@ public class GetRootDepartmentsTests : DirectoryBaseTests
     public async Task GetRootDepartmentsTests_no_data_should_suceed()
     {
         // arrange
-
         var cancellationToken = CancellationToken.None;
 
         // act

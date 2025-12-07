@@ -3,7 +3,7 @@ using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
-    public sealed class Location : Entity<LocationId>
+    public sealed class Location : Entity<LocationId>//, ISoftDeletable
     {
         // EF Core
         private Location(LocationId id)
@@ -38,6 +38,12 @@ namespace DirectoryService.Domain.Locations
         {
             var newLocationId = LocationId.Create();
             return new Location(newLocationId, name, address, timezone);
+        }
+
+        public void SoftDelete()
+        {
+            IsActive = false;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

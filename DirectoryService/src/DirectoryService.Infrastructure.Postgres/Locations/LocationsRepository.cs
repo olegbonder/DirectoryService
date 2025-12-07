@@ -1,4 +1,5 @@
 ﻿using DirectoryService.Application.Features.Locations;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
 
         public async Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken)
         {
-            var name = location.Name.Value;
+            string name = location.Name.Value;
             try
             {
                 await _context.AddAsync(location, cancellationToken);
@@ -59,23 +60,58 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             }
         }
 
-        public async Task<Result<IReadOnlyCollection<Location>>> GetLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
+        public async Task<Result<IReadOnlyCollection<Location>>> GetLocationsByIds(
+            List<LocationId> locationIds, CancellationToken cancellationToken)
         {
-            var locations = await _context.Locations.Where(l => locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
+            var locations = await _context.Locations
+                .Where(l => locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
             var result = CheckLocationsByIds(locationIds, locations);
             return result;
         }
 
-        public async Task<Result<IReadOnlyCollection<Location>>> GetActiveLocationByIds(List<LocationId> locationIds, CancellationToken cancellationToken)
+        public async Task<Result<IReadOnlyCollection<Location>>> GetActiveLocationsByIds(
+            List<LocationId> locationIds, CancellationToken cancellationToken)
         {
-            var locations = await _context.Locations.Where(l => l.IsActive && locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
+            var locations = await _context.Locations
+                .Where(l => l.IsActive && locationIds.Contains(l.Id)).ToListAsync(cancellationToken);
             var result = CheckLocationsByIds(locationIds, locations);
             return result;
         }
 
-        private Result<IReadOnlyCollection<Location>> CheckLocationsByIds(List<LocationId> locationIds, List<Location> locations)
+        public async Task<Result> DeactivateLocationsByDepartment(
+            DepartmentId departmentId, CancellationToken cancellationToken)
         {
-            var notFoundLocationIds = locationIds.Except(locations.Select(l => l.Id));
+            var deptId = departmentId.Value;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                    $"""
+                     WITH lock_locations AS (SELECT dl.location_id 
+                                             FROM department_locations dl
+                                             JOIN locations l ON dl.location_id = l.id
+                                             WHERE dl.department_id = {deptId}
+                                                AND l.is_active = true 
+                                             FOR UPDATE)
+                     
+                     UPDATE locations
+                     SET is_active = false,
+                         updated_at = now()
+                     WHERE id in 
+                           (SELECT location_id FROM lock_locations)
+                     """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Отмена операции обновления локаций у подразделения с id={deptId}", deptId);
+                return DepartmentErrors.DatabaseUpdateLocationsError(deptId);
+            }
+        }
+
+        private Result<IReadOnlyCollection<Location>> CheckLocationsByIds(
+            List<LocationId> locationIds, List<Location> locations)
+        {
+            var notFoundLocationIds = locationIds.Except(locations.Select(l => l.Id)).ToList();
             if (notFoundLocationIds.Any())
             {
                 var errors = notFoundLocationIds.Select(l => LocationErrors.NotFound(l.Value));

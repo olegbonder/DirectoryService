@@ -9,9 +9,19 @@ namespace DirectoryService.Domain.Shared
             return Error.Failure("department.database.error", "Ошибка сохранения подразделения");
         }
 
+        public static Error DatabaseUpdateError(Guid id)
+        {
+            return Error.Failure("department.database.error", $"Ошибка обновления подразделения {id}");
+        }
+
         public static Error DatabaseUpdateLocationsError(Guid id)
         {
             return Error.Failure("department.locations.database.error", $"Ошибка обновления локаций у подразделения {id}");
+        }
+
+        public static Error DatabaseUpdatePositionsError(Guid id)
+        {
+            return Error.Failure("department.positions.database.error", $"Ошибка обновления позиций у подразделения {id}");
         }
 
         public static Error DatabaseUpdateChildrenError(Guid id)

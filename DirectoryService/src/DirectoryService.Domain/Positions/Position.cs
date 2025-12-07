@@ -53,5 +53,11 @@ namespace DirectoryService.Domain.Positions
 
             return new Position(id, name, desription, departmentPositions);
         }
+
+        public void SoftDelete()
+        {
+            IsActive = false;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

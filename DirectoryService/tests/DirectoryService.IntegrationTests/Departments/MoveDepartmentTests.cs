@@ -1,5 +1,4 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
-using DirectoryService.Contracts.Departments;
 using DirectoryService.Contracts.Departments.MoveDepartment;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
@@ -8,24 +7,19 @@ using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments
 {
-    public class MoveDepartmentTests : DirectoryBaseTests
+    public class MoveDepartmentTests(DirectoryTestWebFactory factory) : DirectoryBaseTests(factory)
     {
-        public MoveDepartmentTests(DirectoryTestWebFactory factory)
-            : base(factory)
-        {
-        }
-
         [Fact]
         public async Task MoveDepartment_with_valid_data_move_to_root_path_should_suceed()
         {
             // arrange
-            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            int[] deptAndLocations = [1, 1, 1, 1];
             var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartment = departments[2];
             var moveDepartmentId = moveDepartment.Id;
             var moveDepartmentIdentifier = moveDepartment.Identifier;
             var moveDepartmentPath = moveDepartment.Path;
-            var moveDepartmentDepth = moveDepartment.Depth;
+            int moveDepartmentDepth = moveDepartment.Depth;
 
             var cancellationToken = CancellationToken.None;
 
@@ -59,13 +53,13 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_valid_data_move_to_child_path_should_suceed()
         {
             // arrange
-            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            int[] deptAndLocations = [1, 1, 1, 1];
             var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartment = departments[3];
             var moveDepartmentId = moveDepartment.Id;
             var moveDepartmentIdentifier = moveDepartment.Identifier;
             var moveDepartmentPath = moveDepartment.Path;
-            var moveDepartmentDepth = moveDepartment.Depth;
+            int moveDepartmentDepth = moveDepartment.Depth;
 
             var parentDeptId = departments[1].Id;
 
@@ -96,8 +90,8 @@ namespace DirectoryService.IntegrationTests.Departments
                 Assert.StartsWith(parentDepartment.Path.Value, movedDepartment.Path.Value);
                 Assert.NotEqual(moveDepartmentPath, movedDepartment.Path);
                 Assert.True(movedChidren.All(c => c.Depth == parentDepartment.Depth + 2));
-                var parentPathForChilds = $"{parentDepartment.Path.Value}.{moveDepartmentIdentifier.Value}";
-                Assert.True(movedChidren.All(c => c.Path.Value.StartsWith(parentPathForChilds)));
+                string parentPathForChildren = $"{parentDepartment.Path.Value}.{moveDepartmentIdentifier.Value}";
+                Assert.True(movedChidren.All(c => c.Path.Value.StartsWith(parentPathForChildren)));
             });
         }
 
@@ -144,7 +138,7 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_move_to_parent_id_as_child_should_failed()
         {
             // arrange
-            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            int[] deptAndLocations = [1, 1, 1, 1];
             var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartmentId = departments[2].Id;
 
@@ -168,7 +162,7 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_not_exist_parent_department_should_failed()
         {
             // arrange
-            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            int[] deptAndLocations = [1, 1, 1, 1];
             var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartmentId = departments[1].Id;
 
@@ -193,7 +187,7 @@ namespace DirectoryService.IntegrationTests.Departments
         public async Task MoveDepartment_with_not_exist_department_should_failed()
         {
             // arrange
-            var deptAndLocations = new[] { 1, 1, 1, 1 };
+            int[] deptAndLocations = [1, 1, 1, 1];
             var departments = await TestData.CreateDepartments(deptAndLocations);
             var moveDepartmentId = DepartmentId.Create();
             var parentDepartmentId = departments[1].Id;

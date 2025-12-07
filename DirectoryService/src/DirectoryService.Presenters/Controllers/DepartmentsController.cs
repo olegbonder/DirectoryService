@@ -1,5 +1,6 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
 using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
+using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
 using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
 using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
@@ -97,6 +98,18 @@ namespace DirectoryService.Presenters.Controllers
         {
             var query = new GetChildDepartmentsQuery(parentId, request);
             return await handler.Handle(query, cancellationToken);
+        }
+
+        [HttpDelete("{departmentId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<Guid>> SoftDeleteDepartment(
+            [FromRoute] Guid departmentId,
+            [FromServices] SoftDeleteDepartmentHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new SoftDeleteDepartmentCommand(departmentId);
+            return await handler.Handle(command, cancellationToken);
         }
     }
 }

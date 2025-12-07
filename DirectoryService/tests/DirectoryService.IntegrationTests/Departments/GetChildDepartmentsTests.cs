@@ -7,20 +7,16 @@ using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
 
-public class GetChildDepartmentsTests : DirectoryBaseTests
+public class GetChildDepartmentsTests(DirectoryTestWebFactory factory)
+    : DirectoryBaseTests(factory)
 {
-    public GetChildDepartmentsTests(DirectoryTestWebFactory factory)
-        : base(factory)
-    {
-    }
-
     [Fact]
     public async Task GetChildDepartments_with_valid_request_should_suceed()
     {
          // arrange
          var cancellationToken = CancellationToken.None;
 
-         var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+         int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
          var departments = await TestData.CreateDepartments(deptAndLocations);
          var parentId = departments[0].Id.Value;
          var location = await TestData.CreateLocation("Test", "12");
@@ -49,7 +45,7 @@ public class GetChildDepartmentsTests : DirectoryBaseTests
     public async Task GetRootDepartmentsTests_with_second_page_should_suceed()
     {
          // arrange
-         var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+         int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
          var departments = await TestData.CreateDepartments(deptAndLocations);
          var parentId = departments[0].Id.Value;
          var cancellationToken = CancellationToken.None;
@@ -69,7 +65,7 @@ public class GetChildDepartmentsTests : DirectoryBaseTests
         // arrange
         var cancellationToken = CancellationToken.None;
 
-        var deptAndLocations = new[] { 1, 1, 1, 1, 1, 1 };
+        int[] deptAndLocations = [1, 1, 1, 1, 1, 1];
         var departments = await TestData.CreateDepartments(deptAndLocations);
         var parentId = departments[0].Id.Value;
         var location = await TestData.CreateLocation("Test", "12");
