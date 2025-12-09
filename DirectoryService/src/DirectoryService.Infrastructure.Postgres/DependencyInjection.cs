@@ -24,6 +24,7 @@ namespace DirectoryService.Infrastructure.Postgres
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
             services.AddScoped<ITransactionManager, TransactionManager>();
+            services.AddScoped<TransactionManager>();
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();
             services.AddScoped<IPositionsRepository, PositionsRepository>();

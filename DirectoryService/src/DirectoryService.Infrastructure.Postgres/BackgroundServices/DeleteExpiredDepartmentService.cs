@@ -1,34 +1,56 @@
 ﻿using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Positions;
+using DirectoryService.Domain.Shared;
+using DirectoryService.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.BackgroundServices;
 
 public class DeleteExpiredDepartmentService
 {
     private readonly ILogger<DeleteExpiredDepartmentService> _logger;
+    private readonly TransactionManager _transactionManager;
     private readonly ApplicationDbContext _dbContext;
 
     public DeleteExpiredDepartmentService(
         ILogger<DeleteExpiredDepartmentService> logger,
+        TransactionManager transactionManager,
         ApplicationDbContext dbContext)
     {
         _logger = logger;
+        _transactionManager = transactionManager;
         _dbContext = dbContext;
     }
 
     public async Task Process(CancellationToken cancellationToken)
     {
+        var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
+        if (transactionScopeResult.IsFailure)
+        {
+            return;
+        }
+
+        using var transactionScope = transactionScopeResult.Value;
+
         var departments = await GetExpiredDepartments(cancellationToken);
         if (departments.Any())
         {
+            var updateChildResults = new List<Result>();
             foreach (var department in departments)
             {
                 var departmentId = department.Id.Value;
                 string departmentPath = department.Path.Value;
-                await UpdateChildrenDepartmentPaths(departmentPath, departmentId, cancellationToken);
+                var result = await UpdateChildrenDepartmentPaths(departmentPath, departmentId, cancellationToken);
+                updateChildResults.Add(result);
+
                 await UpdateChildrenDepartments(department.Id, cancellationToken);
+            }
+
+            var failedResults = updateChildResults.Where(r => r.IsFailure).ToList();
+            if (failedResults.Any())
+            {
+                transactionScope.RollBack();
             }
 
             var departmentIds = departments.Select(d => d.Id).ToList();
@@ -44,9 +66,12 @@ public class DeleteExpiredDepartmentService
             }
             catch (Exception ex)
             {
+                transactionScope.RollBack();
                 _logger.LogError(ex, "Отмена операции удаления подразделений/позиций/локаций");
             }
         }
+
+        transactionScope.Commit();
     }
 
     private async Task<List<Department>> GetExpiredDepartments(CancellationToken cancellationToken)
@@ -85,7 +110,7 @@ public class DeleteExpiredDepartmentService
             .ExecuteDeleteAsync(cancellationToken);
     }
 
-    private async Task UpdateChildrenDepartmentPaths(
+    private async Task<Result> UpdateChildrenDepartmentPaths(
         string oldDepartmentPath, Guid newDepartmentId, CancellationToken cancellationToken)
     {
         try
@@ -99,10 +124,12 @@ public class DeleteExpiredDepartmentService
                  WHERE path <@ {oldDepartmentPath}::ltree
                  and path != {oldDepartmentPath}::ltree
                  """, cancellationToken);
+            return Result.Success();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Отмена операции обновления дочерних подразделений у родителя {newDepartmentId}", newDepartmentId);
+            return DepartmentErrors.DatabaseUpdateChildrenError(newDepartmentId);
         }
     }
 }
