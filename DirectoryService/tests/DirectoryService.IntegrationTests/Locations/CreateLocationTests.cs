@@ -19,7 +19,7 @@ public class CreateLocationTests: DirectoryBaseTests
     {
         // arrange
         var name = "Локация";
-        var addressDto = new AddressDTO("Россия", "Нижний Новгород", "улица", "10","10");
+        var addressDto = new AddressDTO("Россия", "Нижний Новгород", "улица", "10", "10");
         string timeZone = "Europe/Moscow";
 
         var cancellationToken = CancellationToken.None;
@@ -30,7 +30,7 @@ public class CreateLocationTests: DirectoryBaseTests
         // assert
         await TestData.ExecuteInDb(async dbContext =>
         {
-            var createdLocation= await dbContext.Locations
+            var createdLocation = await dbContext.Locations
                 .FirstAsync(d => d.Id == LocationId.Current(result.Value), cancellationToken);
 
             Assert.True(result.IsSuccess);
@@ -48,7 +48,7 @@ public class CreateLocationTests: DirectoryBaseTests
         // arrange
         var cancellationToken = CancellationToken.None;
         var addressDto = new AddressDTO(
-            "Россия", "Нижний Новгород", String.Empty, "10", null);
+            "Россия", "Нижний Новгород", string.Empty, "10", null);
 
         // act
         var result = await TestData.CreateLocation(string.Empty, addressDto, "test", cancellationToken);

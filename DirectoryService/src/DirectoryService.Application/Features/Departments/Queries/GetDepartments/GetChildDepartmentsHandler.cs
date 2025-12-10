@@ -51,7 +51,8 @@ public class GetChildDepartmentsHandler : IQueryHandler<GetChildDepartmentsRespo
             totalCount = await dbConnection.ExecuteScalarAsync<int>(
                     "SELECT COUNT(*) FROM departments WHERE parent_id = @parentId",
                     new { parentId });
-            departments = (await dbConnection.QueryAsync<ChildDepartmentDTO>(sql,
+            departments = (await dbConnection.QueryAsync<ChildDepartmentDTO>(
+                sql,
                 param: new
                 {
                     offset = offset,
