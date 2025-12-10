@@ -234,7 +234,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("DepartmentId");
 
-                            b1.ToTable("departments");
+                            b1.ToTable("departments", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DepartmentId");
@@ -253,7 +253,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("DepartmentId");
 
-                            b1.ToTable("departments");
+                            b1.ToTable("departments", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DepartmentId");
@@ -275,7 +275,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                             NpgsqlIndexBuilderExtensions.HasMethod(b1.HasIndex("Value"), "gist");
 
-                            b1.ToTable("departments");
+                            b1.ToTable("departments", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DepartmentId");
@@ -327,7 +327,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                             b1.HasIndex("Country", "City", "Street", "HouseNumber", "FlatNumber")
                                 .IsUnique();
 
-                            b1.ToTable("locations");
+                            b1.ToTable("locations", (string)null);
 
                             b1.ToJson("address");
 
@@ -351,7 +351,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("locations");
+                            b1.ToTable("locations", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("LocationId");
