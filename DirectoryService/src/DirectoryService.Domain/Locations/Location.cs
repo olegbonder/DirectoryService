@@ -3,7 +3,7 @@ using Shared.Result;
 
 namespace DirectoryService.Domain.Locations
 {
-    public sealed class Location : Entity<LocationId>//, ISoftDeletable
+    public sealed class Location : Entity<LocationId>
     {
         // EF Core
         private Location(LocationId id)

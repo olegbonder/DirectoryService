@@ -5,7 +5,6 @@ using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Result;
-using System.Linq;
 
 namespace DirectoryService.Infrastructure.Postgres.Seeding
 {
@@ -14,6 +13,30 @@ namespace DirectoryService.Infrastructure.Postgres.Seeding
         private readonly ApplicationDbContext _dbContext;
         private readonly ILogger<Seeder> _logger;
         private readonly Random _rnd = new();
+
+        private static T UnwrapResult<T>(Result<T> result)
+        {
+            if (result.IsSuccess)
+                return result.Value;
+
+            // If creation failed — бросаем, т.к. сгенерированные данные должны быть валидными.
+            var errors = result.Errors;
+            throw new ApplicationException($"Domain factory returned failure during seeding: {errors}");
+        }
+
+        private static string RandomAlphaNumeric(int length)
+        {
+            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            var rnd = new Random();
+            return new string(Enumerable.Range(0, length).Select(_ => chars[rnd.Next(chars.Length)]).ToArray());
+        }
+
+        private static string RandomLatin(int length)
+        {
+            const string chars = "abcdefghijklmnopqrstuvwxyz";
+            var rnd = new Random();
+            return new string(Enumerable.Range(0, length).Select(_ => chars[rnd.Next(chars.Length)]).ToArray());
+        }
 
         private static class SeedConstants
         {
@@ -128,6 +151,7 @@ namespace DirectoryService.Infrastructure.Postgres.Seeding
                         deptLocations);
 
                     var department = UnwrapResult(deptRes);
+
                     // EF navigation: department.DepartmentLocations should be set by constructor; DepartmentLocation objects already reference ids
                     departments.Add(department);
                 }
@@ -170,7 +194,8 @@ namespace DirectoryService.Infrastructure.Postgres.Seeding
                 // Коммит транзакции
                 await transaction.CommitAsync();
 
-                _logger.LogInformation("Seeding finished. Inserted: {locations} locations, {departments} departments, {positions} positions",
+                _logger.LogInformation(
+                    "Seeding finished. Inserted: {locations} locations, {departments} departments, {positions} positions",
                     locations.Count, departments.Count, positions.Count);
             }
             catch (Exception ex)
@@ -179,30 +204,6 @@ namespace DirectoryService.Infrastructure.Postgres.Seeding
                 await transaction.RollbackAsync();
                 throw;
             }
-        }
-
-        private static T UnwrapResult<T>(Result<T> result)
-        {
-            if (result.IsSuccess)
-                return result.Value;
-
-            // If creation failed — бросаем, т.к. сгенерированные данные должны быть валидными.
-            var errors = result.Errors;
-            throw new ApplicationException($"Domain factory returned failure during seeding: {errors}");
-        }
-
-        private static string RandomAlphaNumeric(int length)
-        {
-            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-            var rnd = new Random();
-            return new string(Enumerable.Range(0, length).Select(_ => chars[rnd.Next(chars.Length)]).ToArray());
-        }
-
-        private static string RandomLatin(int length)
-        {
-            const string chars = "abcdefghijklmnopqrstuvwxyz";
-            var rnd = new Random();
-            return new string(Enumerable.Range(0, length).Select(_ => chars[rnd.Next(chars.Length)]).ToArray());
         }
     }
 }

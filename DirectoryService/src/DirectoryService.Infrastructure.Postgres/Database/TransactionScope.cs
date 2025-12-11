@@ -5,7 +5,6 @@ using Shared.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.Database
 {
-
     public class TransactionScope : ITransactionScope
     {
         private readonly IDbTransaction _transaction;

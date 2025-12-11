@@ -1,29 +1,58 @@
 ﻿services:
-  postgres:  
-    container_name: postgres
-    image: postgres
+  directory-service:
+    container_name: directory-service-prod
+    build:
+      context: .
+      dockerfile: src/DirectoryService.Web/Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8090
+    restart: always
+    depends_on:
+      - postgres-prod
+      - seq-prod
+    
+  postgres-prod:
+    container_name: postgres-prod
+    image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_DB: directory_service_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5434:5432"
+      - "5436:5432"
     volumes:
-    - postgres-data:/var/lib/postgresql/data
+      - postgres-prod-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  seq:
-    container_name: seq
+  seq-prod:
+    container_name: seq-prod
     image: datalust/seq:latest
     ports:
-      - "5341:5341"
-      - "8080:80"
+      - "5343:5341"
+      - "8082:80"
     environment:
-      ACCEPT_EULA: 'Y' # Required to accept the Seq End User License Agreement
+      ACCEPT_EULA: 'Y'
       SEQ_FIRSTRUN_NOAUTHENTICATION: 'true'
-    restart: always 
-    
+    restart: always
+    volumes:
+      - seq-prod-data:/data
+
+networks:
+  directory-prod-network:
+    driver: bridge
+    name: directory-prod-network
+
 volumes:
-  postgres-data:  
-  
-  
+  postgres-prod-data:
+    name: postgres-prod-data
+  seq-prod-data:
+    name: seq-prod-data
+    

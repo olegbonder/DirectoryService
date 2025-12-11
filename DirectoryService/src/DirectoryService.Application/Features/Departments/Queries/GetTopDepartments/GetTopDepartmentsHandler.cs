@@ -20,7 +20,6 @@ public sealed class GetTopDepartmentsHandler: IQueryHandler<GetTopDepartmentsRes
         _logger = logger;
     }
 
-
     public async Task<Result<GetTopDepartmentsResponse>> Handle(
         GetTopDepartmentsRequest query,
         CancellationToken cancellationToken)
