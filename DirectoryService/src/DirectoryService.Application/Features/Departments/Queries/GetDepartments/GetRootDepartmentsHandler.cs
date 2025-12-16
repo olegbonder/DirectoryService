@@ -1,9 +1,12 @@
-﻿using Dapper;
+﻿using System.Text.Json;
+using Dapper;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments;
@@ -11,17 +14,48 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
 public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsResponse, GetRootDepartmentsRequest>
 {
     private readonly IDBConnectionFactory _factory;
+    private readonly ICacheService _cache;
     private readonly ILogger<GetRootDepartmentsHandler> _logger;
+    private readonly DistributedCacheEntryOptions _cacheOptions;
 
     public GetRootDepartmentsHandler(
         IDBConnectionFactory factory,
+        ICacheService cache,
         ILogger<GetRootDepartmentsHandler> logger)
     {
         _factory = factory;
+        _cache = cache;
+        _cacheOptions = new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(Constants.SLIDING_EXPIRATION_TIME_FROM_MINUTES)
+        };
         _logger = logger;
     }
 
     public async Task<Result<GetRootDepartmentsResponse>> Handle(
+        GetRootDepartmentsRequest query,
+        CancellationToken cancellationToken)
+    {
+        string key = $"{Constants.PREFIX_DEPARTMENT_KEY}{JsonSerializer.Serialize(query)}";
+
+        var cachedDepartments = await _cache.GetOrSetAsync(key, _cacheOptions,
+            async () =>
+            {
+                var departments = await GetRootDepartments(query, cancellationToken);
+
+                return departments;
+            },
+            cancellationToken);
+
+        if (cachedDepartments is null)
+        {
+            _logger.LogInformation($"Данные по корневым подразделениям с запросом {query} не найдены в кэше/БД");
+        }
+
+        return cachedDepartments!;
+    }
+
+    private async Task<GetRootDepartmentsResponse> GetRootDepartments(
         GetRootDepartmentsRequest query,
         CancellationToken cancellationToken)
     {

@@ -1,8 +1,11 @@
-﻿using Dapper;
+﻿using System.Text.Json;
+using Dapper;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments;
@@ -11,16 +14,47 @@ public class GetChildDepartmentsHandler : IQueryHandler<GetChildDepartmentsRespo
 {
     private readonly IDBConnectionFactory _factory;
     private readonly ILogger<GetRootDepartmentsHandler> _logger;
+    private readonly ICacheService _cache;
+    private readonly DistributedCacheEntryOptions _cacheOptions;
 
     public GetChildDepartmentsHandler(
         IDBConnectionFactory factory,
+        ICacheService cache,
         ILogger<GetRootDepartmentsHandler> logger)
     {
         _factory = factory;
         _logger = logger;
+        _cache = cache;
+        _cacheOptions = new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(Constants.SLIDING_EXPIRATION_TIME_FROM_MINUTES)
+        };
     }
 
     public async Task<Result<GetChildDepartmentsResponse>> Handle(
+        GetChildDepartmentsQuery query,
+        CancellationToken cancellationToken)
+    {
+        string key = $"{Constants.PREFIX_DEPARTMENT_KEY}{JsonSerializer.Serialize(query)}";
+
+        var cachedDepartments = await _cache.GetOrSetAsync(key, _cacheOptions,
+            async () =>
+            {
+                var departments = await GetChildDepartments(query, cancellationToken);
+
+                return departments;
+            },
+            cancellationToken);
+
+        if (cachedDepartments is null)
+        {
+            _logger.LogInformation($"Данные по дочерним подразделениям с запросом {query} не найдены в кэше/БД");
+        }
+
+        return cachedDepartments!;
+    }
+
+    private async Task<GetChildDepartmentsResponse> GetChildDepartments(
         GetChildDepartmentsQuery query,
         CancellationToken cancellationToken)
     {
@@ -49,8 +83,8 @@ public class GetChildDepartmentsHandler : IQueryHandler<GetChildDepartmentsRespo
         {
             var dbConnection = await _factory.CreateConnectionAsync(cancellationToken);
             totalCount = await dbConnection.ExecuteScalarAsync<int>(
-                    "SELECT COUNT(*) FROM departments WHERE parent_id = @parentId",
-                    new { parentId });
+                "SELECT COUNT(*) FROM departments WHERE parent_id = @parentId",
+                new { parentId });
             departments = (await dbConnection.QueryAsync<ChildDepartmentDTO>(
                 sql,
                 param: new

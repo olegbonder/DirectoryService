@@ -8,6 +8,7 @@ using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations
@@ -18,6 +19,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<UpdateLocationsCommand> _validator;
+        private readonly ICacheService _cache;
         private readonly ILogger<UpdateDepartmentLocationsHandler> _logger;
 
         public UpdateDepartmentLocationsHandler(
@@ -25,12 +27,14 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
             IDepartmentsRepository departmentsRepository,
             ILocationsRepository locationsRepository,
             IValidator<UpdateLocationsCommand> validator,
+            ICacheService cache,
             ILogger<UpdateDepartmentLocationsHandler> logger)
         {
             _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _validator = validator;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -94,8 +98,10 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
             var commitResult = transactionScope.Commit();
             if (commitResult.IsFailure)
             {
-                return commitResult.Errors!;
+                return commitResult.Errors;
             }
+
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_DEPARTMENT_KEY, cancellationToken);
 
             _logger.LogInformation("Локации обновлены для подразделения с {id}", deptId);
 

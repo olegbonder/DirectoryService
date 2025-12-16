@@ -3,6 +3,7 @@ using DirectoryService.Domain.Shared;
 using DirectoryService.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.BackgroundServices;
@@ -12,19 +13,23 @@ public class DeleteExpiredDepartmentService
     private readonly ILogger<DeleteExpiredDepartmentService> _logger;
     private readonly TransactionManager _transactionManager;
     private readonly ApplicationDbContext _dbContext;
+    private readonly ICacheService _cache;
 
     public DeleteExpiredDepartmentService(
         ILogger<DeleteExpiredDepartmentService> logger,
         TransactionManager transactionManager,
-        ApplicationDbContext dbContext)
+        ApplicationDbContext dbContext,
+        ICacheService cache)
     {
         _logger = logger;
         _transactionManager = transactionManager;
         _dbContext = dbContext;
+        _cache = cache;
     }
 
     public async Task Process(CancellationToken cancellationToken)
     {
+        string prefixDepartmentKey = "departments_";
         var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
         if (transactionScopeResult.IsFailure)
         {
@@ -71,7 +76,11 @@ public class DeleteExpiredDepartmentService
             }
         }
 
-        transactionScope.Commit();
+        var commitResult = transactionScope.Commit();
+        if (commitResult.IsSuccess)
+        {
+            await _cache.RemoveByPrefixAsync(prefixDepartmentKey, cancellationToken);
+        }
     }
 
     private async Task<List<Department>> GetExpiredDepartments(CancellationToken cancellationToken)

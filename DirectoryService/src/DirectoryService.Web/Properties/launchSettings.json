@@ -9,7 +9,7 @@
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5158",
-      "commandLineArgs": "--seeding"
+      //"commandLineArgs": "--seeding"
     },
     "https": {
       "commandName": "Project",

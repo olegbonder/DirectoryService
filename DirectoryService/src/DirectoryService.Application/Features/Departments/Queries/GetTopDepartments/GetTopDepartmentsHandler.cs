@@ -1,8 +1,11 @@
-﻿using Dapper;
+﻿using System.Text.Json;
+using Dapper;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
@@ -10,17 +13,48 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetTopDepart
 public sealed class GetTopDepartmentsHandler: IQueryHandler<GetTopDepartmentsResponse, GetTopDepartmentsRequest>
 {
     private readonly IDBConnectionFactory _factory;
+    private readonly ICacheService _cache;
     private readonly ILogger<GetTopDepartmentsHandler> _logger;
+    private readonly DistributedCacheEntryOptions _cacheOptions;
 
     public GetTopDepartmentsHandler(
         IDBConnectionFactory factory,
+        ICacheService cache,
         ILogger<GetTopDepartmentsHandler> logger)
     {
         _factory = factory;
+        _cache = cache;
+        _cacheOptions = new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(Constants.SLIDING_EXPIRATION_TIME_FROM_MINUTES)
+        };
         _logger = logger;
     }
 
     public async Task<Result<GetTopDepartmentsResponse>> Handle(
+        GetTopDepartmentsRequest query,
+        CancellationToken cancellationToken)
+    {
+        string key = $"{Constants.PREFIX_DEPARTMENT_KEY}{JsonSerializer.Serialize(query)}";
+
+        var cachedDepartments = await _cache.GetOrSetAsync(key, _cacheOptions,
+            async () =>
+            {
+                var departments = await GetTopDepartments(query, cancellationToken);
+
+                return departments;
+            },
+            cancellationToken);
+
+        if (cachedDepartments is null)
+        {
+            _logger.LogInformation($"Данные по топ {query.LimitTop} подразделений с позициями с запросом {query} не найдены в кэше/БД");
+        }
+
+        return cachedDepartments!;
+    }
+
+    private async Task<GetTopDepartmentsResponse> GetTopDepartments(
         GetTopDepartmentsRequest query,
         CancellationToken cancellationToken)
     {
@@ -29,15 +63,15 @@ public sealed class GetTopDepartmentsHandler: IQueryHandler<GetTopDepartmentsRes
         int totalCount = 0;
         string sql =
             """
-                  SELECT d.id, d.name,
-                         d.is_active, d.path, d.depth, d.created_at,  
-                         COUNT(dp.*) positionsCount
-                  FROM departments d
-                  LEFT JOIN public.department_positions dp on d.id = dp.department_id
-                  GROUP BY d.id
-                  ORDER BY positionsCount DESC 
-                  LIMIT @limitTop
-                  """;
+            SELECT d.id, d.name,
+                   d.is_active, d.path, d.depth, d.created_at,  
+                   COUNT(dp.*) positionsCount
+            FROM departments d
+            LEFT JOIN public.department_positions dp on d.id = dp.department_id
+            GROUP BY d.id
+            ORDER BY positionsCount DESC 
+            LIMIT @limitTop
+            """;
         try
         {
             totalCount = await dbConnection.ExecuteScalarAsync<int>(@"SELECT COUNT(*) FROM departments", cancellationToken);
