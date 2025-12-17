@@ -5,6 +5,7 @@ using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartment
@@ -14,17 +15,20 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly IValidator<MoveDepartmentCommand> _validator;
+        private readonly ICacheService _cache;
         private readonly ILogger<MoveDepartmentHandler> _logger;
 
         public MoveDepartmentHandler(
             ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
             IValidator<MoveDepartmentCommand> validator,
+            ICacheService cache,
             ILogger<MoveDepartmentHandler> logger)
         {
             _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _validator = validator;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -118,6 +122,8 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
             {
                 return commitResult.Errors;
             }
+
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_DEPARTMENT_KEY, cancellationToken);
 
             _logger.LogInformation("Подразделениe с {id} успешно перемещено", deptId);
 

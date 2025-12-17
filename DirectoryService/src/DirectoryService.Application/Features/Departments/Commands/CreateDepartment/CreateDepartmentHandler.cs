@@ -8,6 +8,7 @@ using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Commands.CreateDepartment
@@ -18,6 +19,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateDepartmentCommand> _validator;
+        private readonly ICacheService _cache;
         private readonly ILogger<CreateDepartmentHandler> _logger;
 
         public CreateDepartmentHandler(
@@ -25,12 +27,14 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
             IDepartmentsRepository departmentsRepository,
             ILocationsRepository locationsRepository,
             IValidator<CreateDepartmentCommand> validator,
+            ICacheService cache,
             ILogger<CreateDepartmentHandler> logger)
         {
             _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _validator = validator;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -106,6 +110,8 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
             {
                 return commitResult.Errors;
             }
+
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_DEPARTMENT_KEY, cancellationToken);
 
             _logger.LogInformation("Подразделение с id = {id} сохранена в БД", addDepartmentRes.Value);
 

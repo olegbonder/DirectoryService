@@ -7,6 +7,7 @@ using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment
@@ -18,6 +19,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
         private readonly ILocationsRepository _locationsRepository;
         private readonly IPositionsRepository _positionsRepository;
         private readonly IValidator<SoftDeleteDepartmentCommand> _validator;
+        private readonly ICacheService _cache;
         private readonly ILogger<SoftDeleteDepartmentHandler> _logger;
 
         public SoftDeleteDepartmentHandler(
@@ -26,6 +28,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
             ILocationsRepository locationsRepository,
             IPositionsRepository positionsRepository,
             IValidator<SoftDeleteDepartmentCommand> validator,
+            ICacheService cache,
             ILogger<SoftDeleteDepartmentHandler> logger)
         {
             _transactionManager = transactionManager;
@@ -33,6 +36,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
             _locationsRepository = locationsRepository;
             _positionsRepository = positionsRepository;
             _validator = validator;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -121,6 +125,8 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
             {
                 return commitResult.Errors;
             }
+
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_DEPARTMENT_KEY, cancellationToken);
 
             _logger.LogInformation("Подразделение с id = {id} не активно", department.Id.Value);
 

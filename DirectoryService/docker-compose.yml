@@ -13,6 +13,7 @@
     depends_on:
       - postgres-prod
       - seq-prod
+      - redis-prod
     
   postgres-prod:
     container_name: postgres-prod
@@ -44,6 +45,17 @@
     restart: always
     volumes:
       - seq-prod-data:/data
+        
+  redis-prod:
+    container_name: redis-prod
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-prod-data:/data
+    networks:
+      - directory-prod-network
+    restart: always        
 
 networks:
   directory-prod-network:
@@ -55,4 +67,5 @@ volumes:
     name: postgres-prod-data
   seq-prod-data:
     name: seq-prod-data
-    
+  redis-prod-data:
+    name: redis-prod-data

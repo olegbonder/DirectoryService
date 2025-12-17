@@ -3,6 +3,7 @@ using DirectoryService.Application.Features.Locations.Commands.CreateLocation;
 using DirectoryService.Presenters.EndpointResult;
 using Serilog;
 using Serilog.Exceptions;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Web.Configuration
@@ -13,6 +14,7 @@ namespace DirectoryService.Web.Configuration
         {
             services
                 .AddSerilogLogging(configuration)
+                .AddDistributedCache(configuration)
                 .AddWebDependencies()
                 .AddApplication();
 
@@ -53,6 +55,21 @@ namespace DirectoryService.Web.Configuration
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionDetails()
                 .Enrich.WithProperty("HandlerName", nameof(CreateLocationHandler)));
+            return services;
+        }
+
+        private static IServiceCollection AddDistributedCache(
+            this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                string connection = configuration.GetConnectionString("Redis")
+                    ?? throw new ArgumentNullException(nameof(connection));
+
+                options.Configuration = connection;
+            });
+
+            services.AddSingleton<ICacheService, DistributedCacheService>();
             return services;
         }
     }
