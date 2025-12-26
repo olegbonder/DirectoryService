@@ -36,7 +36,7 @@ export default function AppSideBar() {
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="mt-10">
       <SidebarHeader className="pl-5"></SidebarHeader>
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
