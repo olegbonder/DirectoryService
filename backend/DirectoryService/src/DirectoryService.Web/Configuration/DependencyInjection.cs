@@ -16,7 +16,8 @@ namespace DirectoryService.Web.Configuration
                 .AddSerilogLogging(configuration)
                 .AddDistributedCache(configuration)
                 .AddWebDependencies()
-                .AddApplication();
+                .AddApplication()
+                .AddCors();
 
             return services;
         }

@@ -1,7 +1,11 @@
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../shared/components/ui/avatar";
 import Link from "next/link";
 import { routes } from "@/shared/routes";
-import { SidebarTrigger } from "../ui/sidebar";
+import { SidebarTrigger } from "../../shared/components/ui/sidebar";
 
 export default function Header() {
   return (
