@@ -1,7 +1,6 @@
 "use client";
 
 import { locationsApi } from "@/entities/locations/api";
-import { LocationDTO } from "@/entities/locations/types";
 import {
   Card,
   CardContent,
@@ -12,17 +11,15 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Location } from "@/entities/locations/types";
+import useFilterLocations from "@/shared/hooks/use-filter-locations";
 
 const PAGE_SIZE = 20;
 
 export default function LocationList() {
-  const [locations, setLocations] = useState<LocationDTO[]>([]);
+  const { departmentIds, search, isActive } = useFilterLocations();
+  const [locations, setLocations] = useState<Location[]>([]);
   const [page, setPage] = useState(1);
-  const [departmentIds, setDepartmentIds] = useState<string[] | undefined>(
-    undefined
-  );
-  const [search, setSearch] = useState<string | undefined>(undefined);
-  const [isActive, setIsActive] = useState<boolean>(true);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,9 +1,9 @@
 export type LocationsResponse = {
-  locations: LocationDTO[];
+  locations: Location[];
   totalCount: number;
 };
 
-export type LocationDTO = {
+export type Location = {
   id: string;
   name: string;
   country: string;
