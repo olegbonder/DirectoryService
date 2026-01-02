@@ -10,48 +10,67 @@ import {
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Location } from "@/entities/locations/types";
+import { useState } from "react";
 import useFilterLocations from "@/shared/hooks/use-filter-locations";
+import { useQuery } from "@tanstack/react-query";
+import LocationFilters from "./locations-filters";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/shared/components/ui/pagination";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 3;
 
 export default function LocationList() {
-  const { departmentIds, search, isActive } = useFilterLocations();
-  const [locations, setLocations] = useState<Location[]>([]);
+  const {
+    departmentIds,
+    setDepartmentIds,
+    search,
+    setSearch,
+    isActive,
+    setIsActive,
+  } = useFilterLocations();
   const [page, setPage] = useState(1);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    locationsApi
-      .getLocations({
+  const {
+    data,
+    isPending: getIsPending,
+    error,
+  } = useQuery({
+    queryFn: () =>
+      locationsApi.getLocations({
         page,
         pageSize: PAGE_SIZE,
         departmentIds,
         search,
         isActive,
-      })
-      .then((data) => setLocations(data.locations))
-      .catch((error) => setError(error.message))
-      .finally(() => setIsLoading(false));
-  }, [page, departmentIds, search, isActive]);
-
-  if (isLoading) {
-    return <Spinner />;
-  }
+      }),
+    queryKey: ["locations", page, departmentIds, search, isActive],
+  });
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500">{error.message}</div>;
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4">
       <div className="mb-8">
         <h1 className="text-3xl mb-2">Локации</h1>
+        <LocationFilters
+          departmentIds={departmentIds}
+          setDepartmentIds={setDepartmentIds}
+          search={search}
+          setSearch={setSearch}
+          isActive={isActive}
+          setIsActive={setIsActive}
+        />
       </div>
+      {getIsPending && <Spinner />}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {locations.map((location) => (
+        {data?.items?.map((location) => (
           <Card key={location.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex items-center justify-between pb-3">
               <CardTitle className="text-lg font-semibold">
@@ -61,7 +80,7 @@ export default function LocationList() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <MapPin className="h-4 w-4 text-gray-500 shrink-0" />
                 <div className="text-sm text-gray-700">
                   <p>
                     {location.street} {location.houseNumber}
@@ -76,6 +95,45 @@ export default function LocationList() {
           </Card>
         ))}
       </div>
+      {data && data.totalPages > 1 && (
+        <div className="mt-8 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationPrevious
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                className={
+                  page === 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              ></PaginationPrevious>
+              {Array.from({ length: data.totalPages }, (_, i) => i + 1).map(
+                (pageNumber) => (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      className="cursor-pointer"
+                      onClick={() => setPage(pageNumber)}
+                      isActive={pageNumber === page}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+              <PaginationNext
+                onClick={() =>
+                  setPage((next) => Math.max(data.totalPages, next + 1))
+                }
+                className={
+                  page === data.totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              ></PaginationNext>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

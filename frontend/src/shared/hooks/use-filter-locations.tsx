@@ -4,7 +4,7 @@ export default function useFilterLocations() {
   const [departmentIds, setDepartmentIds] = useState<string[] | undefined>(
     undefined
   );
-  const [search, setSearch] = useState<string | undefined>(undefined);
+  const [search, setSearch] = useState<string | undefined>("");
   const [isActive, setIsActive] = useState<boolean>(true);
 
   return {

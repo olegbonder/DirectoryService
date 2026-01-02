@@ -5,11 +5,12 @@ using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
 {
-    public sealed class GetLocationsHandler : IQueryHandler<GetLocationsResponse, GetLocationsRequest>
+    public sealed class GetLocationsHandler : IQueryHandler<PaginationResponse<LocationDTO>, GetLocationsRequest>
     {
         private readonly IReadDbContext _readDbContext;
         private readonly ILogger<GetLocationsHandler> _logger;
@@ -22,9 +23,11 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
             _logger = logger;
         }
 
-        public async Task<Result<GetLocationsResponse>> Handle(GetLocationsRequest request, CancellationToken cancellationToken)
+        public async Task<Result<PaginationResponse<LocationDTO>>> Handle(GetLocationsRequest request, CancellationToken cancellationToken)
         {
             int totalCount = 0;
+            int totalPages = 0;
+            List<LocationDTO> locations = [];
             var departmentIdValues = request.DepartmentIds;
 
             try
@@ -53,17 +56,16 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                         query = query.Where(l => l.IsActive == request.IsActive);
                     }
 
-                    var pagination = request.Pagination;
                     query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
 
                     totalCount = await query.CountAsync(cancellationToken);
 
-                    query = query.Skip((pagination.Page - 1) * pagination.PageSize)
-                        .Take(pagination.PageSize);
+                    query = query.Skip((request.Page - 1) * request.PageSize)
+                        .Take(request.PageSize);
 
                 }
 
-                var locations = await query.Select(l => new LocationDTO
+                locations = await query.Select(l => new LocationDTO
                 {
                     Id = l.Id.Value,
                     Name = l.Name.Value,
@@ -77,15 +79,14 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                     CreatedAt = l.CreatedAt
                 }).ToListAsync(cancellationToken);
 
+                totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
                 _logger.LogInformation("Получение списка локаций");
-
-                return new GetLocationsResponse(locations, totalCount);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Ошибка получения данных о локациях с запросом {request}");
-                return new GetLocationsResponse([], totalCount);
             }
+            return new PaginationResponse<LocationDTO>(locations, totalCount, request.Page, request.PageSize, totalPages);
         }
     }
 }
