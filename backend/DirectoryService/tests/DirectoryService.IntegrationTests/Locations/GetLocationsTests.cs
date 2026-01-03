@@ -1,10 +1,10 @@
 ﻿using DirectoryService.Application.Features.Locations.Queries.GetLocations;
 using DirectoryService.Contracts;
-using DirectoryService.Contracts.Locations;
 using DirectoryService.Contracts.Locations.GetLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
+using Shared;
 using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Locations
@@ -34,7 +34,7 @@ namespace DirectoryService.IntegrationTests.Locations
 
             // act
             var result = await GetLocations(departmentIdValues, cancellationToken: cancellationToken);
-            var ids = result.Value.Locations.Select(l => l.Id);
+            var ids = result.Value.Items.Select(l => l.Id);
 
             // assert
             await TestData.ExecuteInDb(async dbContext =>
@@ -50,8 +50,8 @@ namespace DirectoryService.IntegrationTests.Locations
                 Assert.True(result.IsSuccess);
                 Assert.NotNull(result.Value);
 
-                Assert.NotEmpty(result.Value.Locations);
-                Assert.Equal(result.Value.TotalCount, result.Value.Locations.Count);
+                Assert.NotEmpty(result.Value.Items);
+                Assert.Equal(result.Value.TotalCount, result.Value.Items.Count);
                 Assert.Equal(locationIds, ids);
             });
         }
@@ -76,7 +76,7 @@ namespace DirectoryService.IntegrationTests.Locations
 
             // assert
             Assert.True(result.IsSuccess);
-            Assert.Empty(result.Value.Locations);
+            Assert.Empty(result.Value.Items);
             Assert.Equal(0, result.Value.TotalCount);
         }
 
@@ -95,14 +95,14 @@ namespace DirectoryService.IntegrationTests.Locations
 
             // act
             var result = await GetLocations(search: locationName, cancellationToken: cancellationToken);
-            var ids = result.Value.Locations.Select(l => l.Id);
+            var ids = result.Value.Items.Select(l => l.Id);
 
             // assert
             Assert.True(result.IsSuccess);
-            Assert.NotEmpty(result.Value.Locations);
+            Assert.NotEmpty(result.Value.Items);
             Assert.Equal(locationCount, result.Value.TotalCount);
-            Assert.Equal(locationCount, result.Value.Locations.Count);
-            Assert.True(result.Value.Locations.All(l => l.Name.Contains(locationName)));
+            Assert.Equal(locationCount, result.Value.Items.Count);
+            Assert.True(result.Value.Items.All(l => l.Name.Contains(locationName)));
             Assert.Equal(locationIds, ids);
         }
 
@@ -120,13 +120,13 @@ namespace DirectoryService.IntegrationTests.Locations
 
             // act
             var result = await GetLocations(isActive: true, cancellationToken: cancellationToken);
-            var ids = result.Value.Locations.Select(l => l.Id);
+            var ids = result.Value.Items.Select(l => l.Id);
 
             // assert
             Assert.True(result.IsSuccess);
-            Assert.NotEmpty(result.Value.Locations);
+            Assert.NotEmpty(result.Value.Items);
             Assert.Equal(locationCount, result.Value.TotalCount);
-            Assert.True(result.Value.Locations.All(l => l.IsActive));
+            Assert.True(result.Value.Items.All(l => l.IsActive));
             Assert.Equal(locationIds, ids);
         }
 
@@ -144,7 +144,7 @@ namespace DirectoryService.IntegrationTests.Locations
 
             // assert
             Assert.True(result.IsSuccess);
-            Assert.Empty(result.Value.Locations);
+            Assert.Empty(result.Value.Items);
             Assert.Equal(0, result.Value.TotalCount);
         }
 
@@ -164,16 +164,16 @@ namespace DirectoryService.IntegrationTests.Locations
 
             // act
             var result = await GetLocations(page: 2, pageSize: 5, cancellationToken: cancellationToken);
-            var ids = result.Value.Locations.Select(l => l.Id);
+            var ids = result.Value.Items.Select(l => l.Id);
 
             // assert
             Assert.True(result.IsSuccess);
-            Assert.NotEmpty(result.Value.Locations);
+            Assert.NotEmpty(result.Value.Items);
             Assert.Equal(locationCount, result.Value.TotalCount);
             Assert.Equal(locationIds, ids);
         }
 
-        private async Task<Result<GetLocationsResponse>> GetLocations(
+        private async Task<Result<PaginationResponse<LocationDTO>>> GetLocations(
             List<Guid>? departmentIds = null,
             string? search = null,
             bool? isActive = null,
@@ -188,11 +188,8 @@ namespace DirectoryService.IntegrationTests.Locations
                     DepartmentIds = departmentIds,
                     Search = search,
                     IsActive = isActive,
-                    Pagination = new PaginationRequest
-                    {
-                        Page = page,
-                        PageSize = pageSize
-                    }
+                    Page = page,
+                    PageSize = pageSize
                 };
                 return await sut.Handle(query, cancellationToken);
             });

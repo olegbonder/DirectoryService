@@ -1,8 +1,3 @@
-export type LocationsResponse = {
-  locations: Location[];
-  totalCount: number;
-};
-
 export type Location = {
   id: string;
   name: string;
@@ -22,4 +17,13 @@ export type GetLocationsRequest = {
   isActive?: boolean;
   page: number;
   pageSize: number;
+};
+
+export type LocationFilterProps = {
+  departmentIds?: string[];
+  setDepartmentIds: (ids: string[] | undefined) => void;
+  search?: string;
+  setSearch: (search: string | undefined) => void;
+  isActive?: boolean;
+  setIsActive: (isActive: boolean) => void;
 };

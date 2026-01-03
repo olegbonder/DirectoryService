@@ -1,15 +1,9 @@
 ﻿namespace DirectoryService.Contracts.Locations.GetLocations
 {
-    public record GetLocationsRequest
+    public record GetLocationsRequest : PaginationRequest
     {
-        public GetLocationsRequest()
-        {
-            Pagination = new PaginationRequest();
-        }
-
         public List<Guid>? DepartmentIds { get; init; }
         public string? Search { get; init; }
         public bool? IsActive { get; init; }
-        public PaginationRequest Pagination { get; init; }
     }
 }

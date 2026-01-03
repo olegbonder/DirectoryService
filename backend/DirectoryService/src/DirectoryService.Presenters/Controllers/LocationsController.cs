@@ -4,6 +4,7 @@ using DirectoryService.Contracts.Locations.CreateLocation;
 using DirectoryService.Contracts.Locations.GetLocations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 
 namespace DirectoryService.Presenters.Controllers
 {
@@ -31,7 +32,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<EndpointResult<GetLocationsResponse>> GetLocations(
+        public async Task<EndpointResult<PaginationResponse<LocationDTO>>> GetLocations(
             [FromQuery] GetLocationsRequest request,
             [FromServices] GetLocationsHandler handler,
             CancellationToken cancellationToken)
