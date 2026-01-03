@@ -14,14 +14,8 @@ import { useState } from "react";
 import useFilterLocations from "@/shared/hooks/use-filter-locations";
 import { useQuery } from "@tanstack/react-query";
 import LocationFilters from "./locations-filters";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/shared/components/ui/pagination";
+import LocationsPagination from "./locations-pagination";
+import { EnvelopeError } from "@/shared/api/errors";
 
 const PAGE_SIZE = 3;
 
@@ -38,7 +32,8 @@ export default function LocationList() {
   const {
     data,
     isPending: getIsPending,
-    error,
+    error: error,
+    isError,
   } = useQuery({
     queryFn: () =>
       locationsApi.getLocations({
@@ -51,14 +46,18 @@ export default function LocationList() {
     queryKey: ["locations", page, departmentIds, search, isActive],
   });
 
-  if (error) {
-    return <div className="text-red-500">{error.message}</div>;
-  }
-
   return (
     <div className="container mx-auto px-4">
       <div className="mb-8">
         <h1 className="text-3xl mb-2">Локации</h1>
+        {isError && error instanceof EnvelopeError && (
+          <div className="text-red-500 mb-4">
+            Ошибка: {error.getAllMessages()}
+          </div>
+        )}
+        {isError && !(error instanceof EnvelopeError) && (
+          <div className="text-red-500 mb-4">Ошибка: {error.message}</div>
+        )}
         <LocationFilters
           departmentIds={departmentIds}
           setDepartmentIds={setDepartmentIds}
@@ -96,43 +95,11 @@ export default function LocationList() {
         ))}
       </div>
       {data && data.totalPages > 1 && (
-        <div className="mt-8 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationPrevious
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                className={
-                  page === 1
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              ></PaginationPrevious>
-              {Array.from({ length: data.totalPages }, (_, i) => i + 1).map(
-                (pageNumber) => (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      className="cursor-pointer"
-                      onClick={() => setPage(pageNumber)}
-                      isActive={pageNumber === page}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              )}
-              <PaginationNext
-                onClick={() =>
-                  setPage((next) => Math.max(data.totalPages, next + 1))
-                }
-                className={
-                  page === data.totalPages
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              ></PaginationNext>
-            </PaginationContent>
-          </Pagination>
-        </div>
+        <LocationsPagination
+          totalPages={data.totalPages}
+          page={page}
+          setPage={setPage}
+        />
       )}
     </div>
   );
