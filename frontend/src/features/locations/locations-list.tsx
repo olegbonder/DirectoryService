@@ -46,17 +46,18 @@ export default function LocationList() {
     queryKey: ["locations", page, departmentIds, search, isActive],
   });
 
+  const getError = (error: Error): string => {
+    return error instanceof EnvelopeError
+      ? error.getAllMessages()
+      : error.message;
+  };
+
   return (
     <div className="container mx-auto px-4">
       <div className="mb-8">
         <h1 className="text-3xl mb-2">Локации</h1>
-        {isError && error instanceof EnvelopeError && (
-          <div className="text-red-500 mb-4">
-            Ошибка: {error.getAllMessages()}
-          </div>
-        )}
-        {isError && !(error instanceof EnvelopeError) && (
-          <div className="text-red-500 mb-4">Ошибка: {error.message}</div>
+        {isError && (
+          <div className="text-red-500 mb-4">Ошибка: {getError(error)}</div>
         )}
         <LocationFilters
           departmentIds={departmentIds}
