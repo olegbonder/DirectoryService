@@ -1,12 +1,8 @@
 export type ApiError = {
-  messages: ErrorMessage[];
-  type: ErrorType;
-};
-
-export type ErrorMessage = {
   code: string;
   message: string;
   invalidField?: string | null;
+  type: ErrorType;
 };
 
 export type ErrorType =
@@ -18,29 +14,27 @@ export type ErrorType =
   | "serverError";
 
 export class EnvelopeError extends Error {
-  public readonly apiError: ApiError;
-  public readonly type: ErrorType;
+  public readonly apiErrors: ApiError[];
 
-  constructor(apiError: ApiError) {
-    const firstMessage = apiError.messages[0]?.message || "Неизвестная ошибка";
+  constructor(apiErrors: ApiError[]) {
+    const firstMessage = apiErrors[0]?.message || "Неизвестная ошибка";
 
     super(firstMessage);
-    this.apiError = apiError;
-    this.type = apiError.type;
+    this.apiErrors = apiErrors;
 
     Object.setPrototypeOf(this, EnvelopeError.prototype);
   }
 
-  get messages(): ErrorMessage[] {
-    return this.apiError.messages;
+  get errors(): ApiError[] {
+    return this.apiErrors;
   }
 
   get firstMessage(): string {
-    return this.apiError.messages[0]?.message || "Неизвестная ошибка";
+    return this.apiErrors[0]?.message || "Неизвестная ошибка";
   }
 
   getAllMessages(): string {
-    return this.apiError.messages.map((msg) => msg.message).join("\n");
+    return this.apiErrors.map((error) => error.message).join(", ");
   }
 }
 
