@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function useFilterLocations() {
+export function useFilterLocations() {
   const [departmentIds, setDepartmentIds] = useState<string[] | undefined>(
     undefined
   );

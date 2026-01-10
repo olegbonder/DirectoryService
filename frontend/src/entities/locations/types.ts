@@ -3,13 +3,13 @@ export type Address = {
   city: string;
   street: string;
   house: string;
-  flatNumber?: string;
+  flat?: string;
 };
 
 export interface Location extends Address {
   id: string;
   name: string;
-  timezone: string;
+  timeZone: string;
   isActive: boolean;
   createdAt: string;
 }

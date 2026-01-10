@@ -72,9 +72,9 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                     Country = l.Address.Country,
                     City = l.Address.City,
                     Street = l.Address.Street,
-                    HouseNumber = l.Address.HouseNumber,
-                    FlatNumber = l.Address.FlatNumber,
-                    Timezone = l.Timezone.Value,
+                    House = l.Address.HouseNumber,
+                    Flat = l.Address.FlatNumber,
+                    TimeZone = l.Timezone.Value,
                     IsActive = l.IsActive,
                     CreatedAt = l.CreatedAt
                 }).ToListAsync(cancellationToken);

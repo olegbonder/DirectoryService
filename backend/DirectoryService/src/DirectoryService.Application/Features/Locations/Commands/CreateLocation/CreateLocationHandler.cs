@@ -47,7 +47,7 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
 
             var locAdr = command.Request.Address;
 
-            var locAddress = LocationAddress.Create(locAdr.Country, locAdr.City, locAdr.Street, locAdr.House, locAdr.FlatNumber).Value;
+            var locAddress = LocationAddress.Create(locAdr.Country, locAdr.City, locAdr.Street, locAdr.House, locAdr.Flat).Value;
 
             var locTimeZone = LocationTimezone.Create(command.Request.TimeZone).Value;
 

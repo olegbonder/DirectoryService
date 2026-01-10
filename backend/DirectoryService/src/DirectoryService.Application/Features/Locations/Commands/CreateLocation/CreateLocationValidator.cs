@@ -19,7 +19,7 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
 
             RuleFor(l => l.Request.Address)
                 .MustBeValueObject(l =>
-                    LocationAddress.Create(l.Country, l.City, l.Street, l.House, l.FlatNumber));
+                    LocationAddress.Create(l.Country, l.City, l.Street, l.House, l.Flat));
 
             RuleFor(l => l.Request.TimeZone).MustBeValueObject(LocationTimezone.Create);
         }

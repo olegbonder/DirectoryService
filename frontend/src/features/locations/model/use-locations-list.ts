@@ -9,7 +9,7 @@ export function useLocationsList(request: GetLocationsRequest) {
 
   return {
     locations: data?.items,
-    totalPages: data?.totalPages,
+    totalPages: data?.totalPages ?? undefined,
     currentPage: data?.page,
     isPending,
     error,

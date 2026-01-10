@@ -5,5 +5,5 @@
         string City,
         string Street,
         string House,
-        string? FlatNumber);
+        string? Flat);
 }

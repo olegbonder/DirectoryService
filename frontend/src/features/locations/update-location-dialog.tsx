@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import { useCreateLocation } from "./model/use-create-location";
+import { Location } from "@/entities/locations/types";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,28 +16,30 @@ import {
   ChangeLocationData,
   changeLocationSchema,
 } from "@/entities/locations/validations";
+import { useUpdateLocation } from "./model/use-update-location";
 
-type CreateLocationProps = {
+type UpdateLocationProps = {
+  location: Location;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export default function CreateLocationDialog({
+export default function UpdateLocationDialog({
+  location,
   open,
   onOpenChange,
-}: CreateLocationProps) {
+}: UpdateLocationProps) {
   const initialData: ChangeLocationData = {
-    name: "",
-    timeZone: "",
+    name: location.name,
+    timeZone: location.timeZone,
     address: {
-      country: "",
-      city: "",
-      street: "",
-      house: "",
-      flat: undefined,
+      country: location.country,
+      city: location.city,
+      street: location.street,
+      house: location.house,
+      flat: location.flat,
     },
   };
-
   const {
     control,
     register,
@@ -50,24 +52,27 @@ export default function CreateLocationDialog({
     mode: "onChange",
   });
 
-  const { createLocation, isPending } = useCreateLocation();
+  const { updateLocation, isPending } = useUpdateLocation();
 
   const onSubmit = async (data: ChangeLocationData) => {
-    createLocation(data, {
-      onSuccess: () => {
-        reset(initialData);
-        onOpenChange(false);
-      },
-    });
+    updateLocation(
+      { id: location.id, ...data },
+      {
+        onSuccess: () => {
+          reset(initialData);
+          onOpenChange(false);
+        },
+      }
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Создать локацию</DialogTitle>
+          <DialogTitle>Редактировать локацию</DialogTitle>
           <DialogDescription>
-            Заполните форму ниже, чтобы создать новую локацию.
+            Заполните форму ниже, чтобы отредактировать локацию.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -77,11 +82,15 @@ export default function CreateLocationDialog({
             errors={errors}
           />
           <DialogFooter className="pt-6">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Отмена
             </Button>
             <Button type="submit" disabled={isPending}>
-              Создать локацию
+              Редактировать локацию
             </Button>
           </DialogFooter>
         </form>
