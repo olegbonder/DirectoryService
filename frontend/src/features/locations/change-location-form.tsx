@@ -76,28 +76,6 @@ export default function ChangeLocationForm({
               </Select>
             )}
           />
-          {/*<select {...register("timeZone")}>
-            {timeZones.map((timezone) => (
-              <option key={timezone.value} value={timezone.value}>
-                {timezone.label}
-              </option>
-            ))}
-          </select>*/}
-          {/*<Select {...register("timeZone")}>
-            <SelectTrigger aria-invalid={errors.timeZone ? true : false}>
-              <SelectValue
-                id="timeZone"
-                placeholder="Выберите временную зону"
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {timeZones.map((timezone) => (
-                <SelectItem key={timezone.value} value={timezone.value}>
-                  {timezone.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>*/}
           <FieldError>{errors.timeZone?.message}</FieldError>
         </Field>
       </FieldSet>

@@ -16,5 +16,9 @@ namespace DirectoryService.Application.Features.Locations
 
         Task<Result> DeactivateLocationsByDepartment(
             DepartmentId departmentId, CancellationToken cancellationToken);
+
+        Task<Result> UpdateLocation(Location location, CancellationToken cancellationToken);
+
+        Task<Result> DeactivateLocation(LocationId locationId, CancellationToken cancellationToken);
     }
 }

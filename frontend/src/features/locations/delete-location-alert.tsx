@@ -24,8 +24,10 @@ export default function DeleteLocationAlertDialog({
 }: DeleteLocationDialogProps) {
   const { deleteLocation, isPending } = useDeleteLocation();
 
-  const handleDelete = async (locationId: string) => {
-    deleteLocation(locationId);
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteLocation(location.id);
   };
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -41,7 +43,7 @@ export default function DeleteLocationAlertDialog({
           <AlertDialogAction
             disabled={isPending}
             className="bg-destructive text-white hover:bg-destructive/90"
-            onClick={() => handleDelete(location.id)}
+            onClick={handleDelete}
           >
             Удалить
           </AlertDialogAction>

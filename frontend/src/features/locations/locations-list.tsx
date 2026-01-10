@@ -102,7 +102,7 @@ export default function LocationList() {
         <div key={selectedLocation.id}>
           <UpdateLocationDialog
             location={selectedLocation}
-            open={updateOpen}
+            open={selectedLocation !== undefined && updateOpen}
             onOpenChange={setUpdateOpen}
           />
           <DeleteLocationAlertDialog

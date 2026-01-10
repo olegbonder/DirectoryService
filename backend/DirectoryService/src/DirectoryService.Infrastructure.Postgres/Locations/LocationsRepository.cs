@@ -1,4 +1,5 @@
-﻿using DirectoryService.Application.Features.Locations;
+﻿using System.Text.Json;
+using DirectoryService.Application.Features.Locations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
@@ -105,6 +106,56 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             {
                 _logger.LogError(ex, "Отмена операции обновления локаций у подразделения с id={deptId}", deptId);
                 return DepartmentErrors.DatabaseUpdateLocationsError(deptId);
+            }
+        }
+
+        public async Task<Result> UpdateLocation(Location location, CancellationToken cancellationToken)
+        {
+            var id = location.Id.Value;
+            var name = location.Name.Value;
+            var address = JsonSerializer.Serialize(location.Address);
+            var timezone = location.Timezone.Value;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                $"""
+                UPDATE locations
+                     SET name = {name},
+                     address = {address}::jsonb,
+                     timezone = {timezone},
+                     updated_at = now()
+                     WHERE id = {id} 
+                    AND is_active = true
+                """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Отмена операции обновления локации с id={id}", id);
+                return LocationErrors.DatabaseUpdateError(id);
+            }
+        }
+
+        public async Task<Result> DeactivateLocation(LocationId locationId, CancellationToken cancellationToken)
+        {
+            var id = locationId.Value;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                $"""
+                UPDATE locations
+                     SET is_active = false,
+                         updated_at = now(),
+                         deleted_at = now()
+                     WHERE id = {id} 
+                    AND is_active = true
+                """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Отмена операции деактивации локации с id={id}", id);
+                return LocationErrors.DatabaseUpdateError(id);
             }
         }
 

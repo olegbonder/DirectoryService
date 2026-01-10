@@ -9,6 +9,11 @@ namespace DirectoryService.Domain.Shared
             return Error.Failure("location.database.error", "Ошибка сохранения локации");
         }
 
+        public static Error DatabaseUpdateError(Guid id)
+        {
+            return Error.Failure("location.database.error", $"Ошибка обновления локации c {id}");
+        }
+
         public static Error DatabaseGetError()
         {
             return Error.Failure("get.location.database.error", "Ошибка получения списка локаций");
@@ -62,6 +67,16 @@ namespace DirectoryService.Domain.Shared
         public static Error NameLengthOutOfRange(int min, int max)
         {
             return GeneralErrors.PropertyOutOfRange("location.name", min, max);
+        }
+
+        public static Error LocationIdNotBeNull()
+        {
+            return GeneralErrors.ValueIsRequired("locationId");
+        }
+
+        public static Error LocationIdNotBeEmpty()
+        {
+            return GeneralErrors.PropertyIsEmpty("locationId", "Локация");
         }
 
         public static Error NotFound(Guid id)
