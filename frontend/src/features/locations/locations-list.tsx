@@ -1,21 +1,18 @@
 "use client";
 
-import { locationsApi } from "@/entities/locations/api";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { MapPin } from "lucide-react";
 import { useState } from "react";
-import useFilterLocations from "@/shared/hooks/use-filter-locations";
-import { useQuery } from "@tanstack/react-query";
+import { useFilterLocations } from "@/features/locations/model/use-filter-locations";
+import { Location } from "@/entities/locations/types";
 import LocationFilters from "./locations-filters";
 import LocationsPagination from "./locations-pagination";
 import { EnvelopeError } from "@/shared/api/errors";
+import { useLocationsList } from "./model/use-locations-list";
+import { Button } from "@/shared/components/ui/button";
+import LocationCard from "./location-card";
+import CreateLocationDialog from "./create-location-dialog";
+import DeleteLocationAlertDialog from "./delete-location-alert";
+import UpdateLocationDialog from "./update-location-dialog";
 
 const PAGE_SIZE = 3;
 
@@ -30,21 +27,24 @@ export default function LocationList() {
   } = useFilterLocations();
   const [page, setPage] = useState(1);
   const {
-    data,
+    locations,
+    totalPages,
     isPending: getIsPending,
-    error: error,
+    error,
     isError,
-  } = useQuery({
-    queryFn: () =>
-      locationsApi.getLocations({
-        page,
-        pageSize: PAGE_SIZE,
-        departmentIds,
-        search,
-        isActive,
-      }),
-    queryKey: ["locations", page, departmentIds, search, isActive],
+  } = useLocationsList({
+    page,
+    pageSize: PAGE_SIZE,
+    departmentIds,
+    search,
+    isActive,
   });
+  const [createOpen, setCreateOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<
+    Location | undefined
+  >(undefined);
 
   const getError = (error: Error): string => {
     return error instanceof EnvelopeError
@@ -57,50 +57,61 @@ export default function LocationList() {
       <div className="mb-8">
         <h1 className="text-3xl mb-2">Локации</h1>
         {isError && (
-          <div className="text-red-500 mb-4">Ошибка: {getError(error)}</div>
+          <div className="text-red-500 mb-4">Ошибка: {getError(error!)}</div>
         )}
-        <LocationFilters
-          departmentIds={departmentIds}
-          setDepartmentIds={setDepartmentIds}
-          search={search}
-          setSearch={setSearch}
-          isActive={isActive}
-          setIsActive={setIsActive}
-        />
+        {!isError && (
+          <div className="grid gap-4">
+            <LocationFilters
+              departmentIds={departmentIds}
+              setDepartmentIds={setDepartmentIds}
+              search={search}
+              setSearch={setSearch}
+              isActive={isActive}
+              setIsActive={setIsActive}
+            />
+            <Button onClick={() => setCreateOpen(true)}>Создать локацию</Button>
+          </div>
+        )}
       </div>
       {getIsPending && <Spinner />}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data?.items?.map((location) => (
-          <Card key={location.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex items-center justify-between pb-3">
-              <CardTitle className="text-lg font-semibold">
-                {location.name}
-              </CardTitle>
-              <Checkbox checked={location.isActive} disabled />
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-gray-500 shrink-0" />
-                <div className="text-sm text-gray-700">
-                  <p>
-                    {location.street} {location.houseNumber}
-                    {location.flatNumber ? `, кв. ${location.flatNumber}` : ""}
-                  </p>
-                  <p>
-                    {location.city}, {location.country}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {locations?.map((location) => (
+          <LocationCard
+            key={location.id}
+            location={location}
+            onEdit={() => {
+              setSelectedLocation(location);
+              setUpdateOpen(true);
+            }}
+            onDelete={() => {
+              setSelectedLocation(location);
+              setDeleteOpen(true);
+            }}
+          />
         ))}
       </div>
-      {data && data.totalPages > 1 && (
+      {totalPages !== undefined && totalPages > 0 && (
         <LocationsPagination
-          totalPages={data.totalPages}
+          totalPages={totalPages}
           page={page}
           setPage={setPage}
         />
+      )}
+      <CreateLocationDialog open={createOpen} onOpenChange={setCreateOpen} />
+      {selectedLocation && (
+        <div>
+          <UpdateLocationDialog
+            key={selectedLocation.id}
+            location={selectedLocation}
+            open={selectedLocation !== undefined && updateOpen}
+            onOpenChange={setUpdateOpen}
+          />
+          <DeleteLocationAlertDialog
+            location={selectedLocation}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+          />
+        </div>
       )}
     </div>
   );

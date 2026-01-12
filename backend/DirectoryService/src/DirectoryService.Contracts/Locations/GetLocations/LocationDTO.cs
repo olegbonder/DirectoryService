@@ -11,11 +11,11 @@
 
         public string Street { get; init; } = null!;
 
-        public string HouseNumber { get; init; } = null!;
+        public string House { get; init; } = null!;
 
-        public string? FlatNumber { get; init; }
+        public string? Flat { get; init; }
 
-        public string Timezone { get; init; } = null!;
+        public string TimeZone { get; init; } = null!;
 
         public bool IsActive { get; init; }
 

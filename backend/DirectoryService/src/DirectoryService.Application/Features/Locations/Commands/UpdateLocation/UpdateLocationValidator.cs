@@ -1,17 +1,23 @@
-﻿using DirectoryService.Application.Validation;
+using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
+using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Shared.Result;
 
-namespace DirectoryService.Application.Features.Locations.Commands.CreateLocation
+namespace DirectoryService.Application.Features.Locations.Commands.UpdateLocation
 {
-    public class CreateLocationValidator : AbstractValidator<CreateLocationCommand>
+    public class UpdateLocationValidator : AbstractValidator<UpdateLocationCommand>
     {
-        public CreateLocationValidator()
+        public UpdateLocationValidator()
         {
+            RuleFor(l => l.LocationId)
+                .NotNull()
+                .WithError(LocationErrors.LocationIdNotBeNull())
+                .NotEmpty()
+                .WithError(LocationErrors.LocationIdNotBeEmpty());
             RuleFor(l => l.Request)
                 .NotNull()
-                .WithError(GeneralErrors.ValueIsRequired("request"));
+                .WithError(GeneralErrors.RequestIsNull());
             RuleFor(l => l.Request.Name).MustBeValueObject(LocationName.Create);
             RuleFor(l => l.Request.Address)
                 .NotNull()

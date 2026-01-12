@@ -38,7 +38,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<EndpointResult<Guid>> UpdateDeaprtmentLocations(
+        public async Task<EndpointResult<Guid>> UpdateDepartmentLocations(
             [FromRoute] Guid departmentId,
             [FromBody] UpdateDepartmentLocationsRequest request,
             [FromServices] UpdateDepartmentLocationsHandler handler,
@@ -53,7 +53,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<EndpointResult<Guid>> MoveDeaprtment(
+        public async Task<EndpointResult<Guid>> MoveDepartment(
             [FromRoute] Guid departmentId,
             [FromBody] MoveDepartmentRequest request,
             [FromServices] MoveDepartmentHandler handler,

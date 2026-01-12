@@ -1,15 +1,18 @@
-export type Location = {
-  id: string;
-  name: string;
+export type Address = {
   country: string;
   city: string;
   street: string;
-  houseNumber: string;
-  flatNumber?: string;
-  timezone: string;
+  house: string;
+  flat?: string;
+};
+
+export interface Location extends Address {
+  id: string;
+  name: string;
+  timeZone: string;
   isActive: boolean;
   createdAt: string;
-};
+}
 
 export type GetLocationsRequest = {
   departmentIds?: string[];
@@ -26,4 +29,17 @@ export type LocationFilterProps = {
   setSearch: (search: string | undefined) => void;
   isActive?: boolean;
   setIsActive: (isActive: boolean) => void;
+};
+
+export type CreateLocationRequest = {
+  name: string;
+  address: Address;
+  timeZone: string;
+};
+
+export type UpdateLocationRequest = {
+  id: string;
+  name: string;
+  address: Address;
+  timeZone: string;
 };
