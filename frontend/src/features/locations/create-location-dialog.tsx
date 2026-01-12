@@ -47,17 +47,17 @@ export default function CreateLocationDialog({
   } = useForm<ChangeLocationData>({
     defaultValues: initialData,
     resolver: zodResolver(changeLocationSchema),
-    mode: "onChange",
   });
 
   const { createLocation, isPending } = useCreateLocation();
 
+  const onClose = () => {
+    reset(initialData);
+    onOpenChange(false);
+  };
   const onSubmit = async (data: ChangeLocationData) => {
     createLocation(data, {
-      onSuccess: () => {
-        reset(initialData);
-        onOpenChange(false);
-      },
+      onSuccess: () => onClose(),
     });
   };
 
@@ -77,7 +77,7 @@ export default function CreateLocationDialog({
             errors={errors}
           />
           <DialogFooter className="pt-6">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={onClose}>
               Отмена
             </Button>
             <Button type="submit" disabled={isPending}>

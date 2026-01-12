@@ -61,10 +61,7 @@ export default function ChangeLocationForm({
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger aria-invalid={errors.timeZone ? true : false}>
-                  <SelectValue
-                    id="timeZone"
-                    placeholder="Выберите временную зону"
-                  />
+                  <SelectValue placeholder="Выберите временную зону" />
                 </SelectTrigger>
                 <SelectContent>
                   {timeZones.map((timezone) => (

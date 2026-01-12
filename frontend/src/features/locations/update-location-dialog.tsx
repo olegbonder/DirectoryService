@@ -29,17 +29,6 @@ export default function UpdateLocationDialog({
   open,
   onOpenChange,
 }: UpdateLocationProps) {
-  const initialData: ChangeLocationData = {
-    name: location.name,
-    timeZone: location.timeZone,
-    address: {
-      country: location.country,
-      city: location.city,
-      street: location.street,
-      house: location.house,
-      flat: location.flat,
-    },
-  };
   const {
     control,
     register,
@@ -47,7 +36,17 @@ export default function UpdateLocationDialog({
     formState: { errors },
     reset,
   } = useForm<ChangeLocationData>({
-    defaultValues: initialData,
+    defaultValues: {
+      name: location.name,
+      timeZone: location.timeZone,
+      address: {
+        country: location.country,
+        city: location.city,
+        street: location.street,
+        house: location.house,
+        flat: location.flat,
+      },
+    },
     resolver: zodResolver(changeLocationSchema),
     mode: "onChange",
   });
@@ -59,7 +58,6 @@ export default function UpdateLocationDialog({
       { id: location.id, ...data },
       {
         onSuccess: () => {
-          reset(initialData);
           onOpenChange(false);
         },
       }

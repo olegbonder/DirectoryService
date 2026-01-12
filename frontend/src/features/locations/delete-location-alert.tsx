@@ -27,7 +27,7 @@ export default function DeleteLocationAlertDialog({
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    deleteLocation(location.id);
+    deleteLocation(location.id, { onSuccess: () => onOpenChange(false) });
   };
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>

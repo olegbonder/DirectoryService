@@ -99,8 +99,9 @@ export default function LocationList() {
       )}
       <CreateLocationDialog open={createOpen} onOpenChange={setCreateOpen} />
       {selectedLocation && (
-        <div key={selectedLocation.id}>
+        <div>
           <UpdateLocationDialog
+            key={selectedLocation.id}
             location={selectedLocation}
             open={selectedLocation !== undefined && updateOpen}
             onOpenChange={setUpdateOpen}
