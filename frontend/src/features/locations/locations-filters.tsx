@@ -1,9 +1,17 @@
 "use client";
 
-import { LocationFilterProps } from "@/entities/locations/types";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
+
+type LocationFilterProps = {
+  departmentIds?: string[];
+  setDepartmentIds: (ids: string[] | undefined) => void;
+  search?: string;
+  setSearch: (search: string | undefined) => void;
+  isActive?: boolean;
+  setIsActive: (isActive: boolean) => void;
+};
 
 export default function LocationFilters({
   departmentIds,

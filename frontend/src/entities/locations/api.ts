@@ -3,11 +3,12 @@ import { PaginationResponse } from "@/shared/api/types";
 import {
   CreateLocationRequest,
   GetLocationsRequest,
+  GetInfiniteLocationsRequest,
   Location,
   UpdateLocationRequest,
 } from "./types";
 import { Envelope } from "@/shared/api/envelope";
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
 export const locationsApi = {
   getLocations: async (request: GetLocationsRequest) => {
@@ -65,6 +66,34 @@ export const locationsQueryOptions = {
         request.search,
         request.isActive,
       ],
+    });
+  },
+
+  getLocationsInfinityOptions: (request: GetInfiniteLocationsRequest) => {
+    return infiniteQueryOptions({
+      queryFn: ({ pageParam }) => {
+        return locationsApi.getLocations({ ...request, page: pageParam });
+      },
+      queryKey: [
+        locationsQueryOptions.baseKey,
+        request.departmentIds,
+        request.search,
+        request.isActive,
+      ],
+      initialPageParam: 1,
+      getNextPageParam: (response) => {
+        return !response || response.page >= response.totalPages
+          ? undefined
+          : response.page + 1;
+      },
+
+      select: (data): PaginationResponse<Location> => ({
+        items: data.pages.flatMap((page) => page?.items ?? []),
+        totalCount: data.pages[0]?.totalCount ?? 0,
+        page: data.pages[0]?.page ?? 1,
+        pageSize: data.pages[0]?.pageSize ?? request.pageSize,
+        totalPages: data.pages[0]?.totalPages ?? 0,
+      }),
     });
   },
 };

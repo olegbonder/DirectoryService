@@ -14,8 +14,6 @@ import CreateLocationDialog from "./create-location-dialog";
 import DeleteLocationAlertDialog from "./delete-location-alert";
 import UpdateLocationDialog from "./update-location-dialog";
 
-const PAGE_SIZE = 3;
-
 export default function LocationList() {
   const {
     departmentIds,
@@ -25,16 +23,14 @@ export default function LocationList() {
     isActive,
     setIsActive,
   } = useFilterLocations();
-  const [page, setPage] = useState(1);
   const {
     locations,
-    totalPages,
-    isPending: getIsPending,
+    isPending,
     error,
     isError,
+    isFetchingNextPage,
+    cursorRef,
   } = useLocationsList({
-    page,
-    pageSize: PAGE_SIZE,
     departmentIds,
     search,
     isActive,
@@ -73,7 +69,11 @@ export default function LocationList() {
           </div>
         )}
       </div>
-      {getIsPending && <Spinner />}
+      {isPending && (
+        <div className="container mx-auto py-8 px-4 flex justify-center">
+          <Spinner />
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {locations?.map((location) => (
           <LocationCard
@@ -90,13 +90,6 @@ export default function LocationList() {
           />
         ))}
       </div>
-      {totalPages !== undefined && totalPages > 0 && (
-        <LocationsPagination
-          totalPages={totalPages}
-          page={page}
-          setPage={setPage}
-        />
-      )}
       <CreateLocationDialog open={createOpen} onOpenChange={setCreateOpen} />
       {selectedLocation && (
         <div>
@@ -113,6 +106,9 @@ export default function LocationList() {
           />
         </div>
       )}
+      <div ref={cursorRef} className="flex justify-center py-4">
+        {isFetchingNextPage && <Spinner />}
+      </div>
     </div>
   );
 }
