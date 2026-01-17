@@ -37,16 +37,16 @@ const useLocationsFilterStore = create<LocationsFilterStore>()(
       setDepartmentIds: (ids: LocationsFilterState["departmentIds"]) =>
         set(() => ({ departmentIds: ids })),
       setSearch: (input: LocationsFilterState["search"]) =>
-        set(() => ({ search: input?.trim() || undefined })),
+        set(() => ({ search: input?.trim() || "" })),
       setIsActive: (isActive: LocationsFilterState["isActive"]) =>
         set({ isActive }),
       setOrder: (order: LocationsFilterState["order"]) => set({ order }),
     }),
     {
-      name: "locations-filters",
+      name: "ds-locations-filters",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );
 
 export const useGetLocationsFilter = () => {
@@ -57,12 +57,12 @@ export const useGetLocationsFilter = () => {
       isActive: state.isActive,
       pageSize: state.pageSize,
       order: state.order,
-    }))
+    })),
   );
 };
 
 export const setFilterDepartmentIds = (
-  ids: LocationsFilterState["departmentIds"]
+  ids: LocationsFilterState["departmentIds"],
 ) => {
   useLocationsFilterStore.getState().setDepartmentIds(ids);
 };
@@ -72,7 +72,7 @@ export const setFilterSearch = (search: LocationsFilterState["search"]) => {
 };
 
 export const setFilterIsActive = (
-  isActive: LocationsFilterState["isActive"]
+  isActive: LocationsFilterState["isActive"],
 ) => {
   useLocationsFilterStore.getState().setIsActive(isActive);
 };

@@ -15,8 +15,6 @@ import {
   setOrder,
   useGetLocationsFilter,
 } from "./model/locations-filters-store";
-import { useEffect, useState } from "react";
-import { useDebounce } from "use-debounce";
 import { Search } from "lucide-react";
 
 const statuses = [
@@ -32,12 +30,6 @@ const orderByOptions = [
 
 export default function LocationFilters() {
   const { search, departmentIds, isActive, order } = useGetLocationsFilter();
-  const [localSearch, setLocalSearch] = useState<string>(search ?? "");
-  const [debouncedSearch] = useDebounce(localSearch, 300);
-
-  useEffect(() => {
-    setFilterSearch(debouncedSearch);
-  }, [debouncedSearch]);
 
   const handleIsActiveChange = (value: string) => {
     if (value === "all") {
@@ -56,8 +48,8 @@ export default function LocationFilters() {
         <Input
           className="pl-10"
           placeholder="Поиск по наименованию локации"
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
+          value={search}
+          onChange={(e) => setFilterSearch(e.target.value)}
         />
       </div>
 

@@ -12,8 +12,10 @@ import CreateLocationDialog from "./create-location-dialog";
 import DeleteLocationAlertDialog from "./delete-location-alert";
 import UpdateLocationDialog from "./update-location-dialog";
 import { useGetLocationsFilter } from "./model/locations-filters-store";
+import { useGetGlobalFilter } from "@/shared/stores/global-search-store";
 
 export default function LocationList() {
+  const globalSearch = useGetGlobalFilter();
   const { search, departmentIds, isActive, pageSize, order } =
     useGetLocationsFilter();
 
@@ -26,7 +28,7 @@ export default function LocationList() {
     cursorRef,
   } = useLocationsList({
     departmentIds,
-    search,
+    search: search === "" ? globalSearch : search,
     isActive,
     pageSize,
     order,

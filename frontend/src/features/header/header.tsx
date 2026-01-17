@@ -6,8 +6,14 @@ import {
 import Link from "next/link";
 import { routes } from "@/shared/routes";
 import { SidebarTrigger } from "../../shared/components/ui/sidebar";
+import { Input } from "@/shared/components/ui/input";
+import {
+  setGlobalFilterSearch,
+  useGetGlobalFilter,
+} from "@/shared/stores/global-search-store";
 
 export default function Header() {
+  const globalSearch = useGetGlobalFilter();
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
       <div className="flex items-center justify-between px-6 py-4">
@@ -27,6 +33,17 @@ export default function Header() {
               </h1>
             </div>
           </Link>
+        </div>
+
+        {/* Средняя часть - Поиск */}
+        <div className="flex items-center gap-4">
+          <Input
+            type="search"
+            placeholder="Поиск"
+            className="w-80"
+            value={globalSearch}
+            onChange={(e) => setGlobalFilterSearch(e.target.value)}
+          />
         </div>
 
         {/* Правая часть - Профиль */}
