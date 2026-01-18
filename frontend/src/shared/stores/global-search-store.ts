@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 export type GlobalFilterState = {
-  search?: string;
+  search: string;
 };
 
 type Actions = {
@@ -20,7 +20,7 @@ const useGlobalSearchStore = create<GlobalFilterStore>()(
     (set) => ({
       ...initialState,
       setSearch: (input: GlobalFilterState["search"]) =>
-        set(() => ({ search: input?.trim() || "" })),
+        set(() => ({ search: input.trim() || "" })),
     }),
     {
       name: "ds-global-search",

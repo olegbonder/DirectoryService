@@ -5,7 +5,7 @@ import { PAGE_SIZE } from "./use-locations-list";
 
 export type LocationsFilterState = {
   departmentIds?: string[];
-  search?: string;
+  search: string;
   isActive?: boolean;
   pageSize: number;
   order: OrderBy;
@@ -37,7 +37,7 @@ const useLocationsFilterStore = create<LocationsFilterStore>()(
       setDepartmentIds: (ids: LocationsFilterState["departmentIds"]) =>
         set(() => ({ departmentIds: ids })),
       setSearch: (input: LocationsFilterState["search"]) =>
-        set(() => ({ search: input?.trim() || "" })),
+        set(() => ({ search: input.trim() || "" })),
       setIsActive: (isActive: LocationsFilterState["isActive"]) =>
         set({ isActive }),
       setOrder: (order: LocationsFilterState["order"]) => set({ order }),
