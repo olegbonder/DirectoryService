@@ -22,13 +22,6 @@ export type GetLocationsRequest = {
   pageSize: number;
 };
 
-export type GetInfiniteLocationsRequest = {
-  departmentIds?: string[];
-  search?: string;
-  isActive?: boolean;
-  pageSize: number;
-};
-
 export type CreateLocationRequest = {
   name: string;
   address: Address;

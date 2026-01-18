@@ -56,7 +56,19 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                         query = query.Where(l => l.IsActive == request.IsActive);
                     }
 
-                    query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
+                    if (request.Order.HasValue)
+                    {
+                        if (request.Order.HasValue)
+                        {
+                            query = request.Order.Value == OrderBy.Asc
+                                ? query.OrderBy(l => l.CreatedAt)
+                                : query.OrderByDescending(l => l.CreatedAt);
+                        }
+                    }
+                    else
+                    {
+                        query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
+                    }
 
                     totalCount = await query.CountAsync(cancellationToken);
 
