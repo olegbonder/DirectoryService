@@ -4,7 +4,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/shared/components/ui/card";
-import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Badge } from "@/shared/components/ui/badge";
 import { MapPin, Pencil, Trash2 } from "lucide-react";
 import { Location } from "@/entities/locations/types";
 import { Button } from "@/shared/components/ui/button";
@@ -23,46 +23,75 @@ export default function LocationCard({
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     onEdit(location);
   };
+
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="flex items-center justify-between pb-3">
-        <CardTitle className="text-lg font-semibold">{location.name}</CardTitle>
-        <Checkbox checked={location.isActive} disabled />
+    <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-slate-50 to-slate-100 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+      {/* Decorative gradient background */}
+      <div className="absolute inset-0 bg-linear-to-r from-emerald-500/0 via-emerald-500/0 to-cyan-500/0 group-hover:from-emerald-500/5 group-hover:via-emerald-500/5 group-hover:to-cyan-500/5 transition-all duration-300" />
+
+      <CardHeader className="relative pb-4 pt-5 px-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="p-2 rounded-lg bg-linear-to-br from-emerald-500 to-emerald-600 text-white shrink-0">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <CardTitle className="text-base font-bold text-slate-900 line-clamp-3 flex-1">
+              {location.name}
+            </CardTitle>
+          </div>
+          <Badge
+            variant={location.isActive ? "default" : "secondary"}
+            className={`shrink-0 font-medium px-2.5 py-1 text-xs whitespace-nowrap ${
+              location.isActive
+                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                : "bg-slate-300 hover:bg-slate-400 text-slate-700"
+            }`}
+          >
+            {location.isActive ? "Активна" : "Неактивна"}
+          </Badge>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex justify-between gap-2">
-          <div className="flex gap-2">
-            <MapPin className="h-4 w-4 text-gray-500 shrink-0" />
-            <div className="text-sm text-gray-700">
-              <p>
+
+      <CardContent className="relative px-6 pb-5">
+        <div className="space-y-4">
+          {/* Address */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              Адрес
+            </p>
+            <div className="bg-white/60 rounded-lg p-3 border border-slate-200/50">
+              <p className="text-sm text-slate-700 leading-relaxed font-medium">
                 {location.street} {location.house}
                 {location.flat ? `, кв. ${location.flat}` : ""}
               </p>
-              <p>
+              <p className="text-sm text-slate-600 mt-1">
                 {location.city}, {location.country}
               </p>
             </div>
           </div>
+
+          {/* Action buttons */}
           {location.isActive && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-2 justify-end flex-wrap">
               <Button
                 onClick={handleEdit}
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                size="sm"
+                className="h-9 px-3 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors font-medium"
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-4 w-4 mr-2" />
+                Редактировать
               </Button>
               <Button
                 onClick={onDelete}
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:text-white! hover:bg-red-500! transition-colors"
+                size="sm"
+                className="h-9 px-3 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors font-medium"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 mr-2" />
+                Удалить
               </Button>
             </div>
           )}

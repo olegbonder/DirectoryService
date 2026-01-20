@@ -38,8 +38,7 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                     var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
                     query = _readDbContext.DepartmentsRead
                             .Where(d => departmentIds.Contains(d.Id))
-                            .SelectMany(d => d.DepartmentLocations.Select(dl => dl.Location))
-                            .OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
+                            .SelectMany(d => d.DepartmentLocations.Select(dl => dl.Location));
 
                     totalCount = await query.CountAsync(cancellationToken);
                 }
@@ -56,25 +55,25 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                         query = query.Where(l => l.IsActive == request.IsActive);
                     }
 
-                    if (request.Order.HasValue)
-                    {
-                        if (request.Order.HasValue)
-                        {
-                            query = request.Order.Value == OrderBy.Asc
-                                ? query.OrderBy(l => l.CreatedAt)
-                                : query.OrderByDescending(l => l.CreatedAt);
-                        }
-                    }
-                    else
-                    {
-                        query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
-                    }
-
                     totalCount = await query.CountAsync(cancellationToken);
 
                     query = query.Skip((request.Page - 1) * request.PageSize)
                         .Take(request.PageSize);
 
+                }
+
+                if (request.Order.HasValue)
+                {
+                    if (request.Order.HasValue)
+                    {
+                        query = request.Order.Value == OrderDirection.Asc
+                            ? query.OrderBy(l => l.CreatedAt)
+                            : query.OrderByDescending(l => l.CreatedAt);
+                    }
+                }
+                else
+                {
+                    query = query.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt);
                 }
 
                 locations = await query.Select(l => new LocationDTO

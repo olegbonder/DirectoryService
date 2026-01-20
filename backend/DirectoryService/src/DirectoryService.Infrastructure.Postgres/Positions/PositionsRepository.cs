@@ -90,5 +90,59 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
                 return DepartmentErrors.DatabaseUpdatePositionsError(deptId);
             }
         }
+
+        public async Task<Result> UpdatePosition(Position position, CancellationToken cancellationToken)
+        {
+            var id = position.Id.Value;
+            var name = position.Name.Value;
+            var desription = position.Description.Value;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                $"""
+                UPDATE positions
+                     SET name = {name},
+                     description = {desription},
+                     updated_at = now()
+                     WHERE id = {id} 
+                    AND is_active = true
+                """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Отмена операции обновления позиции с id={id}", id);
+                return LocationErrors.DatabaseUpdateError(id);
+            }
+        }
+
+        public async Task<Result> DeactivatePosition(PositionId positionId, CancellationToken cancellationToken)
+        {
+            var id = positionId.Value;
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(
+                $"""
+                UPDATE positions
+                     SET is_active = false,
+                         updated_at = now(),
+                         deleted_at = now()
+                     WHERE id = {id} 
+                    AND is_active = true
+                """, cancellationToken);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Отмена операции деактивации позиции с id={id}", id);
+                return LocationErrors.DatabaseUpdateError(id);
+            }
+        }
+
+        public async Task<Position?> GetActivePositionById(PositionId positionId, CancellationToken cancellationToken) =>
+            await GetBy(p => p.IsActive && p.Id == positionId, cancellationToken);
+
+        public async Task<Position?> GetActivePositionByName(PositionName positionName, CancellationToken cancellationToken) =>
+            await GetBy(p => p.IsActive && p.Name.Value == positionName.Value, cancellationToken);
     }
 }

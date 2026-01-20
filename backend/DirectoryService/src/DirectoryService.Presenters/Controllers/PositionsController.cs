@@ -1,7 +1,16 @@
-﻿using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
+﻿using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
+using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
+using DirectoryService.Application.Features.Positions.Commands.SoftDeletePosition;
+using DirectoryService.Application.Features.Positions.Commands.UpdatePosition;
+using DirectoryService.Application.Features.Positions.Queries.GetPositionDetail;
+using DirectoryService.Application.Features.Positions.Queries.GetPositions;
+using DirectoryService.Contracts.Locations.UpdatePosition;
 using DirectoryService.Contracts.Positions.CreatePosition;
+using DirectoryService.Contracts.Positions.GetPosition;
+using DirectoryService.Contracts.Positions.GetPositions;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 
 namespace DirectoryService.Presenters.Controllers
 {
@@ -9,6 +18,33 @@ namespace DirectoryService.Presenters.Controllers
     [Route("api/[controller]")]
     public class PositionsController: ControllerBase
     {
+        [HttpGet]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<PaginationResponse<PositionDTO>>> GetPositions(
+            [FromQuery] GetPositionsRequest request,
+            [FromServices] GetPositionsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            return await handler.Handle(request, cancellationToken);
+        }
+
+        [HttpGet("{positionId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<PositionDetailDTO?>> GetPosition(
+            [FromRoute] Guid positionId,
+            [FromServices] GetPositionDetailHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetPositionRequest(positionId);
+            return await handler.Handle(query, cancellationToken);
+        }
+
         [HttpPost]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(400)]
@@ -21,6 +57,31 @@ namespace DirectoryService.Presenters.Controllers
             CancellationToken cancellationToken)
         {
             var command = new CreatePositionCommand(request);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpPatch("{positionId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<Guid>> Update(
+            [FromRoute] Guid positionId,
+            [FromBody] UpdatePositionRequest request,
+            [FromServices] UpdatePositionHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new UpdatePositionCommand(positionId, request);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpDelete("{positionId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<Guid>> SoftDelete(
+            [FromRoute] Guid positionId,
+            [FromServices] SoftDeletePositionHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new SoftDeletePositionCommand(positionId);
             return await handler.Handle(command, cancellationToken);
         }
     }

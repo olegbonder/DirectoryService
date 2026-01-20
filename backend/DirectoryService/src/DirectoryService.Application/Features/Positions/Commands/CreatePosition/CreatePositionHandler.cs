@@ -57,7 +57,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             var positionName = PositionName.Create(request.Name).Value;
 
             var activeWithTheSameNamePosition = await _positionsRepository
-                .GetBy(p => p.IsActive && p.Name == positionName, cancellationToken);
+                .GetActivePositionByName(positionName, cancellationToken);
 
             if (activeWithTheSameNamePosition != null)
             {
