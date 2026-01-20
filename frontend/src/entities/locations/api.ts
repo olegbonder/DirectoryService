@@ -3,12 +3,12 @@ import { PaginationResponse } from "@/shared/api/types";
 import {
   CreateLocationRequest,
   GetLocationsRequest,
-  GetInfiniteLocationsRequest,
   Location,
   UpdateLocationRequest,
 } from "./types";
 import { Envelope } from "@/shared/api/envelope";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { LocationsFilterState } from "@/features/locations/model/locations-filters-store";
 
 export const locationsApi = {
   getLocations: async (request: GetLocationsRequest) => {
@@ -69,17 +69,12 @@ export const locationsQueryOptions = {
     });
   },
 
-  getLocationsInfinityOptions: (request: GetInfiniteLocationsRequest) => {
+  getLocationsInfinityOptions: (filter: LocationsFilterState) => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
-        return locationsApi.getLocations({ ...request, page: pageParam });
+        return locationsApi.getLocations({ ...filter, page: pageParam });
       },
-      queryKey: [
-        locationsQueryOptions.baseKey,
-        request.departmentIds,
-        request.search,
-        request.isActive,
-      ],
+      queryKey: [locationsQueryOptions.baseKey, { filter }],
       initialPageParam: 1,
       getNextPageParam: (response) => {
         return !response || response.page >= response.totalPages
@@ -91,7 +86,7 @@ export const locationsQueryOptions = {
         items: data.pages.flatMap((page) => page?.items ?? []),
         totalCount: data.pages[0]?.totalCount ?? 0,
         page: data.pages[0]?.page ?? 1,
-        pageSize: data.pages[0]?.pageSize ?? request.pageSize,
+        pageSize: data.pages[0]?.pageSize ?? filter.pageSize,
         totalPages: data.pages[0]?.totalPages ?? 0,
       }),
     });

@@ -1,21 +1,13 @@
 import { locationsQueryOptions } from "@/entities/locations/api";
-import { GetLocationsRequest } from "@/entities/locations/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { RefCallback, useCallback } from "react";
+import { LocationsFilterState } from "./locations-filters-store";
+import { useDebounce } from "use-debounce";
 
-const PAGE_SIZE = 3;
+export const PAGE_SIZE = 3;
 
-type LocationFilterProps = {
-  departmentIds?: string[];
-  search?: string;
-  isActive?: boolean;
-};
-
-export function useLocationsList({
-  departmentIds,
-  search,
-  isActive,
-}: LocationFilterProps) {
+export function useLocationsList(filter: LocationsFilterState) {
+  const [debouncedSearch] = useDebounce(filter.search ?? "", 500);
   const {
     data,
     isPending,
@@ -25,14 +17,12 @@ export function useLocationsList({
     fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
-  } = useInfiniteQuery(
-    locationsQueryOptions.getLocationsInfinityOptions({
-      departmentIds,
-      search,
-      isActive,
-      pageSize: PAGE_SIZE,
-    })
-  );
+  } = useInfiniteQuery({
+    ...locationsQueryOptions.getLocationsInfinityOptions({
+      ...filter,
+      search: debouncedSearch,
+    }),
+  });
 
   const cursorRef: RefCallback<HTMLDivElement> = useCallback(
     (node) => {
@@ -44,7 +34,7 @@ export function useLocationsList({
         },
         {
           threshold: 0.5,
-        }
+        },
       );
 
       if (node) {
@@ -53,7 +43,7 @@ export function useLocationsList({
 
       return () => observer.disconnect();
     },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
+    [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
 
   return {
