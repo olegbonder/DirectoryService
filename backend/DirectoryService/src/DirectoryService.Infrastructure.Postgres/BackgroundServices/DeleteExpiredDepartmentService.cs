@@ -41,32 +41,32 @@ public class DeleteExpiredDepartmentService
         var departments = await GetExpiredDepartments(cancellationToken);
         if (departments.Any())
         {
-            var departmentPaths = departments.Select(d => d.Path).ToList();
+            var departmentPaths = departments.Select(d => d.Path.Value).ToArray();
             var lockDepartments = await GetDepartmentsWithLock(departmentPaths, cancellationToken);
-            if (lockDepartments.Count != departments.Count)
+            if (lockDepartments.Count < departments.Count)
             {
                 transactionScope.RollBack();
                 _logger.LogError("Отмена операции удаления подразделений из-за несовпадения количества заблокированных записей");
                 return;
             }
 
-            var updateChildResults = new List<Result>();
-            foreach (var department in departments)
-            {
-                var result = await UpdateChildrenDepartments(department, cancellationToken);
-                updateChildResults.Add(result);
-            }
-
-            var failedResults = updateChildResults.Where(r => r.IsFailure).ToList();
-            if (failedResults.Any())
+            var updChildrenResult = await UpdateChildrenDepartments(departmentPaths, cancellationToken);
+            if (updChildrenResult.IsFailure)
             {
                 transactionScope.RollBack();
-                var errors = failedResults.SelectMany(r => r.Errors.Select(e => e.Message)).ToList();
+                var errors = updChildrenResult.Errors.Select(e => e.Message);
                 _logger.LogError(string.Join(", ", errors));
                 return;
             }
 
-            _dbContext.Departments.RemoveRange(departments);
+            var deleteResult = await DeleteDepartments(departmentPaths, cancellationToken);
+            if (deleteResult.IsFailure)
+            {
+                transactionScope.RollBack();
+                var errors = deleteResult.Errors.Select(e => e.Message);
+                _logger.LogError(string.Join(", ", errors));
+                return;
+            }
 
             try
             {
@@ -96,11 +96,10 @@ public class DeleteExpiredDepartmentService
         return departments;
     }
 
-    public async Task<IReadOnlyList<Department>> GetDepartmentsWithLock(
-        List<DepartmentPath> departmentPaths, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<Department>> GetDepartmentsWithLock(
+        string[] departmentPaths, CancellationToken cancellationToken)
     {
-        var departmentPathsString = departmentPaths.Select(dp => dp.Value).ToArray();
-        var childrens = await _dbContext.Departments.FromSql(
+        var departments = await _dbContext.Departments.FromSql(
             $"""
              SELECT 
                  id,
@@ -113,36 +112,71 @@ public class DeleteExpiredDepartmentService
                  created_at,
                  updated_at,
                  deleted_at
-             FROM departments WHERE path <@ ANY(ARRAY[{departmentPathsString}]::ltree[]) FOR UPDATE
+             FROM departments WHERE path <@ ANY(ARRAY[{departmentPaths}]::ltree[]) FOR UPDATE
              """).ToListAsync(cancellationToken);
 
-        return childrens;
+        return departments;
     }
 
     private async Task<Result> UpdateChildrenDepartments(
-        Department department, CancellationToken cancellationToken)
+        string[] departmentPaths, CancellationToken cancellationToken)
     {
-        var departmentId = department.Id.Value;
-        string departmentPath = department.Path.Value;
-        var parentDepartmentId = department.ParentId?.Value;
         try
         {
             await _dbContext.Database.ExecuteSqlAsync(
                 $"""
-                 UPDATE departments
-                 SET path = subpath(path, nlevel({departmentPath}::ltree), nlevel(path::ltree)),
-                     depth = nlevel(path::ltree) - 1,
-                     parent_id = {parentDepartmentId},
-                     updated_at = now()
-                 WHERE path <@ {departmentPath}::ltree
-                 and path != {departmentPath}::ltree
+                WITH updates AS (
+                    SELECT
+                        pd.id new_parent_id,
+                        pd.path new_parent_path,
+                        d.path old_path,
+                        d.depth old_depth
+                    FROM departments d
+                    JOIN departments pd ON (d.parent_id = pd.id) 
+                    WHERE d.path = ANY(ARRAY[{departmentPaths}]::ltree[])
+                )
+                
+                UPDATE departments d
+                SET
+                    path = sd.new_parent_path || subpath(
+                            d.path,
+                            nlevel(sd.old_path),
+                            nlevel(d.path) - nlevel(sd.old_path)
+                           ),
+                    depth = nlevel(sd.new_parent_path || subpath(
+                            d.path,
+                            nlevel(sd.old_path),
+                            nlevel(d.path) - nlevel(sd.old_path))),
+                    parent_id = sd.new_parent_id,
+                    updated_at = now()
+                FROM updates sd
+                WHERE d.path <@ sd.old_path
+                  AND d.path != sd.old_path
+                """, cancellationToken);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Отмена операции обновления дочерних подразделений");
+            return DepartmentErrors.DatabaseUpdateChildrenError();
+        }
+    }
+
+    private async Task<Result> DeleteDepartments(string[] departmentPaths, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _dbContext.Database.ExecuteSqlAsync(
+                $"""
+                 DELETE FROM departments
+                 WHERE path = ANY(ARRAY[{departmentPaths}]::ltree[]);
                  """, cancellationToken);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Отмена операции обновления дочерних подразделений у родителя {departmentId}", departmentId);
-            return DepartmentErrors.DatabaseUpdateChildrenError(departmentId);
+            _logger.LogError(ex, "Отмена операции удаления подразделений");
+            return DepartmentErrors.DatabaseDeleteError();
         }
     }
 }
