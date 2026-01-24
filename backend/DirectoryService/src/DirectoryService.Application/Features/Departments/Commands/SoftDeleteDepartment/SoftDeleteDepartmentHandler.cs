@@ -127,6 +127,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
             }
 
             await _cache.RemoveByPrefixAsync(Constants.PREFIX_DEPARTMENT_KEY, cancellationToken);
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_DEPARTMENT_DICTIONARY_KEY, cancellationToken);
 
             _logger.LogInformation("Подразделение с id = {id} не активно", department.Id.Value);
 

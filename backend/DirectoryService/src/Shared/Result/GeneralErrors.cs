@@ -43,5 +43,10 @@
         {
             return Error.Validation($"request.is.null", $"Запрос не может быть пустым!");
         }
+
+        public static Error ConcurrentOperation(string property)
+        {
+            return Error.Conflict($"{property}.database.update.concurrent", "Другой пользователь параллельно изменил эту же запись");
+        }
     }
 }

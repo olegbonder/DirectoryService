@@ -1,11 +1,14 @@
+﻿using System.Text.Json;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Positions.GetPositions;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
@@ -13,17 +16,46 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
     public sealed class GetPositionsHandler : IQueryHandler<PaginationResponse<PositionDTO>, GetPositionsRequest>
     {
         private readonly IReadDbContext _readDbContext;
+        private readonly ICacheService _cache;
+        private readonly DistributedCacheEntryOptions _cacheOptions;
         private readonly ILogger<GetPositionsHandler> _logger;
 
         public GetPositionsHandler(
             IReadDbContext readDbContext,
+            ICacheService cache,
             ILogger<GetPositionsHandler> logger)
         {
             _readDbContext = readDbContext;
+            _cache = cache;
+            _cacheOptions = new DistributedCacheEntryOptions
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(Constants.SLIDING_EXPIRATION_TIME_FROM_MINUTES)
+            };
             _logger = logger;
         }
 
-        public async Task<Result<PaginationResponse<PositionDTO>>> Handle(GetPositionsRequest request, CancellationToken cancellationToken)
+        public async Task<Result<PaginationResponse<PositionDTO>>> Handle(GetPositionsRequest query, CancellationToken cancellationToken)
+        {
+            string key = $"{Constants.PREFIX_POSITION_KEY}{JsonSerializer.Serialize(query)}";
+
+            var cachedPositions = await _cache.GetOrSetAsync(key, _cacheOptions,
+                async () =>
+                {
+                    var positions = await GetPositions(query, cancellationToken);
+
+                    return positions;
+                },
+                cancellationToken);
+
+            if (cachedPositions is null)
+            {
+                _logger.LogInformation($"Данные по позициям с запросом {query} не найдены в кэше/БД");
+            }
+
+            return cachedPositions!;
+        }
+
+        private async Task<PaginationResponse<PositionDTO>> GetPositions(GetPositionsRequest request, CancellationToken cancellationToken)
         {
             int totalCount = 0;
             int totalPages = 0;
@@ -80,6 +112,7 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
             {
                 _logger.LogError(ex, $"Ошибка получения данных о позициях с запросом {request}");
             }
+
             return new PaginationResponse<PositionDTO>(positions, totalCount, request.Page, request.PageSize, totalPages);
         }
     }

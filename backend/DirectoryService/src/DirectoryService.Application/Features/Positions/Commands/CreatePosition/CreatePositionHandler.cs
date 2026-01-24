@@ -8,6 +8,7 @@ using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Positions.Commands.CreatePosition
@@ -17,6 +18,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly IPositionsRepository _positionsRepository;
+        private readonly ICacheService _cache;
         private readonly IValidator<CreatePositionCommand> _validator;
         private readonly ILogger<CreatePositionHandler> _logger;
 
@@ -24,12 +26,14 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
             IPositionsRepository positionsRepository,
+            ICacheService cache,
             IValidator<CreatePositionCommand> validator,
             ILogger<CreatePositionHandler> logger)
         {
             _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _positionsRepository = positionsRepository;
+            _cache = cache;
             _validator = validator;
             _logger = logger;
         }
@@ -86,7 +90,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             }
 
             var position = positionRes.Value;
-            var addPositionRes = await _positionsRepository.AddAsync(position, cancellationToken);
+            var addPositionRes = await _positionsRepository.Add(position, cancellationToken);
             if (addPositionRes.IsFailure)
             {
                 transactionScope.RollBack();
@@ -98,6 +102,8 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             {
                 return commitResult.Errors!;
             }
+
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_POSITION_KEY, cancellationToken);
 
             _logger.LogInformation("Позиция с id = {id} сохранена в БД", addPositionRes.Value);
 

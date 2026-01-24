@@ -42,6 +42,8 @@ namespace DirectoryService.Domain.Positions
 
         public DateTime? DeletedAt { get; private set; }
 
+        public uint Version { get; set; }
+
         public static Result<Position> Create(
             PositionId id,
             PositionName name,

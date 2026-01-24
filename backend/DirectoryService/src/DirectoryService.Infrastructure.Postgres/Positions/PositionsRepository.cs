@@ -21,9 +21,9 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
             _logger = logger;
         }
 
-        public async Task<Result<Guid>> AddAsync(Position position, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Add(Position position, CancellationToken cancellationToken)
         {
-            var name = position.Name.Value;
+            string name = position.Name.Value;
             try
             {
                 await _context.Positions.AddAsync(position, cancellationToken);
@@ -91,23 +91,39 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
             }
         }
 
-        public async Task<Result> UpdatePosition(Position position, CancellationToken cancellationToken)
+        public async Task<Result> Update(Position position, CancellationToken cancellationToken)
         {
             var id = position.Id.Value;
-            var name = position.Name.Value;
-            var desription = position.Description.Value;
+            string name = position.Name.Value;
             try
             {
-                await _context.Database.ExecuteSqlAsync(
-                $"""
-                UPDATE positions
-                     SET name = {name},
-                     description = {desription},
-                     updated_at = now()
-                     WHERE id = {id} 
-                    AND is_active = true
-                """, cancellationToken);
+                _context.Update(position);
+                await _context.SaveChangesAsync(cancellationToken);
+
                 return Result.Success();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+            {
+                if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation && pgEx.ConstraintName is not null)
+                {
+                    if (pgEx.ConstraintName.Contains("name"))
+                    {
+                        return PositionErrors.NameConflict(name);
+                    }
+                }
+
+                _logger.LogError(ex, "Ошибка обновления позиции с наименованием {name}", name);
+                return PositionErrors.DatabaseError();
+            }
+            catch(DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Ошибка параллельного обновления позиции с наименованием {name}", name);
+                return GeneralErrors.ConcurrentOperation("location");
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogError(ex, "Отмена операции обновления позиции с наименованием {name}", name);
+                return PositionErrors.OperationCancelled();
             }
             catch (Exception ex)
             {

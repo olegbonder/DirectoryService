@@ -7,7 +7,9 @@ namespace DirectoryService.Application.Features.Positions
 {
     public interface IPositionsRepository
     {
-        Task<Result<Guid>> AddAsync(Position position, CancellationToken cancellationToken);
+        Task<Result<Guid>> Add(Position position, CancellationToken cancellationToken);
+
+        Task<Result> Update(Position position, CancellationToken cancellationToken);
 
         Task<Position?> GetBy(Expression<Func<Position, bool>> predicate, CancellationToken cancellationToken);
 
@@ -19,7 +21,5 @@ namespace DirectoryService.Application.Features.Positions
             DepartmentId departmentId, CancellationToken cancellationToken);
 
         Task<Result> DeactivatePosition(PositionId positionId, CancellationToken cancellationToken);
-
-        Task<Result> UpdatePosition(Position position, CancellationToken cancellationToken);
     }
 }

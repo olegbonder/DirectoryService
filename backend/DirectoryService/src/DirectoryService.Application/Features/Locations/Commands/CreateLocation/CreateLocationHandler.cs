@@ -4,6 +4,7 @@ using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Locations.Commands.CreateLocation
@@ -12,17 +13,20 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
     {
         private readonly ITransactionManager _transactionManager;
         private readonly ILocationsRepository _locationsRepository;
+        private readonly ICacheService _cache;
         private readonly IValidator<CreateLocationCommand> _validator;
         private readonly ILogger<CreateLocationHandler> _logger;
 
         public CreateLocationHandler(
             ITransactionManager transactionManager,
             ILocationsRepository locationsRepository,
+            ICacheService cache,
             IValidator<CreateLocationCommand> validator,
             ILogger<CreateLocationHandler> logger)
         {
             _transactionManager = transactionManager;
             _locationsRepository = locationsRepository;
+            _cache = cache;
             _validator = validator;
             _logger = logger;
         }
@@ -59,7 +63,7 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
             }
 
             // Бизнес валидация
-            var addLocationResult = await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
+            var addLocationResult = await _locationsRepository.Add(locationResult.Value, cancellationToken);
             if (addLocationResult.IsFailure)
             {
                 transactionScope.RollBack();
@@ -71,6 +75,8 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
             {
                 return commitResult.Errors!;
             }
+
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_LOCATION_KEY, cancellationToken);
 
             _logger.LogInformation("Локация с id = {id} сохранена в БД", addLocationResult.Value);
 

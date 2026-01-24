@@ -1,4 +1,4 @@
-using DirectoryService.Application.Abstractions;
+﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Validation;
@@ -82,22 +82,11 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
 
             existingPosition.Update(positionName, positionDesription);
 
-            var updPositionResult = await _positionsRepository.UpdatePosition(existingPosition, cancellationToken);
+            var updPositionResult = await _positionsRepository.Update(existingPosition, cancellationToken);
             if (updPositionResult.IsFailure)
             {
                 transactionScope.RollBack();
                 return updPositionResult.Errors;
-            }
-
-            try
-            {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка обновления позиции с {id}", positionIdValue);
-                return LocationErrors.DatabaseUpdateError(positionIdValue);
             }
 
             var commitResult = transactionScope.Commit();
@@ -106,7 +95,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
                 return commitResult.Errors;
             }
 
-            await _cache.RemoveByPrefixAsync(Constants.PREFIX_LOCATION_KEY, cancellationToken);
+            await _cache.RemoveByPrefixAsync(Constants.PREFIX_POSITION_KEY, cancellationToken);
 
             _logger.LogInformation("Позиция с id = {id} обновлена", positionIdValue);
 
