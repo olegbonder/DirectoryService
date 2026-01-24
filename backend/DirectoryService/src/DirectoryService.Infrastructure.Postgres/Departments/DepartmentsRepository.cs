@@ -176,5 +176,8 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
                 return DepartmentErrors.DatabaseUpdateChildrenError(newDepartmentId);
             }
         }
+
+        public async Task<Department?> GetActiveDepartmentById(DepartmentId departmentId, CancellationToken cancellationToken) =>
+            await GetBy(d => d.IsActive && d.Id == departmentId, cancellationToken);
     }
 }

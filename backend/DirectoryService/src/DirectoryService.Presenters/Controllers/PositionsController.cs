@@ -1,5 +1,6 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
 using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
+using DirectoryService.Application.Features.Positions.Commands.DeletePositionDepartment;
 using DirectoryService.Application.Features.Positions.Commands.SoftDeletePosition;
 using DirectoryService.Application.Features.Positions.Commands.UpdatePosition;
 using DirectoryService.Application.Features.Positions.Queries.GetPositionDetail;
@@ -82,6 +83,19 @@ namespace DirectoryService.Presenters.Controllers
             CancellationToken cancellationToken)
         {
             var command = new SoftDeletePositionCommand(positionId);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpDelete("{positionId:guid}/departments/{departmentId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<Guid>> DeletePositionDepartment(
+            [FromRoute] Guid positionId,
+            [FromRoute] Guid departmentId,
+            [FromServices] DeletePositionDepartmentHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new DeletePositionDepartmentCommand(positionId, departmentId);
             return await handler.Handle(command, cancellationToken);
         }
     }

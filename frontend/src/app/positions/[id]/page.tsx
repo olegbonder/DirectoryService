@@ -88,15 +88,17 @@ export default function PositionPage({
                 {position.name}
               </h1>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleEdit}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Pencil className="h-4 w-4 mr-2" />
-                Редактировать
-              </Button>
-            </div>
+            {position.isActive && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleEdit}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Редактировать
+                </Button>
+              </div>
+            )}
           </div>
 
           {position.description && (
@@ -139,10 +141,12 @@ export default function PositionPage({
             <h2 className="text-2xl font-bold text-slate-900">
               Подразделения ({position.departments.length})
             </h2>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Добавить подразделение
-            </Button>
+            {position.isActive && (
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Добавить подразделение
+              </Button>
+            )}
           </div>
 
           {position.departments.length === 0 ? (
@@ -157,13 +161,15 @@ export default function PositionPage({
                   className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                 >
                   <span className="font-medium text-slate-900">{dept}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {position.isActive && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
