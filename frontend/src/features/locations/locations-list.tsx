@@ -48,40 +48,76 @@ export default function LocationList() {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl mb-2">Локации</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-4xl font-bold bg-linear-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+              Локации
+            </h1>
+            <p className="text-slate-600">
+              Управление местоположениями в организации
+            </p>
+          </div>
+          {!isError && (
+            <Button
+              onClick={() => setCreateOpen(true)}
+              className="bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 h-auto rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <span className="mr-2 text-lg">+</span>
+              Создать локацию
+            </Button>
+          )}
+        </div>
         {isError && (
-          <div className="text-red-500 mb-4">Ошибка: {getError(error!)}</div>
-        )}
-        {!isError && (
-          <div className="grid gap-4">
-            <LocationFilters />
-            <Button onClick={() => setCreateOpen(true)}>Создать локацию</Button>
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-800">
+            <p className="font-semibold">Ошибка загрузки</p>
+            <p className="text-sm mt-1">{getError(error!)}</p>
           </div>
         )}
       </div>
-      {isPending && (
-        <div className="container mx-auto py-8 px-4 flex justify-center">
-          <Spinner />
+
+      {!isError && (
+        <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+          <LocationFilters />
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {locations?.map((location) => (
-          <LocationCard
-            key={location.id}
-            location={location}
-            onEdit={() => {
-              setSelectedLocation(location);
-              setUpdateOpen(true);
-            }}
-            onDelete={() => {
-              setSelectedLocation(location);
-              setDeleteOpen(true);
-            }}
-          />
-        ))}
-      </div>
+
+      {isPending && (
+        <div className="flex justify-center items-center py-16">
+          <div className="text-center">
+            <Spinner />
+            <p className="text-slate-400 mt-4">Загрузка локаций...</p>
+          </div>
+        </div>
+      )}
+
+      {!isPending && (!locations || locations.length === 0) && (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="text-slate-400 text-center">
+            <p className="text-lg font-medium mb-2">Локации не найдены</p>
+          </div>
+        </div>
+      )}
+
+      {!isPending && locations && locations.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+          {locations.map((location) => (
+            <LocationCard
+              key={location.id}
+              location={location}
+              onEdit={() => {
+                setSelectedLocation(location);
+                setUpdateOpen(true);
+              }}
+              onDelete={() => {
+                setSelectedLocation(location);
+                setDeleteOpen(true);
+              }}
+            />
+          ))}
+        </div>
+      )}
       <CreateLocationDialog open={createOpen} onOpenChange={setCreateOpen} />
       {selectedLocation && (
         <div>

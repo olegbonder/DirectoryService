@@ -67,14 +67,14 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
             var request = command.Request;
 
             var locationIds = request.LocationIds.Select(LocationId.Current).ToList();
-            var getLocationssResult = await _locationsRepository.GetActiveLocationsByIds(locationIds, cancellationToken);
-            if (getLocationssResult.IsFailure)
+            var getLocationsResult = await _locationsRepository.GetActiveLocationsByIds(locationIds, cancellationToken);
+            if (getLocationsResult.IsFailure)
             {
                 transactionScope.RollBack();
-                return getLocationssResult.Errors;
+                return getLocationsResult.Errors;
             }
 
-            var locations = getLocationssResult.Value;
+            var locations = getLocationsResult.Value;
             var locationDepartments = locations.Select(l => new DepartmentLocation(departmentId, l.Id)).ToList();
 
             var updLocationsResult = department.UpdateLocations(locationDepartments);

@@ -58,7 +58,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpDelete("{locationId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
-        public async Task<EndpointResult<Guid>> SoftDeleteLocation(
+        public async Task<EndpointResult<Guid>> SoftDelete(
             [FromRoute] Guid locationId,
             [FromServices] SoftDeleteLocationHandler handler,
             CancellationToken cancellationToken)

@@ -5,3 +5,12 @@ export type PaginationResponse<T> = {
   pageSize: number;
   totalPages: number;
 };
+
+export type DictionaryResponse = {
+  items: DictionaryItemResponse[];
+};
+
+export type DictionaryItemResponse = {
+  id: string;
+  name: string;
+};

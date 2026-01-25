@@ -10,6 +10,7 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { Location } from "@/entities/locations/types";
 import { useDeleteLocation } from "./model/use-delete-location";
+import { AlertTriangle } from "lucide-react";
 
 type DeleteLocationDialogProps = {
   location: Location;
@@ -31,21 +32,32 @@ export default function DeleteLocationAlertDialog({
   };
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="sm:max-w-lg">
         <AlertDialogHeader>
-          <AlertDialogTitle>Удалить локацию?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Вы уверены, что хотите удалить локацию {location.name}?
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-red-100">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <AlertDialogTitle className="text-lg">
+              Удалить локацию?
+            </AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-base">
+            Вы уверены, что хотите удалить локацию{" "}
+            <span className="font-semibold text-slate-900">
+              {`"${location.name}"`}
+            </span>
+            ? Это действие невозможно отменить.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="gap-3">
           <AlertDialogCancel>Отмена</AlertDialogCancel>
           <AlertDialogAction
             disabled={isPending}
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className="bg-red-600 text-white hover:bg-red-700"
             onClick={handleDelete}
           >
-            Удалить
+            {isPending ? "Удаление..." : "Удалить"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

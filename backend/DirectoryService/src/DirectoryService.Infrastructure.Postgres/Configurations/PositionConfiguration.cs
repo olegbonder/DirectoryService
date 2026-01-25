@@ -19,14 +19,14 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
                     id => PositionId.Current(id))
                 .HasColumnName("id");
 
-            builder.HasIndex(p => p.Name).IsUnique();
-            builder.Property(d => d.Name)
-                .IsRequired()
-                .HasMaxLength(LengthConstants.LENGTH_100)
-                .HasConversion(
-                    p => p.Value,
-                    name => new PositionName(name))
-                .HasColumnName("name");
+            builder.OwnsOne(p => p.Name, pb =>
+            {
+                pb.Property(pn => pn.Value)
+                    .IsRequired()
+                    .HasMaxLength(LengthConstants.LENGTH_100)
+                    .HasColumnName("name");
+                pb.HasIndex(pn => pn.Value).IsUnique();
+            });
 
             builder.ComplexProperty(p => p.Description, pb =>
             {
@@ -47,6 +47,12 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
             builder.Property(p => p.UpdatedAt)
                 .IsRequired()
                 .HasColumnName("updated_at");
+
+            builder.Property(p => p.DeletedAt)
+                .HasColumnName("deleted_at");
+
+            builder.Property(p => p.Version)
+                .IsRowVersion();
         }
     }
 }

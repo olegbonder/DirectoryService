@@ -7,4 +7,9 @@ namespace DirectoryService.Application.Abstractions
     {
         Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken);
     }
+
+    public interface IQueryHandler<TResponse>
+    {
+        Task<Result<TResponse>> Handle(CancellationToken cancellationToken);
+    }
 }

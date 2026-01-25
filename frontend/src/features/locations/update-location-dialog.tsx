@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Location } from "@/entities/locations/types";
+import { MapPin } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,7 @@ import {
   changeLocationSchema,
 } from "@/entities/locations/validations";
 import { useUpdateLocation } from "./model/use-update-location";
+import { is } from "zod/v4/locales";
 
 type UpdateLocationProps = {
   location: Location;
@@ -34,7 +36,6 @@ export default function UpdateLocationDialog({
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<ChangeLocationData>({
     defaultValues: {
       name: location.name,
@@ -60,15 +61,20 @@ export default function UpdateLocationDialog({
         onSuccess: () => {
           onOpenChange(false);
         },
-      }
+      },
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Редактировать локацию</DialogTitle>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-2 rounded-lg bg-linear-to-br from-cyan-500 to-cyan-600 text-white">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <DialogTitle>Редактировать локацию</DialogTitle>
+          </div>
           <DialogDescription>
             Заполните форму ниже, чтобы отредактировать локацию.
           </DialogDescription>
@@ -79,7 +85,7 @@ export default function UpdateLocationDialog({
             register={register}
             errors={errors}
           />
-          <DialogFooter className="pt-6">
+          <DialogFooter className="pt-6 gap-3">
             <Button
               type="button"
               variant="outline"
@@ -87,8 +93,12 @@ export default function UpdateLocationDialog({
             >
               Отмена
             </Button>
-            <Button type="submit" disabled={isPending}>
-              Редактировать локацию
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="bg-linear-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800"
+            >
+              {isPending ? "Редактирование..." : "Редактировать локацию"}
             </Button>
           </DialogFooter>
         </form>

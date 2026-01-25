@@ -21,7 +21,7 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             _logger = logger;
         }
 
-        public async Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Add(Location location, CancellationToken cancellationToken)
         {
             string name = location.Name.Value;
             try
@@ -58,6 +58,52 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
             {
                 _logger.LogError(ex, "Ошибка добавления локации с наименованием {name}", name);
                 return LocationErrors.DatabaseError();
+            }
+        }
+
+        public async Task<Result> Update(Location location, CancellationToken cancellationToken)
+        {
+            string name = location.Name.Value;
+            try
+            {
+                _context.Update(location);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return Result.Success();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+            {
+                if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation && pgEx.ConstraintName is not null)
+                {
+                    if (pgEx.ConstraintName.Contains("name"))
+                    {
+                        return LocationErrors.NameConflict(name);
+                    }
+
+                    if (pgEx.ConstraintName.Contains("address"))
+                    {
+                        return LocationErrors.AddressConflict();
+                    }
+                }
+
+                _logger.LogError(ex, "Ошибка обновления локации с наименованием {name}", name);
+                return LocationErrors.DatabaseError();
+            }
+            catch(DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Ошибка параллельного обновления локации с наименованием {name}", name);
+                return GeneralErrors.ConcurrentOperation("location");
+            }
+            catch(OperationCanceledException ex)
+            {
+                _logger.LogError(ex, "Отмена операции обновления локации с наименованием {name}", name);
+                return GeneralErrors.OperationCancelled("location");
+            }
+            catch (Exception ex)
+            {
+                var locId = location.Id.Value;
+                _logger.LogError(ex, "Ошибка обновления локации с {id}", locId);
+                return LocationErrors.DatabaseUpdateError(locId);
             }
         }
 
@@ -157,6 +203,14 @@ namespace DirectoryService.Infrastructure.Postgres.Locations
                 _logger.LogError(ex, "Отмена операции деактивации локации с id={id}", id);
                 return LocationErrors.DatabaseUpdateError(id);
             }
+        }
+
+        public async Task<Location?> GetActiveLocationById(LocationId locationId, CancellationToken cancellationToken)
+        {
+            var location = await _context.Locations
+                .FirstOrDefaultAsync(l => l.IsActive && l.Id == locationId, cancellationToken);
+
+            return location;
         }
 
         private Result<IReadOnlyCollection<Location>> CheckLocationsByIds(

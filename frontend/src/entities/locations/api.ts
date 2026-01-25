@@ -16,6 +16,9 @@ export const locationsApi = {
       Envelope<PaginationResponse<Location>>
     >("/locations", {
       params: request,
+      paramsSerializer: {
+        indexes: null, // этот параметр заставляет axios использовать department=id1&department=id2
+      },
     });
     return response.data.result;
   },
@@ -23,7 +26,7 @@ export const locationsApi = {
   createLocation: async (request: CreateLocationRequest) => {
     const response = await apiClient.post<Envelope<string>>(
       "/locations",
-      request
+      request,
     );
 
     return response.data.result;
@@ -46,7 +49,7 @@ export const locationsApi = {
 
   deleteLocation: async (locationId: string) => {
     const response = await apiClient.delete<Envelope<string>>(
-      `/locations/${locationId}`
+      `/locations/${locationId}`,
     );
 
     return response.data.result;
@@ -61,10 +64,11 @@ export const locationsQueryOptions = {
       queryFn: () => locationsApi.getLocations(request),
       queryKey: [
         locationsQueryOptions.baseKey,
-        request.page,
         request.departmentIds,
-        request.search,
         request.isActive,
+        request.search,
+        request.page,
+        request.pageSize,
       ],
     });
   },
@@ -74,7 +78,13 @@ export const locationsQueryOptions = {
       queryFn: ({ pageParam }) => {
         return locationsApi.getLocations({ ...filter, page: pageParam });
       },
-      queryKey: [locationsQueryOptions.baseKey, { filter }],
+      queryKey: [
+        locationsQueryOptions.baseKey,
+        filter.departmentIds,
+        filter.isActive,
+        filter.search,
+        filter.pageSize,
+      ],
       initialPageParam: 1,
       getNextPageParam: (response) => {
         return !response || response.page >= response.totalPages

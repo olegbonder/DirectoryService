@@ -47,8 +47,9 @@ export default function ChangeLocationForm({
           </FieldLabel>
           <Input
             id="name"
-            placeholder="Введите наименование"
+            placeholder="Введите наименование локации"
             aria-invalid={errors.name ? true : false}
+            className={errors.name ? "border-red-500 focus:ring-red-500" : ""}
             {...register("name")}
           />
           <FieldError>{errors.name?.message}</FieldError>
@@ -60,7 +61,12 @@ export default function ChangeLocationForm({
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger aria-invalid={errors.timeZone ? true : false}>
+                <SelectTrigger
+                  aria-invalid={errors.timeZone ? true : false}
+                  className={
+                    errors.timeZone ? "border-red-500 focus:ring-red-500" : ""
+                  }
+                >
                   <SelectValue placeholder="Выберите временную зону" />
                 </SelectTrigger>
                 <SelectContent>
@@ -87,6 +93,11 @@ export default function ChangeLocationForm({
               type="text"
               placeholder="Введите страну"
               aria-invalid={errors.address?.country ? true : false}
+              className={
+                errors.address?.country
+                  ? "border-red-500 focus:ring-red-500"
+                  : ""
+              }
               {...register("address.country")}
             />
             <FieldError>{errors.address?.country?.message}</FieldError>
@@ -98,6 +109,9 @@ export default function ChangeLocationForm({
               type="text"
               placeholder="Введите город"
               aria-invalid={errors.address?.city ? true : false}
+              className={
+                errors.address?.city ? "border-red-500 focus:ring-red-500" : ""
+              }
               {...register("address.city")}
             />
             <FieldError>{errors.address?.city?.message}</FieldError>
@@ -110,6 +124,9 @@ export default function ChangeLocationForm({
             type="text"
             placeholder="Введите улицу"
             aria-invalid={errors.address?.street ? true : false}
+            className={
+              errors.address?.street ? "border-red-500 focus:ring-red-500" : ""
+            }
             {...register("address.street")}
           />
           <FieldError>{errors.address?.street?.message}</FieldError>
@@ -120,14 +137,23 @@ export default function ChangeLocationForm({
             <Input
               id="house"
               type="number"
+              placeholder="Номер дома"
               aria-invalid={errors.address?.house ? true : false}
+              className={
+                errors.address?.house ? "border-red-500 focus:ring-red-500" : ""
+              }
               {...register("address.house")}
             />
             <FieldError>{errors.address?.house?.message}</FieldError>
           </Field>
           <Field>
             <FieldLabel htmlFor="flat">Квартира</FieldLabel>
-            <Input id="flat" type="number" {...register("address.flat")} />
+            <Input
+              id="flat"
+              type="number"
+              placeholder="Номер квартиры (опционально)"
+              {...register("address.flat")}
+            />
           </Field>
         </div>
       </FieldSet>

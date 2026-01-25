@@ -2,16 +2,15 @@ import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { PAGE_SIZE } from "./use-locations-list";
+import { OrderDirection } from "@/features/sort/sort-select";
 
 export type LocationsFilterState = {
-  departmentIds?: string[];
+  departmentIds: string[];
   search: string;
   isActive?: boolean;
   pageSize: number;
-  order: OrderBy;
+  order: OrderDirection;
 };
-
-export type OrderBy = "asc" | "desc";
 
 type Actions = {
   setDepartmentIds: (ids: LocationsFilterState["departmentIds"]) => void;
@@ -23,7 +22,7 @@ type Actions = {
 type LocationsFilterStore = LocationsFilterState & Actions;
 
 const initialState: LocationsFilterState = {
-  departmentIds: undefined,
+  departmentIds: [],
   search: "",
   isActive: undefined,
   pageSize: PAGE_SIZE,
@@ -61,22 +60,24 @@ export const useGetLocationsFilter = () => {
   );
 };
 
-export const setFilterDepartmentIds = (
+export const setFilterLocationsDepartmentIds = (
   ids: LocationsFilterState["departmentIds"],
 ) => {
   useLocationsFilterStore.getState().setDepartmentIds(ids);
 };
 
-export const setFilterSearch = (search: LocationsFilterState["search"]) => {
+export const setFilterLocationsSearch = (
+  search: LocationsFilterState["search"],
+) => {
   useLocationsFilterStore.getState().setSearch(search);
 };
 
-export const setFilterIsActive = (
+export const setFilterLocationsIsActive = (
   isActive: LocationsFilterState["isActive"],
 ) => {
   useLocationsFilterStore.getState().setIsActive(isActive);
 };
 
-export const setOrder = (orderBy: LocationsFilterState["order"]) => {
+export const setLocationsOrder = (orderBy: LocationsFilterState["order"]) => {
   useLocationsFilterStore.getState().setOrder(orderBy);
 };

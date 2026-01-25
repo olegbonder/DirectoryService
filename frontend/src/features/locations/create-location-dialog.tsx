@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { useCreateLocation } from "./model/use-create-location";
+import { MapPin } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,9 +64,14 @@ export default function CreateLocationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Создать локацию</DialogTitle>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <DialogTitle>Создать локацию</DialogTitle>
+          </div>
           <DialogDescription>
             Заполните форму ниже, чтобы создать новую локацию.
           </DialogDescription>
@@ -76,12 +82,16 @@ export default function CreateLocationDialog({
             register={register}
             errors={errors}
           />
-          <DialogFooter className="pt-6">
+          <DialogFooter className="pt-6 gap-3">
             <Button variant="outline" onClick={onClose}>
               Отмена
             </Button>
-            <Button type="submit" disabled={isPending}>
-              Создать локацию
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+            >
+              {isPending ? "Создание..." : "Создать локацию"}
             </Button>
           </DialogFooter>
         </form>

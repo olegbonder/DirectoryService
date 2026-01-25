@@ -73,7 +73,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
                 }
 
                 // поиск активного родителя
-                newParentDepartment = await _departmentsRepository.GetBy(d => d.IsActive && d.Id == newParentDeptId, cancellationToken);
+                newParentDepartment = await _departmentsRepository.GetActiveDepartmentById(newParentDeptId, cancellationToken);
                 if (newParentDepartment == null)
                 {
                     transactionScope.RollBack();

@@ -10,6 +10,11 @@ namespace DirectoryService.Application.Features.Departments
 
         Task<Department?> GetBy(Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken);
 
+        Task<Department?> GetActiveDepartmentById(DepartmentId departmentId, CancellationToken cancellationToken);
+
+        Task<IReadOnlyList<Department>> GetActiveDepartmentsByIds(
+            List<DepartmentId> departmentIds, CancellationToken cancellationToken);
+
         Task<Department?> GetByWithLocations(
             Expression<Func<Department, bool>> predicate, CancellationToken cancellationToken);
 
