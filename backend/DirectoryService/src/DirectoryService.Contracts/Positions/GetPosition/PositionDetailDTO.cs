@@ -7,7 +7,7 @@
 
         public string? Description { get; init; }
 
-        public List<string> Departments { get; init; } = null!;
+        public List<DictionaryItemResponse> Departments { get; init; } = null!;
 
         public bool IsActive { get; init; }
 

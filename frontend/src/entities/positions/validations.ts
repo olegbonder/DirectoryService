@@ -16,3 +16,10 @@ export const createPositionSchema = z.object({
 });
 
 export type CreatePositionData = z.infer<typeof createPositionSchema>;
+
+export const updatePositionSchema = z.object({
+  name: z.string().min(1, "Наименование обязательно"),
+  description: z.string().optional(),
+});
+
+export type UpdatePositionFormData = z.infer<typeof updatePositionSchema>;

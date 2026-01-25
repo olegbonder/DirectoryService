@@ -11,7 +11,6 @@ import { Briefcase } from "lucide-react";
 import { PositionDetail } from "@/entities/positions/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   FieldGroup,
   FieldSet,
@@ -22,19 +21,16 @@ import {
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { useUpdatePosition } from "./model/use-update-position";
+import {
+  UpdatePositionFormData,
+  updatePositionSchema,
+} from "@/entities/positions/validations";
 
 type UpdatePositionProps = {
   position: PositionDetail;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-const updatepositionSchema = z.object({
-  name: z.string().min(1, "Наименование обязательно"),
-  description: z.string().optional(),
-});
-
-type PositionFormData = z.infer<typeof updatepositionSchema>;
 
 export default function UpdatePositionDialog({
   position,
@@ -45,18 +41,18 @@ export default function UpdatePositionDialog({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<PositionFormData>({
+  } = useForm<UpdatePositionFormData>({
     defaultValues: {
       name: position.name,
       description: position.description,
     },
-    resolver: zodResolver(updatepositionSchema),
+    resolver: zodResolver(updatePositionSchema),
     mode: "onChange",
   });
 
   const { updatePosition, isPending } = useUpdatePosition();
 
-  const onSubmit = async (data: PositionFormData) => {
+  const onSubmit = async (data: UpdatePositionFormData) => {
     updatePosition(
       { id: position.id, ...data },
       {

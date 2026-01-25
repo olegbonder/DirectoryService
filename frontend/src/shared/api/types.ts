@@ -10,7 +10,7 @@ export type DictionaryResponse = {
   items: DictionaryItemResponse[];
 };
 
-type DictionaryItemResponse = {
+export type DictionaryItemResponse = {
   id: string;
   name: string;
 };

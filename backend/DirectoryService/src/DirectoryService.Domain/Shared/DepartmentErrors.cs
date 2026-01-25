@@ -31,7 +31,7 @@ namespace DirectoryService.Domain.Shared
 
         public static Error ParentIdConflict()
         {
-            return Error.Failure("department.parent_id.conflict", $"Идентификатор родителя не должен совпадать с идентификатором подразделение");
+            return Error.Failure("department.parent_id.conflict", $"Идентификатор родителя не должен совпадать с идентификатором подразделения");
         }
 
         public static Error ParentIdAsChildConflict(Guid id)
@@ -104,6 +104,11 @@ namespace DirectoryService.Domain.Shared
         public static Error NotFound(Guid id)
         {
             return GeneralErrors.NotFound("department", id);
+        }
+
+        public static Error NotFounds()
+        {
+            return GeneralErrors.NotFound("departments", null);
         }
     }
 }

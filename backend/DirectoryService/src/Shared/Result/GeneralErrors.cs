@@ -10,8 +10,8 @@
 
         public static Error NotFound(string entity, Guid? id)
         {
-            var forId = id == null ? string.Empty : $" for id: '{id}'";
-            return Error.NotFound($"{entity}.not.found", $"record not found{forId}");
+            var forId = id == null ? string.Empty : $" для id: '{id}'";
+            return Error.NotFound($"{entity}.not.found", $"Запись не найдена {forId}");
         }
 
         public static Error PropertyIsEmpty(string property, string name = "Название")

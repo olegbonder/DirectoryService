@@ -1,5 +1,6 @@
-using DirectoryService.Application.Abstractions;
+﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
+using DirectoryService.Contracts;
 using DirectoryService.Contracts.Positions.GetPosition;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,7 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositionDet
                     Description = p.Description.Value,
                     Departments = _readDbContext.DepartmentsRead
                         .Where(d => p.DepartmentPositions.Any(dp => dp.DepartmentId == d.Id))
-                        .Select(d => d.Name.Value).ToList(),
+                        .Select(d => new DictionaryItemResponse(d.Id.Value, d.Name.Value)).ToList(),
                     IsActive = p.IsActive,
                     CreatedAt = p.CreatedAt
                 }).FirstOrDefaultAsync(cancellationToken);

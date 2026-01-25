@@ -8,28 +8,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { Position } from "@/entities/positions/types";
 import { AlertTriangle } from "lucide-react";
-import { useDeletePosition } from "./model/use-delete-position";
+import { useDeletePositionDepartment } from "@/features/departments/model/use-delete-position-department";
 
-type DeletePositionDialogProps = {
-  position: Position;
+type DeletePositionDepartmentDialogProps = {
+  positionId: string;
+  departmentId: string;
+  departmentName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 };
 
-export default function DeletePositionAlertDialog({
-  position,
+export default function DeletePositionDepartmentAlertDialog({
+  positionId,
+  departmentId,
+  departmentName,
   open,
   onOpenChange,
   onConfirm,
-}: DeletePositionDialogProps) {
-  const { deletePosition, isPending } = useDeletePosition();
+}: DeletePositionDepartmentDialogProps) {
+  const { deleteDeparment, isPending } = useDeletePositionDepartment();
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    deletePosition(position.id, { onSuccess: () => onConfirm() });
+    deleteDeparment(
+      {
+        positionId,
+        departmentId,
+      },
+      { onSuccess: () => onConfirm() },
+    );
   };
 
   return (
@@ -45,9 +54,9 @@ export default function DeletePositionAlertDialog({
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-base">
-            Вы уверены, что хотите удалить позицию
+            Вы уверены, что хотите удалить подразделение
             <span className="font-semibold text-slate-900">
-              {`"${position.name}"`}
+              {`"${departmentName}"`}
             </span>
             ? Это действие невозможно отменить.
           </AlertDialogDescription>
@@ -59,7 +68,7 @@ export default function DeletePositionAlertDialog({
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? "Удаление... " : "Удалить"}
+            {isPending ? "Удаление..." : "Удалить"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

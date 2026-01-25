@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
@@ -179,5 +180,14 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
 
         public async Task<Department?> GetActiveDepartmentById(DepartmentId departmentId, CancellationToken cancellationToken) =>
             await GetBy(d => d.IsActive && d.Id == departmentId, cancellationToken);
+
+        public async Task<IReadOnlyList<Department>> GetActiveDepartmentsByIds(
+            List<DepartmentId> departmentIds, CancellationToken cancellationToken)
+        {
+            var departments = await _context.Departments
+                .Where(d => d.IsActive && departmentIds.Contains(d.Id)).ToListAsync(cancellationToken);
+
+            return departments;
+        }
     }
 }

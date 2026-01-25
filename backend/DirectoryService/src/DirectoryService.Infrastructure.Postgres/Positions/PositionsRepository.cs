@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DirectoryService.Application.Features.Positions;
+using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
@@ -60,6 +61,11 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
 
         public async Task<Position?> GetBy(Expression<Func<Position, bool>> predicate, CancellationToken cancellationToken) =>
             await _context.Positions.FirstOrDefaultAsync(predicate, cancellationToken);
+
+        public async Task<Position?> GetByWithDepartments(Expression<Func<Position, bool>> predicate, CancellationToken cancellationToken) =>
+            await _context.Positions
+                .Include(p => p.DepartmentPositions)
+                .FirstOrDefaultAsync(predicate, cancellationToken);
 
         public async Task<Result> DeactivatePositionsByDepartment(
             DepartmentId departmentId, CancellationToken cancellationToken)
@@ -160,5 +166,32 @@ namespace DirectoryService.Infrastructure.Postgres.Positions
 
         public async Task<Position?> GetActivePositionByName(PositionName positionName, CancellationToken cancellationToken) =>
             await GetBy(p => p.IsActive && p.Name.Value == positionName.Value, cancellationToken);
+
+        public async Task<Result> AddDepartmentsToPosition(
+            Position position, IEnumerable<DepartmentId> newDepartmentIds, CancellationToken cancellationToken)
+        {
+            var name = position.Name.Value;
+            try
+            {
+                position.DepartmentPositions.AddRange(newDepartmentIds.Select(d => new DepartmentPosition(d, position.Id)));
+                await _context.SaveChangesAsync(cancellationToken);
+                return Result.Success();
+            }
+            catch(DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Ошибка параллельного обновления позиции с наименованием {name}", name);
+                return GeneralErrors.ConcurrentOperation("location");
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogError(ex, "Отмена операции добавления позиции с наименованием {name}", name);
+                return PositionErrors.OperationCancelled();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка добавления позиции с наименованием {name}", name);
+                return PositionErrors.DatabaseError();
+            }
+        }
     }
 }

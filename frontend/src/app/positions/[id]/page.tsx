@@ -7,7 +7,9 @@ import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import usePosition from "@/features/positions/model/use-position";
 import UpdatePositionDialog from "@/features/positions/update-position-dialog";
-import { set } from "zod";
+import AddDepartmentsToPositionDialog from "@/features/departments/add-departments-to-position-dialog";
+import { DictionaryItemResponse } from "@/shared/api/types";
+import DeletePositionDepartmentAlertDialog from "@/features/departments/delete-position-department-alert";
 
 export default function PositionPage({
   params,
@@ -16,6 +18,14 @@ export default function PositionPage({
 }) {
   const { id } = React.use(params);
   const [updatePositionOpen, setUpdatePositionOpen] = useState(false);
+
+  const [addDepartmentsToPositionOpen, setAddDepartmentsToPositionOpen] =
+    useState(false);
+  const [deletePositionDepartmentOpen, setDeletePositionDepartmentOpen] =
+    useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<
+    DictionaryItemResponse | undefined
+  >(undefined);
 
   const { position, isPending, isError, error } = usePosition(id);
 
@@ -142,7 +152,10 @@ export default function PositionPage({
               Подразделения ({position.departments.length})
             </h2>
             {position.isActive && (
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => setAddDepartmentsToPositionOpen(true)}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Добавить подразделение
               </Button>
@@ -157,15 +170,21 @@ export default function PositionPage({
             <div className="space-y-2">
               {position.departments.map((dept) => (
                 <div
-                  key={dept}
+                  key={dept.id}
                   className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                 >
-                  <span className="font-medium text-slate-900">{dept}</span>
+                  <span className="font-medium text-slate-900">
+                    {dept.name}
+                  </span>
                   {position.isActive && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => {
+                        setSelectedDepartment(dept);
+                        setDeletePositionDepartmentOpen(true);
+                      }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -176,12 +195,32 @@ export default function PositionPage({
           )}
         </div>
       </div>
-      <UpdatePositionDialog
-        key={position.id}
-        position={position}
-        open={updatePositionOpen}
-        onOpenChange={setUpdatePositionOpen}
-      />
+      <div key={position.id}>
+        <UpdatePositionDialog
+          position={position}
+          open={updatePositionOpen}
+          onOpenChange={setUpdatePositionOpen}
+        />
+        <AddDepartmentsToPositionDialog
+          positionId={position.id}
+          positionDepartmentIds={position.departments.map((d) => d.id)}
+          open={addDepartmentsToPositionOpen}
+          onOpenChange={setAddDepartmentsToPositionOpen}
+        />
+        {selectedDepartment && (
+          <DeletePositionDepartmentAlertDialog
+            positionId={position.id}
+            departmentId={selectedDepartment.id}
+            departmentName={selectedDepartment.name}
+            open={deletePositionDepartmentOpen}
+            onOpenChange={setDeletePositionDepartmentOpen}
+            onConfirm={() => {
+              setSelectedDepartment(undefined);
+              setDeletePositionDepartmentOpen(false);
+            }}
+          />
+        )}
+      </div>
     </>
   );
 }

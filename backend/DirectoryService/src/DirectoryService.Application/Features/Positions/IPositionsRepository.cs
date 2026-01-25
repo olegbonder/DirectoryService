@@ -13,6 +13,8 @@ namespace DirectoryService.Application.Features.Positions
 
         Task<Position?> GetBy(Expression<Func<Position, bool>> predicate, CancellationToken cancellationToken);
 
+        Task<Position?> GetByWithDepartments(Expression<Func<Position, bool>> predicate, CancellationToken cancellationToken);
+
         Task<Position?> GetActivePositionById(PositionId positionId, CancellationToken cancellationToken);
 
         Task<Position?> GetActivePositionByName(PositionName positionName, CancellationToken cancellationToken);
@@ -21,5 +23,7 @@ namespace DirectoryService.Application.Features.Positions
             DepartmentId departmentId, CancellationToken cancellationToken);
 
         Task<Result> DeactivatePosition(PositionId positionId, CancellationToken cancellationToken);
+
+        Task<Result> AddDepartmentsToPosition(Position position, IEnumerable<DepartmentId> newDepartmentIds, CancellationToken cancellationToken);
     }
 }

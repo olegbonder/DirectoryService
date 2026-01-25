@@ -11,24 +11,24 @@ using Microsoft.Extensions.Logging;
 using Shared.Caching;
 using Shared.Result;
 
-namespace DirectoryService.Application.Features.Positions.Commands.DeletePositionDepartment
+namespace DirectoryService.Application.Features.Positions.Commands.CreatePositionDepartments
 {
-    public sealed class DeletePositionDepartmentHandler : ICommandHandler<Guid, DeletePositionDepartmentCommand>
+    public sealed class CreatePositionDepartmentsHandler : ICommandHandler<Guid, CreatePositionDepartmentsCommand>
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IPositionsRepository _positionsRepository;
         private readonly IDepartmentsRepository _departmentsRepository;
-        private readonly IValidator<DeletePositionDepartmentCommand> _validator;
+        private readonly IValidator<CreatePositionDepartmentsCommand> _validator;
         private readonly ICacheService _cache;
-        private readonly ILogger<DeletePositionDepartmentHandler> _logger;
+        private readonly ILogger<CreatePositionDepartmentsHandler> _logger;
 
-        public DeletePositionDepartmentHandler(
+        public CreatePositionDepartmentsHandler(
             ITransactionManager transactionManager,
             IPositionsRepository positionsRepository,
             IDepartmentsRepository departmentsRepository,
-            IValidator<DeletePositionDepartmentCommand> validator,
+            IValidator<CreatePositionDepartmentsCommand> validator,
             ICacheService cache,
-            ILogger<DeletePositionDepartmentHandler> logger)
+            ILogger<CreatePositionDepartmentsHandler> logger)
         {
             _transactionManager = transactionManager;
             _positionsRepository = positionsRepository;
@@ -38,7 +38,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
             _logger = logger;
         }
 
-        public async Task<Result<Guid>> Handle(DeletePositionDepartmentCommand command, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(CreatePositionDepartmentsCommand command, CancellationToken cancellationToken)
         {
             var validResult = await _validator.ValidateAsync(command, cancellationToken);
             if (validResult.IsValid == false)
@@ -64,16 +64,25 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
                 return PositionErrors.NotFound(posId);
             }
 
-            var deptId = command.DepartmentId;
-            var departmentId = DepartmentId.Current(deptId);
-            var departmentPosition = position.DepartmentPositions.FirstOrDefault(dp => dp.DepartmentId == departmentId && dp.PositionId == positionId);
-            if (departmentPosition == null)
+            var positionDepartmentIds = position.DepartmentPositions.Select(dp => dp.DepartmentId).ToList();
+
+            var request = command.Request;
+            var departmentIds = request.DepartmentIds.Select(DepartmentId.Current).ToList();
+            var getDepartments = await _departmentsRepository.GetActiveDepartmentsByIds(departmentIds, cancellationToken);
+            if (!getDepartments.Any())
             {
                 transactionScope.RollBack();
-                return DepartmentErrors.NotFound(deptId);
+                return DepartmentErrors.NotFounds();
             }
 
-            position.DepartmentPositions.Remove(departmentPosition);
+            var dbDepartmentIds = getDepartments.Select(d => d.Id).ToList();
+
+            var addDepartmentsResult = await _positionsRepository.AddDepartmentsToPosition(position, dbDepartmentIds, cancellationToken);
+            if (addDepartmentsResult.IsFailure)
+            {
+                transactionScope.RollBack();
+                return addDepartmentsResult.Errors;
+            }
 
             try
             {

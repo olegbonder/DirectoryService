@@ -1,3 +1,5 @@
+import { DictionaryItemResponse } from "@/shared/api/types";
+
 export type Position = {
   id: string;
   name: string;
@@ -10,7 +12,7 @@ export type PositionDetail = {
   id: string;
   name: string;
   description?: string;
-  departments: string[];
+  departments: DictionaryItemResponse[];
   isActive: boolean;
   createdAt: string;
 };

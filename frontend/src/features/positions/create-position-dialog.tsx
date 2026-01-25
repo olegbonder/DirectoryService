@@ -21,13 +21,6 @@ import {
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
-import {
   CreatePositionData,
   createPositionSchema,
 } from "@/entities/positions/validations";

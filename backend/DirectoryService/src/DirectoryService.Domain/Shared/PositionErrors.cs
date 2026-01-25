@@ -48,7 +48,7 @@ namespace DirectoryService.Domain.Shared
 
         public static Error DepartmentIdsNotBeNull()
         {
-            return GeneralErrors.ValueIsRequired("position.locationIds");
+            return GeneralErrors.ValueIsRequired("position.departmentIds");
         }
 
         public static Error DepartmentIdsNotBeEmpty()
