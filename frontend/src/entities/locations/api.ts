@@ -62,29 +62,19 @@ export const locationsQueryOptions = {
   getLocationsOptions: (request: GetLocationsRequest) => {
     return queryOptions({
       queryFn: () => locationsApi.getLocations(request),
-      queryKey: [
-        locationsQueryOptions.baseKey,
-        request.departmentIds,
-        request.isActive,
-        request.search,
-        request.page,
-        request.pageSize,
-      ],
+      queryKey: [locationsQueryOptions.baseKey, request],
     });
   },
 
   getLocationsInfinityOptions: (filter: LocationsFilterState) => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
-        return locationsApi.getLocations({ ...filter, page: pageParam });
+        return locationsApi.getLocations({
+          ...filter,
+          page: pageParam,
+        });
       },
-      queryKey: [
-        locationsQueryOptions.baseKey,
-        filter.departmentIds,
-        filter.isActive,
-        filter.search,
-        filter.pageSize,
-      ],
+      queryKey: [locationsQueryOptions.baseKey, filter],
       initialPageParam: 1,
       getNextPageParam: (response) => {
         return !response || response.page >= response.totalPages

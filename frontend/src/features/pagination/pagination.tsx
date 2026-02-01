@@ -23,6 +23,7 @@ export default function ItemsPagination({
         <PaginationContent>
           <PaginationPrevious
             onClick={() => setPage(Math.max(1, page - 1))}
+            text="Предыдущая"
             className={
               page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
             }
@@ -42,6 +43,7 @@ export default function ItemsPagination({
           )}
           <PaginationNext
             onClick={() => setPage(Math.max(totalPages, page + 1))}
+            text="Следующая"
             className={
               page === totalPages
                 ? "pointer-events-none opacity-50"

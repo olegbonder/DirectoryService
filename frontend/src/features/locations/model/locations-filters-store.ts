@@ -8,6 +8,7 @@ export type LocationsFilterState = {
   departmentIds: string[];
   search: string;
   isActive?: boolean;
+  page: number;
   pageSize: number;
   order: OrderDirection;
 };
@@ -17,6 +18,7 @@ type Actions = {
   setSearch: (search: LocationsFilterState["search"]) => void;
   setIsActive: (isActive: LocationsFilterState["isActive"]) => void;
   setOrder: (order: LocationsFilterState["order"]) => void;
+  setPage: (page: LocationsFilterState["page"]) => void;
 };
 
 type LocationsFilterStore = LocationsFilterState & Actions;
@@ -25,6 +27,7 @@ const initialState: LocationsFilterState = {
   departmentIds: [],
   search: "",
   isActive: undefined,
+  page: 1,
   pageSize: PAGE_SIZE,
   order: "asc",
 };
@@ -39,6 +42,7 @@ const useLocationsFilterStore = create<LocationsFilterStore>()(
         set(() => ({ search: input.trim() || "" })),
       setIsActive: (isActive: LocationsFilterState["isActive"]) =>
         set({ isActive }),
+      setPage: (page: LocationsFilterState["page"]) => set({ page: page }),
       setOrder: (order: LocationsFilterState["order"]) => set({ order }),
     }),
     {
@@ -54,6 +58,7 @@ export const useGetLocationsFilter = () => {
       departmentIds: state.departmentIds,
       search: state.search,
       isActive: state.isActive,
+      page: state.page,
       pageSize: state.pageSize,
       order: state.order,
     })),
@@ -80,4 +85,8 @@ export const setFilterLocationsIsActive = (
 
 export const setLocationsOrder = (orderBy: LocationsFilterState["order"]) => {
   useLocationsFilterStore.getState().setOrder(orderBy);
+};
+
+export const setLocationsPage = (page: LocationsFilterState["page"]) => {
+  useLocationsFilterStore.getState().setPage(page);
 };

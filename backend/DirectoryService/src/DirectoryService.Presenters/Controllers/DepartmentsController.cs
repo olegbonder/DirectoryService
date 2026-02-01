@@ -8,12 +8,14 @@ using DirectoryService.Application.Features.Departments.Queries.GetTopDepartment
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.CreateDepartment;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
+using DirectoryService.Contracts.Departments.GetDepartmentDictionary;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.Contracts.Departments.MoveDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 
 namespace DirectoryService.Presenters.Controllers
 {
@@ -92,11 +94,12 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("dictionary")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
-        public async Task<EndpointResult<DictionaryResponse>> GetDepartmentDictionary(
+        public async Task<EndpointResult<PaginationResponse<DictionaryItemResponse>>> GetDepartmentDictionary(
+            [FromQuery] GetDepartmentDictionaryRequest request,
             [FromServices] GetDepartmentDictionaryHandler handler,
             CancellationToken cancellationToken)
         {
-            return await handler.Handle(cancellationToken);
+            return await handler.Handle(request,cancellationToken);
         }
 
         [HttpGet("{parentId:guid}/children")]

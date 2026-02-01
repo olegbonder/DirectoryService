@@ -27,12 +27,10 @@ export default function LocationFilters() {
           onChange={(e) => setFilterLocationsSearch(e.target.value)}
         />
       </div>
-      <div className="flex-0.5">
-        <DepartmentSelect
-          departmentIds={departmentIds}
-          onDepartmentChange={setFilterLocationsDepartmentIds}
-        />
-      </div>
+      <DepartmentSelect
+        selectedDepartmentIds={departmentIds}
+        onDepartmentChange={setFilterLocationsDepartmentIds}
+      />
 
       <StatusSelect
         isActive={isActive}

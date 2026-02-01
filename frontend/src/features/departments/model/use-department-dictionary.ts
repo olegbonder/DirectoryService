@@ -1,14 +1,32 @@
 import { departmentsQueryOptions } from "@/entities/departments/api";
-import { useQuery } from "@tanstack/react-query";
+import { DepartmentDictionaryState } from "@/entities/departments/types";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-export function useDepartmentDictionary() {
-  const query = useQuery({
-    ...departmentsQueryOptions.getDictionaryOptions(),
+export function useDepartmentDictionary(filter: DepartmentDictionaryState) {
+  const {
+    data,
+    isPending,
+    error,
+    isError,
+    refetch,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    ...departmentsQueryOptions.getDepartmentDictionaryInfinityOptions({
+      ...filter,
+    }),
   });
   return {
-    departments: query.data?.items,
-    isPending: query.isPending,
-    isError: query.isError,
-    error: query.error,
+    departments: data?.items,
+    totalPages: data?.totalPages ?? undefined,
+    currentPage: data?.page,
+    isPending,
+    error,
+    isError,
+    refetch,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
   };
 }

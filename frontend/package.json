@@ -34,6 +34,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.70.0",
+    "react-select": "^5.10.2",
+    "react-window": "^2.2.5",
     "root": "github:tanstack/react-query",
     "shadcn": "^3.6.2",
     "sonner": "^2.0.7",

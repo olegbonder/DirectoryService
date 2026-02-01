@@ -10,7 +10,6 @@ import {
 import { Briefcase } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   FieldGroup,
   FieldSet,
@@ -24,9 +23,8 @@ import {
   CreatePositionData,
   createPositionSchema,
 } from "@/entities/positions/validations";
-import { MultiSelect } from "@/shared/components/ui/multi-select";
-import { useDepartmentDictionary } from "../departments/model/use-department-dictionary";
 import { useCreatePosition } from "./model/use-create-position";
+import DepartmentSelect from "../departments/department-select";
 
 type CreatePositionProps = {
   open: boolean;
@@ -37,7 +35,6 @@ export default function CreatePositionDialog({
   open,
   onOpenChange,
 }: CreatePositionProps) {
-  const { departments, isPending, isError, error } = useDepartmentDictionary();
   const initialData: CreatePositionData = {
     name: "",
     description: undefined,
@@ -120,27 +117,13 @@ export default function CreatePositionDialog({
               </Field>
               <Field data-invalid={errors.departmentIds}>
                 <FieldLabel htmlFor="departments">Подразделения</FieldLabel>
-                {isPending && <p>Загрузка подразделений...</p>}
-                {!isPending && isError && (
-                  <p className="text-red-500">
-                    Ошибка загрузки подразделений: {error?.message}
-                  </p>
-                )}
-                {!isPending && !isError && departments && (
-                  <Controller
-                    name="departmentIds"
-                    control={control}
-                    render={({ field }) => (
-                      <MultiSelect
-                        options={departments.map((dept) => ({
-                          value: dept.id,
-                          label: dept.name,
-                        }))}
-                        onValueChange={field.onChange}
-                      />
-                    )}
-                  />
-                )}
+                <Controller
+                  name="departmentIds"
+                  control={control}
+                  render={({ field }) => (
+                    <DepartmentSelect onDepartmentChange={field.onChange} />
+                  )}
+                />
                 <FieldError>{errors.departmentIds?.message}</FieldError>
               </Field>
             </FieldSet>

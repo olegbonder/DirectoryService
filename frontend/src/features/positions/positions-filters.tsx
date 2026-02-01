@@ -26,7 +26,7 @@ export default function PositionFilters() {
         />
       </div>
       <DepartmentSelect
-        departmentIds={departmentIds}
+        selectedDepartmentIds={departmentIds}
         onDepartmentChange={setFilterPositionsDepartmentIds}
       />
       <StatusSelect

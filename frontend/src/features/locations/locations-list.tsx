@@ -11,12 +11,15 @@ import LocationCard from "./location-card";
 import CreateLocationDialog from "./create-location-dialog";
 import DeleteLocationAlertDialog from "./delete-location-alert";
 import UpdateLocationDialog from "./update-location-dialog";
-import { useGetLocationsFilter } from "./model/locations-filters-store";
+import {
+  setLocationsPage,
+  useGetLocationsFilter,
+} from "./model/locations-filters-store";
 import { useGetGlobalFilter } from "@/shared/stores/global-search-store";
 
 export default function LocationList() {
   const globalSearch = useGetGlobalFilter();
-  const { search, departmentIds, isActive, pageSize, order } =
+  const { search, departmentIds, isActive, page, pageSize, order } =
     useGetLocationsFilter();
 
   const {
@@ -31,6 +34,7 @@ export default function LocationList() {
     search: search === "" ? globalSearch : search,
     isActive,
     pageSize,
+    page: departmentIds.length === 0 ? page : 1,
     order,
   });
 

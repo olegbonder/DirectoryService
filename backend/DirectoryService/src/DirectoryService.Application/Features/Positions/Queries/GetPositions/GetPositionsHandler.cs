@@ -73,6 +73,7 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
                             .OrderBy(p => p.Name.Value).ThenBy(l => l.CreatedAt);
 
                     totalCount = await query.CountAsync(cancellationToken);
+                    totalPages = totalCount;
                 }
                 else
                 {
@@ -93,6 +94,8 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
                         .Take(request.PageSize);
 
                     query = query.OrderBy(p => p.Name.Value).ThenBy(p => p.CreatedAt);
+
+                    totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
                 }
 
                 positions = await query.Select(p => new PositionDTO
@@ -105,7 +108,6 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
                     CreatedAt = p.CreatedAt
                 }).ToListAsync(cancellationToken);
 
-                totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
                 _logger.LogInformation("Получение списка позиций");
             }
             catch (Exception ex)

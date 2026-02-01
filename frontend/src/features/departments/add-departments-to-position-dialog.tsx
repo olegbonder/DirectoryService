@@ -17,13 +17,12 @@ import {
   FieldLabel,
   FieldError,
 } from "@/shared/components/ui/field";
-import { MultiSelect } from "@/shared/components/ui/multi-select";
-import { useDepartmentDictionary } from "./model/use-department-dictionary";
 import { useAddDepartmentsToPosition } from "./model/use-add-departments-to-position";
 import {
   AddDepartmentsToPositionData,
   addDepartmentsToPositionSchema,
 } from "@/entities/departments/validations";
+import DepartmentSelect from "./department-select";
 
 type AddDepartmentsToPositionProps = {
   positionId: string;
@@ -38,15 +37,6 @@ export default function AddDepartmentsToPositionDialog({
   open,
   onOpenChange,
 }: AddDepartmentsToPositionProps) {
-  const {
-    departments,
-    isPending: isPendingDepartments,
-    isError: isErrorDepartments,
-    error,
-  } = useDepartmentDictionary();
-  const filteredDepartments = departments?.filter(
-    (department) => !positionDepartmentIds.includes(department.id),
-  );
   const initialData: AddDepartmentsToPositionData = {
     departmentIds: [],
   };
@@ -95,29 +85,16 @@ export default function AddDepartmentsToPositionDialog({
             <FieldSet>
               <Field data-invalid={errors.departmentIds}>
                 <FieldLabel htmlFor="departments">Подразделения</FieldLabel>
-                {isPendingDepartments && <p>Загрузка подразделений...</p>}
-                {!isPendingDepartments && isErrorDepartments && (
-                  <p className="text-red-500">
-                    Ошибка загрузки подразделений: {error?.message}
-                  </p>
-                )}
-                {!isPendingDepartments &&
-                  !isErrorDepartments &&
-                  filteredDepartments && (
-                    <Controller
-                      name="departmentIds"
-                      control={control}
-                      render={({ field }) => (
-                        <MultiSelect
-                          options={filteredDepartments.map((dept) => ({
-                            value: dept.id,
-                            label: dept.name,
-                          }))}
-                          onValueChange={field.onChange}
-                        />
-                      )}
+                <Controller
+                  name="departmentIds"
+                  control={control}
+                  render={({ field }) => (
+                    <DepartmentSelect
+                      excludeDepartmentIds={positionDepartmentIds}
+                      onDepartmentChange={field.onChange}
                     />
                   )}
+                />
                 <FieldError>{errors.departmentIds?.message}</FieldError>
               </Field>
             </FieldSet>

@@ -68,11 +68,18 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                 if (departmentIdValues != null && departmentIdValues.Any())
                 {
                     var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
-                    query = _readDbContext.DepartmentsRead
-                            .Where(d => departmentIds.Contains(d.Id))
-                            .SelectMany(d => d.DepartmentLocations.Select(dl => dl.Location));
+                    var locationIds = await _readDbContext.DepartmentsRead
+                        .Where(d => departmentIds.Contains(d.Id))
+                        .SelectMany(d => d.DepartmentLocations)
+                        .Select(dl => dl.LocationId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    query = _readDbContext.LocationsRead
+                        .Where(l => locationIds.Contains(l.Id));
 
                     totalCount = await query.CountAsync(cancellationToken);
+                    totalPages = totalCount;
                 }
                 else
                 {
@@ -92,6 +99,7 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                     query = query.Skip((request.Page - 1) * request.PageSize)
                         .Take(request.PageSize);
 
+                    totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
                 }
 
                 if (request.Order.HasValue)
@@ -122,7 +130,6 @@ namespace DirectoryService.Application.Features.Locations.Queries.GetLocations
                     CreatedAt = l.CreatedAt
                 }).ToListAsync(cancellationToken);
 
-                totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
                 _logger.LogInformation("Получение списка локаций");
             }
             catch (Exception ex)
