@@ -77,7 +77,9 @@ export const locationsQueryOptions = {
       queryKey: [locationsQueryOptions.baseKey, filter],
       initialPageParam: 1,
       getNextPageParam: (response) => {
-        return !response || response.page >= response.totalPages
+        return !response ||
+          response.page >= response.totalPages ||
+          filter.departmentIds?.length > 0
           ? undefined
           : response.page + 1;
       },
