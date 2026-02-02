@@ -46,21 +46,12 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
-            {
-                return transactionScopeResult.Errors;
-            }
-
-            using var transactionScope = transactionScopeResult.Value;
-
             var posId = command.PositionId;
             var positionId = PositionId.Current(posId);
 
             var position = await _positionsRepository.GetByWithDepartments(p => p.IsActive && p.Id == positionId, cancellationToken);
             if (position == null)
             {
-                transactionScope.RollBack();
                 return PositionErrors.NotFound(posId);
             }
 
@@ -69,7 +60,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
             var departmentPosition = position.DepartmentPositions.FirstOrDefault(dp => dp.DepartmentId == departmentId && dp.PositionId == positionId);
             if (departmentPosition == null)
             {
-                transactionScope.RollBack();
                 return DepartmentErrors.NotFound(deptId);
             }
 
@@ -81,15 +71,8 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
             }
             catch (Exception ex)
             {
-                transactionScope.RollBack();
                 _logger.LogError(ex, "Ошибка удаления подразделений у позиции с {id}", posId);
                 return DepartmentErrors.DatabaseUpdateLocationsError(posId);
-            }
-
-            var commitResult = transactionScope.Commit();
-            if (commitResult.IsFailure)
-            {
-                return commitResult.Errors;
             }
 
             await _cache.RemoveByPrefixAsync(Constants.PREFIX_POSITION_KEY, cancellationToken);

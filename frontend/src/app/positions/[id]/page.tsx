@@ -1,14 +1,11 @@
-"use client";
-
 import PositionDetail from "@/features/positions/position-detail";
-import React from "react";
 
-export default function PositionPage({
-  params,
-}: {
+type Props = {
   params: Promise<{ id: string }>;
-}) {
-  const { id } = React.use(params);
+};
+
+export default async function PositionPage({ params }: Props) {
+  const { id } = await params;
 
   return <PositionDetail id={id} />;
 }

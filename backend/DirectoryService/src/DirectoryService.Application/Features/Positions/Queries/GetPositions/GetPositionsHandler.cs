@@ -75,28 +75,26 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
                     totalCount = await query.CountAsync(cancellationToken);
                     totalPages = totalCount;
                 }
-                else
+
+                query = _readDbContext.PositionsRead;
+                if (string.IsNullOrWhiteSpace(request.Search) == false)
                 {
-                    query = _readDbContext.PositionsRead;
-                    if (string.IsNullOrWhiteSpace(request.Search) == false)
-                    {
-                        query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
-                    }
-
-                    if (request.IsActive.HasValue)
-                    {
-                        query = query.Where(p => p.IsActive == request.IsActive);
-                    }
-
-                    totalCount = await query.CountAsync(cancellationToken);
-
-                    query = query.Skip((request.Page - 1) * request.PageSize)
-                        .Take(request.PageSize);
-
-                    query = query.OrderBy(p => p.Name.Value).ThenBy(p => p.CreatedAt);
-
-                    totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
+                    query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
                 }
+
+                if (request.IsActive.HasValue)
+                {
+                    query = query.Where(p => p.IsActive == request.IsActive);
+                }
+
+                totalCount = await query.CountAsync(cancellationToken);
+
+                query = query.Skip((request.Page - 1) * request.PageSize)
+                    .Take(request.PageSize);
+
+                query = query.OrderBy(p => p.Name.Value).ThenBy(p => p.CreatedAt);
+
+                totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
 
                 positions = await query.Select(p => new PositionDTO
                 {

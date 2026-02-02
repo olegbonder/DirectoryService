@@ -71,19 +71,17 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
 
                     totalCount = await query.CountAsync(cancellationToken);
                 }
-                else
+
+                query = query.Where(d => d.IsActive);
+                if (string.IsNullOrWhiteSpace(request.Search) == false)
                 {
-                    query = query.Where(d => d.IsActive);
-                    if (string.IsNullOrWhiteSpace(request.Search) == false)
-                    {
-                        query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
-                    }
-
-                    totalCount = await query.CountAsync(cancellationToken);
-
-                    query = query.Skip((request.Page - 1) * request.PageSize)
-                            .Take(request.PageSize);
+                    query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
                 }
+
+                totalCount = await query.CountAsync(cancellationToken);
+
+                query = query.Skip((request.Page - 1) * request.PageSize)
+                        .Take(request.PageSize);
 
                 items = await query
                     .OrderBy(d => d.Name.Value)

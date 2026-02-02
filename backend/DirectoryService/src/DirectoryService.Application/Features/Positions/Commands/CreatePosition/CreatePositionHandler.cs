@@ -46,14 +46,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
-            {
-                return transactionScopeResult.Errors;
-            }
-
-            using var transactionScope = transactionScopeResult.Value;
-
             var request = command.Request;
 
             var newPositionId = PositionId.Create();
@@ -65,7 +57,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
 
             if (activeWithTheSameNamePosition != null)
             {
-                transactionScope.RollBack();
                 return PositionErrors.ActivePositionHaveSameName(positionName.Value);
             }
 
@@ -75,7 +66,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             var getDepartmentsRes = await _departmentsRepository.GetDepartmentByIds(departmentIds, cancellationToken);
             if (getDepartmentsRes.IsFailure)
             {
-                transactionScope.RollBack();
                 return getDepartmentsRes.Errors;
             }
 
@@ -85,7 +75,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             var positionRes = Position.Create(newPositionId, positionName, positionDesription, departmentPositions);
             if (positionRes.IsFailure)
             {
-                transactionScope.RollBack();
                 return positionRes.Errors!;
             }
 
@@ -93,14 +82,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             var addPositionRes = await _positionsRepository.Add(position, cancellationToken);
             if (addPositionRes.IsFailure)
             {
-                transactionScope.RollBack();
                 return addPositionRes.Errors!;
-            }
-
-            var commitResult = transactionScope.Commit();
-            if (commitResult.IsFailure)
-            {
-                return commitResult.Errors!;
             }
 
             await _cache.RemoveByPrefixAsync(Constants.PREFIX_POSITION_KEY, cancellationToken);

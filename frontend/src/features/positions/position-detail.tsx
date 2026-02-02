@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import usePosition from "./model/use-position";
 import { DictionaryItemResponse } from "@/shared/api/types";
