@@ -2,16 +2,20 @@
 using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
 using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
+using DirectoryService.Application.Features.Departments.Queries.GetDepartmentDictionary;
 using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
+using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.CreateDepartment;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
+using DirectoryService.Contracts.Departments.GetDepartmentDictionary;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.Contracts.Departments.MoveDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 
 namespace DirectoryService.Presenters.Controllers
 {
@@ -87,6 +91,17 @@ namespace DirectoryService.Presenters.Controllers
             return await handler.Handle(request, cancellationToken);
         }
 
+        [HttpGet("dictionary")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<PaginationResponse<DictionaryItemResponse>>> GetDepartmentDictionary(
+            [FromQuery] GetDepartmentDictionaryRequest request,
+            [FromServices] GetDepartmentDictionaryHandler handler,
+            CancellationToken cancellationToken)
+        {
+            return await handler.Handle(request,cancellationToken);
+        }
+
         [HttpGet("{parentId:guid}/children")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
@@ -103,7 +118,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpDelete("{departmentId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
-        public async Task<EndpointResult<Guid>> SoftDeleteDepartment(
+        public async Task<EndpointResult<Guid>> SoftDelete(
             [FromRoute] Guid departmentId,
             [FromServices] SoftDeleteDepartmentHandler handler,
             CancellationToken cancellationToken)

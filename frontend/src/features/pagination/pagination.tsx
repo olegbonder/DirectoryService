@@ -6,23 +6,24 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/shared/components/ui/pagination";
-import { Dispatch, SetStateAction } from "react";
 
-export default function LocationsPagination({
+type ItemsPaginationProps = {
+  totalPages: number;
+  page: number;
+  setPage: (page: number) => void;
+};
+export default function ItemsPagination({
   totalPages,
   page,
   setPage,
-}: {
-  totalPages: number;
-  page: number;
-  setPage: Dispatch<SetStateAction<number>>;
-}) {
+}: ItemsPaginationProps) {
   return (
-    <div className="mt-8 flex justify-center">
+    <div className="flex justify-center">
       <Pagination>
         <PaginationContent>
           <PaginationPrevious
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            onClick={() => setPage(Math.max(1, page - 1))}
+            text="Предыдущая"
             className={
               page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
             }
@@ -38,10 +39,11 @@ export default function LocationsPagination({
                   {pageNumber}
                 </PaginationLink>
               </PaginationItem>
-            )
+            ),
           )}
           <PaginationNext
-            onClick={() => setPage((next) => Math.max(totalPages, next + 1))}
+            onClick={() => setPage(Math.max(totalPages, page + 1))}
+            text="Следующая"
             className={
               page === totalPages
                 ? "pointer-events-none opacity-50"

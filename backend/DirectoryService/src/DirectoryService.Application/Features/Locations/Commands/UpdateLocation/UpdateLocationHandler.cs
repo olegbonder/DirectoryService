@@ -1,4 +1,4 @@
-using DirectoryService.Application.Abstractions;
+﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
@@ -51,52 +51,29 @@ namespace DirectoryService.Application.Features.Locations.Commands.UpdateLocatio
             var locId = command.LocationId;
             var locationId = LocationId.Current(locId);
 
-            var existingLocationResult = await _locationsRepository.GetActiveLocationsByIds(new List<LocationId> { locationId }, cancellationToken);
-            if (existingLocationResult.IsFailure)
-            {
-                transactionScope.RollBack();
-                return existingLocationResult.Errors!;
-            }
-
-            var existingLocation = existingLocationResult.Value.FirstOrDefault();
+            var existingLocation = await _locationsRepository.GetActiveLocationById(locationId, cancellationToken);
             if (existingLocation == null)
             {
                 transactionScope.RollBack();
                 return LocationErrors.NotFound(locId);
             }
 
-            var locName = LocationName.Create(command.Request.Name).Value;
+            var request = command.Request;
+            var name = request.Name;
+            var locName = LocationName.Create(name).Value;
 
-            var locAdr = command.Request.Address;
+            var locAdr = request.Address;
 
             var locAddress = LocationAddress.Create(locAdr.Country, locAdr.City, locAdr.Street, locAdr.House, locAdr.Flat).Value;
 
-            var locTimeZone = LocationTimezone.Create(command.Request.TimeZone).Value;
+            var locTimeZone = LocationTimezone.Create(request.TimeZone).Value;
 
-            var locationResult = Location.Update(locationId, locName, locAddress, locTimeZone);
-            if (locationResult.IsFailure)
+            existingLocation.Update(locName, locAddress, locTimeZone);
+            var updateResult = await _locationsRepository.Update(existingLocation, cancellationToken);
+            if (updateResult.IsFailure)
             {
                 transactionScope.RollBack();
-                return locationResult.Errors!;
-            }
-
-            var location = locationResult.Value;
-            var updlocationResult = await _locationsRepository.UpdateLocation(location, cancellationToken);
-            if (updlocationResult.IsFailure)
-            {
-                transactionScope.RollBack();
-                return updlocationResult.Errors;
-            }
-
-            try
-            {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка обновления локации с {id}", locId);
-                return LocationErrors.DatabaseUpdateError(locId);
+                return updateResult.Errors;
             }
 
             var commitResult = transactionScope.Commit();

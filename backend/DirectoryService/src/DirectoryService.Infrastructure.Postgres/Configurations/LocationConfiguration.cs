@@ -70,6 +70,9 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
 
             builder.Property(l => l.DeletedAt)
                 .HasColumnName("deleted_at");
+
+            builder.Property(l => l.Version)
+                .IsRowVersion();
         }
     }
 }

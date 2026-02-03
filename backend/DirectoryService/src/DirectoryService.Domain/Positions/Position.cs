@@ -40,6 +40,10 @@ namespace DirectoryService.Domain.Positions
 
         public DateTime UpdatedAt { get; private set; }
 
+        public DateTime? DeletedAt { get; private set; }
+
+        public uint Version { get; set; }
+
         public static Result<Position> Create(
             PositionId id,
             PositionName name,
@@ -54,10 +58,10 @@ namespace DirectoryService.Domain.Positions
             return new Position(id, name, desription, departmentPositions);
         }
 
-        public void SoftDelete()
+        public void Update(PositionName name, PositionDesription desription)
         {
-            IsActive = false;
-            UpdatedAt = DateTime.UtcNow;
+            Name = name;
+            Description = desription;
         }
     }
 }

@@ -48,7 +48,7 @@ namespace DirectoryService.Domain.Shared
 
         public static Error DepartmentIdsNotBeNull()
         {
-            return GeneralErrors.ValueIsRequired("position.locationIds");
+            return GeneralErrors.ValueIsRequired("position.departmentIds");
         }
 
         public static Error DepartmentIdsNotBeEmpty()
@@ -60,5 +60,11 @@ namespace DirectoryService.Domain.Shared
         {
             return Error.Validation("position.departmentIds.must.be.unique", "Список подразделений должен быть уникальным");
         }
+
+        public static Error PositionIdNotBeNull() => GeneralErrors.ValueIsRequired("positionId");
+
+        public static Error PositionIdNotBeEmpty() => GeneralErrors.PropertyIsEmpty("positionId", "Позиция");
+
+        public static Result<Guid> NotFound(Guid id) => GeneralErrors.NotFound("position", id);
     }
 }

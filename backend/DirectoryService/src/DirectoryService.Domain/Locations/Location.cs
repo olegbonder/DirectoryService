@@ -36,15 +36,20 @@ namespace DirectoryService.Domain.Locations
 
         public DateTime? DeletedAt { get; private set; }
 
+        public uint Version { get; set; }
+
         public static Result<Location> Create(LocationName name, LocationAddress address, LocationTimezone timezone)
         {
             var newLocationId = LocationId.Create();
             return new Location(newLocationId, name, address, timezone);
         }
 
-        public static Result<Location> Update(LocationId id, LocationName name, LocationAddress address, LocationTimezone timezone)
+        public void Update(LocationName name, LocationAddress address, LocationTimezone timezone)
         {
-            return new Location(id, name, address, timezone);
+            Name = name;
+            Address = address;
+            Timezone = timezone;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

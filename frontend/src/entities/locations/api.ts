@@ -16,6 +16,9 @@ export const locationsApi = {
       Envelope<PaginationResponse<Location>>
     >("/locations", {
       params: request,
+      paramsSerializer: {
+        indexes: null, // этот параметр заставляет axios использовать department=id1&department=id2
+      },
     });
     return response.data.result;
   },
@@ -23,7 +26,7 @@ export const locationsApi = {
   createLocation: async (request: CreateLocationRequest) => {
     const response = await apiClient.post<Envelope<string>>(
       "/locations",
-      request
+      request,
     );
 
     return response.data.result;
@@ -46,7 +49,7 @@ export const locationsApi = {
 
   deleteLocation: async (locationId: string) => {
     const response = await apiClient.delete<Envelope<string>>(
-      `/locations/${locationId}`
+      `/locations/${locationId}`,
     );
 
     return response.data.result;
@@ -59,25 +62,24 @@ export const locationsQueryOptions = {
   getLocationsOptions: (request: GetLocationsRequest) => {
     return queryOptions({
       queryFn: () => locationsApi.getLocations(request),
-      queryKey: [
-        locationsQueryOptions.baseKey,
-        request.page,
-        request.departmentIds,
-        request.search,
-        request.isActive,
-      ],
+      queryKey: [locationsQueryOptions.baseKey, request],
     });
   },
 
   getLocationsInfinityOptions: (filter: LocationsFilterState) => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
-        return locationsApi.getLocations({ ...filter, page: pageParam });
+        return locationsApi.getLocations({
+          ...filter,
+          page: pageParam,
+        });
       },
-      queryKey: [locationsQueryOptions.baseKey, { filter }],
+      queryKey: [locationsQueryOptions.baseKey, filter],
       initialPageParam: 1,
       getNextPageParam: (response) => {
-        return !response || response.page >= response.totalPages
+        return !response ||
+          response.page >= response.totalPages ||
+          filter.departmentIds?.length > 0
           ? undefined
           : response.page + 1;
       },

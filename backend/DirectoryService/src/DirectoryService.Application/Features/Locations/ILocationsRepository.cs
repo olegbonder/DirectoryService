@@ -6,10 +6,15 @@ namespace DirectoryService.Application.Features.Locations
 {
     public interface ILocationsRepository
     {
-        Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken);
+        Task<Result<Guid>> Add(Location location, CancellationToken cancellationToken);
+
+        Task<Result> Update(Location location, CancellationToken cancellationToken);
 
         Task<Result<IReadOnlyCollection<Location>>> GetLocationsByIds(
             List<LocationId> locationIds, CancellationToken cancellationToken);
+
+        Task<Location?> GetActiveLocationById(
+            LocationId locationId, CancellationToken cancellationToken);
 
         Task<Result<IReadOnlyCollection<Location>>> GetActiveLocationsByIds(
             List<LocationId> locationIds, CancellationToken cancellationToken);

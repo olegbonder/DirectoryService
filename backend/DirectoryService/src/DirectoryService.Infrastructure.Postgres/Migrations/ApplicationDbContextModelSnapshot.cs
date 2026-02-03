@@ -120,6 +120,12 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.ComplexProperty<Dictionary<string, object>>("Timezone", "DirectoryService.Domain.Locations.Location.Timezone#LocationTimezone", b1 =>
                         {
                             b1.IsRequired();
@@ -146,19 +152,23 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.ComplexProperty<Dictionary<string, object>>("Description", "DirectoryService.Domain.Positions.Position.Description#PositionDesription", b1 =>
                         {
@@ -172,9 +182,6 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_positions");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("positions", (string)null);
                 });
@@ -363,6 +370,34 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
+
+                    b.Navigation("Name")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DirectoryService.Domain.Positions.Position", b =>
+                {
+                    b.OwnsOne("DirectoryService.Domain.Positions.PositionName", "Name", b1 =>
+                        {
+                            b1.Property<Guid>("PositionId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("name");
+
+                            b1.HasKey("PositionId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique();
+
+                            b1.ToTable("positions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PositionId");
+                        });
 
                     b.Navigation("Name")
                         .IsRequired();
