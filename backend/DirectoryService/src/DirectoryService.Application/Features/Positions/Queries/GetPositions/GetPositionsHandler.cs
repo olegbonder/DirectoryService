@@ -64,19 +64,15 @@ namespace DirectoryService.Application.Features.Positions.Queries.GetPositions
 
             try
             {
-                IQueryable<Position> query;
+                IQueryable<Position> query = _readDbContext.PositionsRead;
                 if (departmentIdValues != null && departmentIdValues.Any())
                 {
                     var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
-                    query = _readDbContext.PositionsRead
+                    query = query
                             .Where(p => p.DepartmentPositions.Any(dp => departmentIds.Contains(dp.DepartmentId)))
                             .OrderBy(p => p.Name.Value).ThenBy(l => l.CreatedAt);
-
-                    totalCount = await query.CountAsync(cancellationToken);
-                    totalPages = totalCount;
                 }
 
-                query = _readDbContext.PositionsRead;
                 if (string.IsNullOrWhiteSpace(request.Search) == false)
                 {
                     query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));

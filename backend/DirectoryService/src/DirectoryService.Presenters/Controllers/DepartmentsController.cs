@@ -12,6 +12,7 @@ using DirectoryService.Contracts.Departments.CreateDepartment;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Contracts.Departments.GetDepartment;
 using DirectoryService.Contracts.Departments.GetDepartmentDictionary;
+using DirectoryService.Contracts.Departments.GetDepartments;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.Contracts.Departments.MoveDepartment;
@@ -26,6 +27,19 @@ namespace DirectoryService.Presenters.Controllers
     [Route("api/[controller]")]
     public class DepartmentsController: ControllerBase
     {
+        [HttpGet]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<PaginationResponse<DepartmentDTO>>> GetDepartments(
+            [FromQuery] GetDepartmentsRequest request,
+            [FromServices] GetDepartmentsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            return await handler.Handle(request, cancellationToken);
+        }
+
         [HttpPost]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(400)]
