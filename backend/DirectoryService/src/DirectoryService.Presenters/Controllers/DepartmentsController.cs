@@ -1,13 +1,16 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
 using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
+using DirectoryService.Application.Features.Departments.Commands.UpdateDepartment;
 using DirectoryService.Application.Features.Departments.Commands.UpdateDepartmentLocations;
+using DirectoryService.Application.Features.Departments.Queries.GetDepartmentDetail;
 using DirectoryService.Application.Features.Departments.Queries.GetDepartmentDictionary;
 using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.CreateDepartment;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
+using DirectoryService.Contracts.Departments.GetDepartment;
 using DirectoryService.Contracts.Departments.GetDepartmentDictionary;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
@@ -113,6 +116,33 @@ namespace DirectoryService.Presenters.Controllers
         {
             var query = new GetChildDepartmentsQuery(parentId, request);
             return await handler.Handle(query, cancellationToken);
+        }
+
+        [HttpGet("{departmentId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<DepartmentDetailDTO?>> GetPosition(
+            [FromRoute] Guid departmentId,
+            [FromServices] GetDepartmentDetailHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetDepartmentRequest(departmentId);
+            return await handler.Handle(query, cancellationToken);
+        }
+
+        [HttpPut("{departmentId:guid}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<Guid>> Update(
+            [FromRoute] Guid departmentId,
+            [FromBody] CreateDepartmentRequest request,
+            [FromServices] UpdateDepartmentHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new UpdateDepartmentCommand(departmentId, request);
+            return await handler.Handle(command, cancellationToken);
         }
 
         [HttpDelete("{departmentId:guid}")]
