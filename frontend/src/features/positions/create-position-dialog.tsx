@@ -24,7 +24,7 @@ import {
   createPositionSchema,
 } from "@/entities/positions/validations";
 import { useCreatePosition } from "./model/use-create-position";
-import DepartmentSelect from "../departments/department-select";
+import DepartmentSelect from "../departments/department-multi-select";
 
 type CreatePositionProps = {
   open: boolean;

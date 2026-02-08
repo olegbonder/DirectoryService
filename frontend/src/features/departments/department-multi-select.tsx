@@ -2,20 +2,19 @@ import * as React from "react";
 import { useDepartmentDictionary } from "./model/use-department-dictionary";
 import { MultiSelect } from "@/shared/components/ui/multi-select";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { DictionaryItemResponse } from "@/shared/api/types";
+import { DictionaryItemResponse, PAGE_SIZE } from "@/shared/api/types";
 
-const PAGE_SIZE = 3;
-type DepartmentProps = {
+type DepartmentMultiSelectProps = {
   selectedDepartmentIds?: string[];
   excludeDepartmentIds?: string[];
   onDepartmentChange: (departmentIds: string[]) => void;
 };
 
-export default function DepartmentSelect({
+export default function DepartmentMultiSelect({
   selectedDepartmentIds,
   excludeDepartmentIds,
   onDepartmentChange,
-}: DepartmentProps) {
+}: DepartmentMultiSelectProps) {
   const {
     departments: selectedDepartments,
     isPending: isSelectedPending,
@@ -26,6 +25,7 @@ export default function DepartmentSelect({
       selectedDepartmentIds && selectedDepartmentIds.length > 0
         ? selectedDepartmentIds
         : undefined,
+    showOnlyParents: false,
   });
 
   // Загружаем все департаменты постранично
@@ -39,6 +39,7 @@ export default function DepartmentSelect({
     fetchNextPage: allFetchNextPage,
   } = useDepartmentDictionary({
     pageSize: PAGE_SIZE,
+    showOnlyParents: false,
   });
 
   // Объединяем загруженные департаменты
@@ -69,7 +70,9 @@ export default function DepartmentSelect({
     // Фильтруем результат по excludeDepartmentIds
     let filteredResult = result;
     if (excludeDepartmentIds && excludeDepartmentIds.length > 0) {
-      filteredResult = result.filter((dept) => !excludeDepartmentIds.includes(dept.id));
+      filteredResult = result.filter(
+        (dept) => !excludeDepartmentIds.includes(dept.id),
+      );
     }
 
     return filteredResult;
@@ -85,8 +88,10 @@ export default function DepartmentSelect({
   // Фильтруем defaultValue, чтобы он содержал только те ID, которые представлены в options
   const filteredDefaultValues = React.useMemo(() => {
     if (!selectedDepartmentIds || !selectedDepartmentIds.length) return [];
-    const availableIds = new Set(multiSelectOptions.map(option => option.value));
-    return selectedDepartmentIds.filter(id => availableIds.has(id));
+    const availableIds = new Set(
+      multiSelectOptions.map((option) => option.value),
+    );
+    return selectedDepartmentIds.filter((id) => availableIds.has(id));
   }, [selectedDepartmentIds, multiSelectOptions]);
 
   // Определяем, показывать ли компонент

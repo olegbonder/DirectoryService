@@ -9,7 +9,7 @@ import {
 } from "./types";
 import { Envelope } from "@/shared/api/envelope";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { LocationsFilterState } from "@/features/locations/model/locations-filters-store";
+import { PositionsFilterState } from "@/features/positions/model/positions-filters-store";
 
 export const positionsApi = {
   getPositions: async (request: GetPositionsRequest) => {
@@ -75,7 +75,7 @@ export const positionsQueryOptions = {
     });
   },
 
-  getPositionsInfinityOptions: (filter: LocationsFilterState) => {
+  getPositionsInfinityOptions: (filter: PositionsFilterState) => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
         return positionsApi.getPositions({ ...filter, page: pageParam });

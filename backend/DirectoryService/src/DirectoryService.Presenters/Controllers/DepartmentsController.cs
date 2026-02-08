@@ -124,7 +124,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         public async Task<EndpointResult<GetChildDepartmentsResponse>> GetChildDepartments(
             [FromRoute] Guid parentId,
-            [FromQuery] GetChildDepartmentsRequest request,
+            [FromQuery] PaginationRequest request,
             [FromServices] GetChildDepartmentsHandler handler,
             CancellationToken cancellationToken)
         {

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { PAGE_SIZE } from "./use-positions-list";
+import { PAGE_SIZE } from "@/shared/api/types";
 
 export type PositionsFilterState = {
   departmentIds: string[];

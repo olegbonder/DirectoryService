@@ -1,4 +1,4 @@
-import { DictionaryItemResponse } from "@/shared/api/types";
+import { DictionaryItemResponse, PaginationRequest } from "@/shared/api/types";
 
 export type Position = {
   id: string;
@@ -17,13 +17,11 @@ export type PositionDetail = {
   createdAt: string;
 };
 
-export type GetPositionsRequest = {
+export interface GetPositionsRequest extends PaginationRequest {
   departmentIds?: string[];
   search?: string;
   isActive?: boolean;
-  page: number;
-  pageSize: number;
-};
+}
 
 export type CreatePositionRequest = {
   name: string;

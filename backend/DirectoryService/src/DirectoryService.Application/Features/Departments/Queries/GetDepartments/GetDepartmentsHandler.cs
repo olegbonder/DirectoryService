@@ -3,10 +3,8 @@ using System.Text.Json;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetDepartments;
-using DirectoryService.Contracts.Positions.GetPositions;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -123,6 +121,7 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                     Name = d.Name.Value,
                     Identifier = d.Identifier.Value,
                     ParentId = d.ParentId == null ? null : d.ParentId.Value,
+                    Path = d.Path.Value,
                     IsActive = d.IsActive,
                     CreatedAt = d.CreatedAt
                 }).ToListAsync(cancellationToken);

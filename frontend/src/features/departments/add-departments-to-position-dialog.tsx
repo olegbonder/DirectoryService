@@ -22,7 +22,7 @@ import {
   AddDepartmentsToPositionData,
   addDepartmentsToPositionSchema,
 } from "@/entities/departments/validations";
-import DepartmentSelect from "./department-select";
+import DepartmentSelect from "./department-multi-select";
 
 type AddDepartmentsToPositionProps = {
   positionId: string;

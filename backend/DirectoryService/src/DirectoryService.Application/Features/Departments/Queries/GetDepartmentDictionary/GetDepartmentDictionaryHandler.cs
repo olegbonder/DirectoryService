@@ -78,6 +78,11 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                     query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
                 }
 
+                if (request.ShowOnlyParents)
+                {
+                    query = query.Where(d => d.Children.Any());
+                }
+
                 totalCount = await query.CountAsync(cancellationToken);
 
                 query = query.Skip((request.Page - 1) * request.PageSize)

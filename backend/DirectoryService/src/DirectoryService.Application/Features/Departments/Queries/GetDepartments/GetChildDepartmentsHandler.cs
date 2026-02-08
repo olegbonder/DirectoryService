@@ -66,8 +66,8 @@ public class GetChildDepartmentsHandler : IQueryHandler<GetChildDepartmentsRespo
             return new GetChildDepartmentsResponse(departments, totalCount);
         }
 
-        var pagination = query.Request.Pagination;
-        int offset = (pagination.Page - 1) * pagination.PageSize;
+        var request = query.Request;
+        int offset = (request.Page - 1) * request.PageSize;
         string sql =
             """
             SELECT d.id, d.parent_id, d.name,
@@ -89,8 +89,8 @@ public class GetChildDepartmentsHandler : IQueryHandler<GetChildDepartmentsRespo
                 sql,
                 param: new
                 {
-                    offset = offset,
-                    limit = pagination.PageSize,
+                    offset,
+                    limit = request.PageSize,
                     parentId
                 })).ToList();
         }

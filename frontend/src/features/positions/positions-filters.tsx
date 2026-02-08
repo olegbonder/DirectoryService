@@ -8,8 +8,8 @@ import {
   setFilterPositionsSearch,
   useGetPositionsFilter,
 } from "./model/positions-filters-store";
-import DepartmentSelect from "../departments/department-select";
 import StatusSelect from "../status/status-select";
+import DepartmentMultiSelect from "../departments/department-multi-select";
 
 export default function PositionFilters() {
   const { search, departmentIds, isActive } = useGetPositionsFilter();
@@ -25,7 +25,7 @@ export default function PositionFilters() {
           onChange={(e) => setFilterPositionsSearch(e.target.value)}
         />
       </div>
-      <DepartmentSelect
+      <DepartmentMultiSelect
         selectedDepartmentIds={departmentIds}
         onDepartmentChange={setFilterPositionsDepartmentIds}
       />

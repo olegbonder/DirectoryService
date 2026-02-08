@@ -62,8 +62,7 @@ public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsRespons
         var dbConnection = await _factory.CreateConnectionAsync(cancellationToken);
         List<RootDepartmentDTO> departments = [];
         int totalCount = 0;
-        var pagination = query.Pagination;
-        int offset = (pagination.Page - 1) * pagination.PageSize;
+        int offset = (query.Page - 1) * query.PageSize;
         string sql =
             """
             WITH roots AS (SELECT d.id,
@@ -117,7 +116,7 @@ public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsRespons
                 param: new
                 {
                     root_offset = offset,
-                    root_limit = pagination.PageSize,
+                    root_limit = query.PageSize,
                     child_limit = query.Prefetch
                 },
                 map: (parent, child) =>
