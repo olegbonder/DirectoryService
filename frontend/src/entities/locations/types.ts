@@ -22,6 +22,10 @@ export interface GetLocationsRequest extends PaginationRequest {
   isActive?: boolean;
 }
 
+export interface GetLocationDictionaryRequest extends PaginationRequest {
+  search?: string;
+}
+
 export type CreateLocationRequest = {
   name: string;
   address: Address;
@@ -33,4 +37,10 @@ export type UpdateLocationRequest = {
   name: string;
   address: Address;
   timeZone: string;
+};
+
+export type LocationDictionaryState = {
+  search?: string;
+  pageSize: number;
+  locationIds?: string[];
 };

@@ -3,7 +3,6 @@
 import { Input } from "@/shared/components/ui/input";
 import { Search } from "lucide-react";
 import StatusSelect from "../status/status-select";
-import DepartmentMultiSelect from "./department-multi-select";
 import {
   setFilterDepartmentsIdentifier,
   setFilterDepartmentsIsActive,
@@ -13,6 +12,7 @@ import {
   useGetDepartmentsFilter,
 } from "./model/departments-filters-store";
 import ParentDepartmentSelect from "./parent-department-select";
+import LocationDictionary from "../locations/location-dictionary";
 
 export default function DepartmentFilters() {
   const { name, identifier, parentId, locationIds, isActive } =
@@ -42,9 +42,9 @@ export default function DepartmentFilters() {
         parentId={parentId}
         setParentId={setFilterDepartmentsParentId}
       />
-      <DepartmentMultiSelect
-        selectedDepartmentIds={locationIds}
-        onDepartmentChange={setFilterDepartmentsLocationIds}
+      <LocationDictionary
+        selectedLocationIds={locationIds}
+        onLocationChange={setFilterDepartmentsLocationIds}
       />
 
       <StatusSelect

@@ -4,17 +4,17 @@ import { MultiSelect } from "@/shared/components/ui/multi-select";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { DictionaryItemResponse, PAGE_SIZE } from "@/shared/api/types";
 
-type DepartmentMultiSelectProps = {
+type DepartmentDictionaryProps = {
   selectedDepartmentIds?: string[];
   excludeDepartmentIds?: string[];
   onDepartmentChange: (departmentIds: string[]) => void;
 };
 
-export default function DepartmentMultiSelect({
+export default function DepartmentDictionary({
   selectedDepartmentIds,
   excludeDepartmentIds,
   onDepartmentChange,
-}: DepartmentMultiSelectProps) {
+}: DepartmentDictionaryProps) {
   const {
     departments: selectedDepartments,
     isPending: isSelectedPending,

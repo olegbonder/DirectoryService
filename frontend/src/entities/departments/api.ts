@@ -18,7 +18,7 @@ import {
 import { DepartmentsFilterState } from "@/features/departments/model/departments-filters-store";
 
 export const departmentsApi = {
-  getDictionary: async (request: GetDepartmentDictionaryRequest) => {
+  getDepartmentDictionary: async (request: GetDepartmentDictionaryRequest) => {
     const response = await apiClient.get<
       Envelope<PaginationResponse<DictionaryItemResponse>>
     >("/departments/dictionary", {
@@ -52,40 +52,15 @@ export const departmentsApi = {
   },
 
   getDepartments: async (request: GetDepartmentsRequest) => {
-    // Создаем копию параметров
-    const params = { ...request };
-
-    // Если есть параметр сортировки, преобразуем его в нужный формат
-    if (params.orderColumnn) {
-      const transformedParams = { ...params };
-      transformedParams["OrderColumn.Field"] =
-        params.orderColumnn.field.charAt(0).toUpperCase() +
-        params.orderColumnn.field.slice(1);
-      transformedParams["OrderColumn.Direction"] =
-        params.orderColumnn.direction.charAt(0).toUpperCase() +
-        params.orderColumnn.direction.slice(1);
-      delete transformedParams.orderColumnn;
-
-      const response = await apiClient.get<
-        Envelope<PaginationResponse<Department>>
-      >("/departments", {
-        params: transformedParams,
-        paramsSerializer: {
-          indexes: null,
-        },
-      });
-      return response.data.result;
-    } else {
-      const response = await apiClient.get<
-        Envelope<PaginationResponse<Department>>
-      >("/departments", {
-        params: request,
-        paramsSerializer: {
-          indexes: null,
-        },
-      });
-      return response.data.result;
-    }
+    const response = await apiClient.get<
+      Envelope<PaginationResponse<Department>>
+    >("/departments", {
+      params: request,
+      paramsSerializer: {
+        indexes: null,
+      },
+    });
+    return response.data.result;
   },
 
   getDepartmentDetails: async (departmentId: string) => {
@@ -147,7 +122,7 @@ export const departmentsQueryOptions = {
   ) => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
-        return departmentsApi.getDictionary({
+        return departmentsApi.getDepartmentDictionary({
           ...filter,
           page: pageParam,
         });

@@ -16,7 +16,7 @@ import { Department } from "@/entities/departments/types";
 
 export default function DepartmentList() {
   const globalSearch = useGetGlobalFilter();
-  const { name, identifier, parentId, locationIds, isActive, orderColumnn } =
+  const { name, identifier, parentId, locationIds, isActive, orderBy, orderDirection } =
     useGetDepartmentsFilter();
 
   const {
@@ -33,7 +33,8 @@ export default function DepartmentList() {
     locationIds,
     isActive,
     pageSize: PAGE_SIZE,
-    orderColumnn,
+    orderBy,
+    orderDirection,
   });
 
   const [createOpen, setCreateOpen] = useState(false);

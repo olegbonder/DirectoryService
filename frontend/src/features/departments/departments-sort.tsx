@@ -9,7 +9,11 @@ import {
   SelectItem,
 } from "@/shared/components/ui/select";
 import { DepartmentOrderColumnn } from "@/entities/departments/types";
-import { setDepartmentsOrder, useGetDepartmentsFilter } from "./model/departments-filters-store";
+import {
+  setDepartmentsOrderBy,
+  setDepartmentsOrderDirection,
+  useGetDepartmentsFilter,
+} from "./model/departments-filters-store";
 
 type orderColumnOptions = {
   value: DepartmentOrderColumnn;
@@ -23,23 +27,26 @@ const orderColumns: orderColumnOptions[] = [
 ];
 
 export default function DepartmentSort() {
-  const { orderColumnn } = useGetDepartmentsFilter();
+  const { orderBy, orderDirection } = useGetDepartmentsFilter();
+  const handleOrderByChange = (value: DepartmentOrderColumnn | "none") => {
+    if (value === "none") {
+      setDepartmentsOrderBy(undefined);
+    } else {
+      setDepartmentsOrderBy(value);
+    }
+  };
+
+  // Обеспечиваем, что значение всегда строка, чтобы избежать проблем с контролируемым компонентом
+  const orderByValue = orderBy ?? "";
 
   return (
     <div className="flex items-center gap-4">
-      <Select
-        onValueChange={(value) =>
-          setDepartmentsOrder({
-            field: value as DepartmentOrderColumnn,
-            direction: orderColumnn?.direction ?? "asc",
-          })
-        }
-        value={orderColumnn?.field}
-      >
+      <Select onValueChange={handleOrderByChange} value={orderByValue}>
         <SelectTrigger>
-          <SelectValue placeholder="Поле" />
+          <SelectValue placeholder="Выберите столбец" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="none">Без сортировки</SelectItem>
           {orderColumns.map((column) => (
             <SelectItem key={column.value} value={column.value}>
               {column.label}
@@ -48,13 +55,8 @@ export default function DepartmentSort() {
         </SelectContent>
       </Select>
       <SortSelect
-        order={orderColumnn?.direction ?? "asc"}
-        setOrder={(value) =>
-          setDepartmentsOrder({
-            field: orderColumnn?.field ?? "name",
-            direction: value,
-          })
-        }
+        order={orderDirection ?? "asc"}
+        setOrder={(value) => setDepartmentsOrderDirection(value)}
       />
     </div>
   );

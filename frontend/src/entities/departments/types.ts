@@ -27,20 +27,17 @@ export type DepartmentDetail = {
   createdAt: Date;
 };
 
+export type DepartmentOrderColumnn = "name" | "path" | "createdAt";
+
 export interface GetDepartmentsRequest extends PaginationRequest {
   name?: string;
   identifier?: string;
   parentId?: string;
   locationIds?: string[];
   isActive?: boolean;
-  orderColumnn?: OrderColumnn;
+  orderBy?: DepartmentOrderColumnn;
+  orderDirection?: OrderDirection;
 }
-
-export type DepartmentOrderColumnn = "name" | "path" | "createdAt";
-export type OrderColumnn = {
-  field: DepartmentOrderColumnn;
-  direction: OrderDirection;
-};
 
 export interface GetRootDepartmentsRequest extends PaginationRequest {
   prefetch?: number;
@@ -70,13 +67,6 @@ export interface GetDepartmentDictionaryRequest extends PaginationRequest {
   showOnlyParents: boolean;
 }
 
-export type DepartmentDictionaryState = {
-  search?: string;
-  departmentIds?: string[];
-  pageSize: number;
-  showOnlyParents: boolean;
-};
-
 export type AddDepartmentsToPositionRequest = {
   positionId: string;
   departmentIds: string[];
@@ -85,4 +75,11 @@ export type AddDepartmentsToPositionRequest = {
 export type DeletePositionDepartmentRequest = {
   positionId: string;
   departmentId: string;
+};
+
+export type DepartmentDictionaryState = {
+  search?: string;
+  departmentIds?: string[];
+  pageSize: number;
+  showOnlyParents: boolean;
 };

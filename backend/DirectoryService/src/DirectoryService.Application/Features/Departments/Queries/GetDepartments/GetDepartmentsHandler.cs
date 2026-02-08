@@ -99,16 +99,15 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                 query = query.Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize);
 
-                var orderColumn = request.OrderColumn;
-                if (orderColumn != null)
+                if (request.OrderBy.HasValue && request.OrderDirection.HasValue)
                 {
-                    Expression<Func<Department, object>> expression = orderColumn.Field switch
+                    Expression<Func<Department, object>> expression = request.OrderBy.Value switch
                     {
-                        OrderField.Name => d => d.Name.Value,
-                        OrderField.Path => d => d.Path.Value,
+                        DepartmentOrderField.Name => d => d.Name.Value,
+                        DepartmentOrderField.Path => d => d.Path.Value,
                         _ => d => d.CreatedAt,
                     };
-                    query = orderColumn.Direction == OrderDirection.Desc
+                    query = request.OrderDirection.Value == OrderDirection.Desc
                         ? query.OrderByDescending(expression)
                         : query.OrderBy(expression);
                 }

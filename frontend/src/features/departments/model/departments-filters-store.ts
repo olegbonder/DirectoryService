@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { PAGE_SIZE } from "@/shared/api/types";
-import { OrderColumnn } from "@/entities/departments/types";
+import { OrderDirection, PAGE_SIZE } from "@/shared/api/types";
+import { DepartmentOrderColumnn } from "@/entities/departments/types";
 
 export type DepartmentsFilterState = {
   name?: string;
@@ -11,7 +11,8 @@ export type DepartmentsFilterState = {
   locationIds?: string[];
   isActive?: boolean;
   pageSize: number;
-  orderColumnn?: OrderColumnn;
+  orderBy?: DepartmentOrderColumnn;
+  orderDirection?: OrderDirection;
 };
 
 type Actions = {
@@ -20,8 +21,9 @@ type Actions = {
   setParentId: (parentId: DepartmentsFilterState["parentId"]) => void;
   setLocationIds: (ids: DepartmentsFilterState["locationIds"]) => void;
   setIsActive: (isActive: DepartmentsFilterState["isActive"]) => void;
-  setOrderColumnn: (
-    orderColumnn: DepartmentsFilterState["orderColumnn"],
+  setOrderBy: (orderBy: DepartmentsFilterState["orderBy"]) => void;
+  setOrderDirection: (
+    orderBy: DepartmentsFilterState["orderDirection"],
   ) => void;
 };
 
@@ -34,7 +36,8 @@ const initialState: DepartmentsFilterState = {
   locationIds: [],
   isActive: undefined,
   pageSize: PAGE_SIZE,
-  orderColumnn: undefined,
+  orderBy: undefined,
+  orderDirection: undefined,
 };
 
 const useDepartmentsFilterStore = create<DepartmentsFilterStore>()(
@@ -50,8 +53,11 @@ const useDepartmentsFilterStore = create<DepartmentsFilterStore>()(
         set(() => ({ locationIds })),
       setIsActive: (isActive: DepartmentsFilterState["isActive"]) =>
         set({ isActive }),
-      setOrderColumnn: (orderColumnn: DepartmentsFilterState["orderColumnn"]) =>
-        set(() => ({ orderColumnn })),
+      setOrderBy: (orderBy: DepartmentsFilterState["orderBy"]) =>
+        set({ orderBy }),
+      setOrderDirection: (
+        orderDirection: DepartmentsFilterState["orderDirection"],
+      ) => set({ orderDirection }),
     }),
     {
       name: "ds-departments-filters",
@@ -69,7 +75,8 @@ export const useGetDepartmentsFilter = () => {
       locationIds: state.locationIds,
       isActive: state.isActive,
       pageSize: state.pageSize,
-      orderColumnn: state.orderColumnn,
+      orderBy: state.orderBy,
+      orderDirection: state.orderDirection,
     })),
   );
 };
@@ -104,8 +111,14 @@ export const setFilterDepartmentsIsActive = (
   useDepartmentsFilterStore.getState().setIsActive(isActive);
 };
 
-export const setDepartmentsOrder = (
-  orderColumnn: DepartmentsFilterState["orderColumnn"],
+export const setDepartmentsOrderBy = (
+  orderBy: DepartmentsFilterState["orderBy"],
 ) => {
-  useDepartmentsFilterStore.getState().setOrderColumnn(orderColumnn);
+  useDepartmentsFilterStore.getState().setOrderBy(orderBy);
+};
+
+export const setDepartmentsOrderDirection = (
+  orderDirection: DepartmentsFilterState["orderDirection"],
+) => {
+  useDepartmentsFilterStore.getState().setOrderDirection(orderDirection);
 };

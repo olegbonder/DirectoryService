@@ -11,7 +11,7 @@ import {
 import { Search } from "lucide-react";
 import StatusSelect from "../status/status-select";
 import SortSelect from "../sort/sort-select";
-import DepartmentMultiSelect from "../departments/department-multi-select";
+import DepartmentDictionary from "../departments/department-dictionary";
 
 export default function LocationFilters() {
   const { search, departmentIds, isActive, order } = useGetLocationsFilter();
@@ -27,7 +27,7 @@ export default function LocationFilters() {
           onChange={(e) => setFilterLocationsSearch(e.target.value)}
         />
       </div>
-      <DepartmentMultiSelect
+      <DepartmentDictionary
         selectedDepartmentIds={departmentIds}
         onDepartmentChange={setFilterLocationsDepartmentIds}
       />

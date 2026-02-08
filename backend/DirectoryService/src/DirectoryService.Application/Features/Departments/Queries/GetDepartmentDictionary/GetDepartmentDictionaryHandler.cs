@@ -68,8 +68,6 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                 {
                     var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
                     query = query.Where(d => departmentIds.Contains(d.Id));
-
-                    totalCount = await query.CountAsync(cancellationToken);
                 }
 
                 query = query.Where(d => d.IsActive);

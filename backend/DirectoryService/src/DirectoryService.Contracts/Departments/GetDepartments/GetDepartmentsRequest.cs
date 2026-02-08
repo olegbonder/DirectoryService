@@ -14,17 +14,13 @@ namespace DirectoryService.Contracts.Departments.GetDepartments
 
         public bool? IsActive { get; init; }
 
-        public OrderColumn? OrderColumn { get; init; }
-    }
+        public DepartmentOrderField? OrderBy { get; init; }
 
-    public record OrderColumn
-    {
-        public OrderField Field { get; init; }
-        public OrderDirection Direction { get; init; }
+        public OrderDirection? OrderDirection { get; init; }
     }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum OrderField
+    public enum DepartmentOrderField
     {
         Name,
         Path,
