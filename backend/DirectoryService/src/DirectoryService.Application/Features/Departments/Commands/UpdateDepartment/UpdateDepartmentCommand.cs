@@ -1,7 +1,7 @@
 ﻿using DirectoryService.Application.Abstractions;
-using DirectoryService.Contracts.Departments.CreateDepartment;
+using DirectoryService.Contracts.Departments.UpdateDepartment;
 
 namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepartment
 {
-    public record UpdateDepartmentCommand(Guid Id, CreateDepartmentRequest Request) : ICommand;
+    public record UpdateDepartmentCommand(Guid Id, UpdateDepartmentRequest Request) : ICommand;
 }

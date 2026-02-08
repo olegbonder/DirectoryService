@@ -1,13 +1,6 @@
-import {
-  SelectContent,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-} from "@/shared/components/ui/select";
-import { Spinner } from "@/shared/components/ui/spinner";
 import { useDepartmentDictionary } from "./model/use-department-dictionary";
 import { PAGE_SIZE } from "@/shared/api/types";
+import DepartmentSelect from "./department-select";
 
 type ParentDepartmentSelectProps = {
   parentId: string | undefined;
@@ -17,36 +10,30 @@ export default function ParentDepartmentSelect({
   parentId,
   setParentId,
 }: ParentDepartmentSelectProps) {
-  const { departments, isPending, isError, error } = useDepartmentDictionary({
+  const {
+    departments,
+    isPending,
+    isError,
+    error,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useDepartmentDictionary({
     pageSize: PAGE_SIZE,
     showOnlyParents: true,
   });
+
   return (
-    <>
-      {isPending && <Spinner />}
-      {!isPending && isError && (
-        <p className="text-red-500">
-          Ошибка загрузки подразделений: {error?.message}
-        </p>
-      )}
-      <Select
-        onValueChange={(value) =>
-          setParentId(value === "none" ? undefined : value)
-        }
-        value={parentId}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Выберите родительское подразделение" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="none">Без родительского подразделения</SelectItem>
-          {departments?.map((department) => (
-            <SelectItem key={department.id} value={department.id}>
-              {department.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </>
+    <DepartmentSelect
+      departments={departments ?? []}
+      selectedId={parentId}
+      onChange={setParentId}
+      isPending={isPending}
+      isError={isError}
+      error={error}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      hasNextPage={hasNextPage}
+    />
   );
 }

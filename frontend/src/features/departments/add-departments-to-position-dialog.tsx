@@ -22,7 +22,7 @@ import {
   AddDepartmentsToPositionData,
   addDepartmentsToPositionSchema,
 } from "@/entities/departments/validations";
-import DepartmentSelect from "./department-dictionary";
+import DepartmentDictionary from "./department-dictionary";
 
 type AddDepartmentsToPositionProps = {
   positionId: string;
@@ -89,7 +89,7 @@ export default function AddDepartmentsToPositionDialog({
                   name="departmentIds"
                   control={control}
                   render={({ field }) => (
-                    <DepartmentSelect
+                    <DepartmentDictionary
                       excludeDepartmentIds={positionDepartmentIds}
                       onDepartmentChange={field.onChange}
                     />

@@ -2,7 +2,6 @@
 
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useState } from "react";
-import { Location } from "@/entities/locations/types";
 import { EnvelopeError } from "@/shared/api/errors";
 import { Button } from "@/shared/components/ui/button";
 import { useGetGlobalFilter } from "@/shared/stores/global-search-store";
@@ -13,11 +12,20 @@ import DepartmentFilters from "./departments-filters";
 import DepartmentSort from "./departments-sort";
 import DepartmentCard from "./department-card";
 import { Department } from "@/entities/departments/types";
+import DeleteDepartmentAlertDialog from "./delete-department-alert";
+import CreateDepartmentDialog from "./create-department-dialog";
 
 export default function DepartmentList() {
   const globalSearch = useGetGlobalFilter();
-  const { name, identifier, parentId, locationIds, isActive, orderBy, orderDirection } =
-    useGetDepartmentsFilter();
+  const {
+    name,
+    identifier,
+    parentId,
+    locationIds,
+    isActive,
+    orderBy,
+    orderDirection,
+  } = useGetDepartmentsFilter();
 
   const {
     departments,
@@ -87,7 +95,9 @@ export default function DepartmentList() {
           </div>
           <div className="p-4 bg-white rounded-lg shadow-sm border border-slate-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-700">Сортировка</h3>
+              <h3 className="text-lg font-semibold text-slate-700">
+                Сортировка
+              </h3>
               <div className="flex items-center gap-4">
                 <DepartmentSort />
               </div>
@@ -129,6 +139,27 @@ export default function DepartmentList() {
               }}
             />
           ))}
+        </div>
+      )}
+      <CreateDepartmentDialog open={createOpen} onOpenChange={setCreateOpen} />
+      {selectedDepartment && (
+        <div>
+          {/*          <UpdateLocationDialog
+            key={selectedLocation.id}
+            location={selectedLocation}
+            open={selectedLocation !== undefined && updateOpen}
+            onOpenChange={setUpdateOpen}
+          /> */}
+
+          <DeleteDepartmentAlertDialog
+            department={selectedDepartment}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            onConfirm={() => {
+              setDeleteOpen(false);
+              setSelectedDepartment(undefined);
+            }}
+          />
         </div>
       )}
 

@@ -49,6 +49,8 @@ export default function LocationDictionary({
           allLocMap.set(location.id, true);
         }
       });
+
+      console.log(selectedLocations);
     }
 
     // Затем добавляем остальные департаменты
@@ -60,7 +62,6 @@ export default function LocationDictionary({
         }
       });
     }
-
     return result;
   }, [selectedLocations, allLocations]);
 

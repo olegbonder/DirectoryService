@@ -59,6 +59,10 @@ export type UpdateDepartmentRequest = {
   name: string;
   identifier: string;
   parentId?: string;
+};
+
+export type UpdateDepartmentLocationsRequest = {
+  departmentId: string;
   locationIds: string[];
 };
 

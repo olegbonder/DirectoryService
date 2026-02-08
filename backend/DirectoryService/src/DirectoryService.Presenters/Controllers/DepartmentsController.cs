@@ -16,6 +16,7 @@ using DirectoryService.Contracts.Departments.GetDepartments;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.Contracts.Departments.MoveDepartment;
+using DirectoryService.Contracts.Departments.UpdateDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
@@ -151,7 +152,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         public async Task<EndpointResult<Guid>> Update(
             [FromRoute] Guid departmentId,
-            [FromBody] CreateDepartmentRequest request,
+            [FromBody] UpdateDepartmentRequest request,
             [FromServices] UpdateDepartmentHandler handler,
             CancellationToken cancellationToken)
         {

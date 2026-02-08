@@ -67,7 +67,7 @@ export default function CreateLocationDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
+            <div className="p-2 rounded-lg bg-linear-to-br from-emerald-500 to-emerald-600 text-white">
               <MapPin className="h-5 w-5" />
             </div>
             <DialogTitle>Создать локацию</DialogTitle>
@@ -89,7 +89,7 @@ export default function CreateLocationDialog({
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+              className="bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
             >
               {isPending ? "Создание..." : "Создать локацию"}
             </Button>

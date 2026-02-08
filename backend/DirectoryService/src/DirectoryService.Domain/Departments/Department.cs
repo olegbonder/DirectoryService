@@ -111,14 +111,13 @@ namespace DirectoryService.Domain.Departments
             Path = DepartmentPath.CreateForSoftDelete(Identifier);
         }
 
-        public void Update(DepartmentId? parentDepartmentId, DepartmentName deptName, DepartmentIdentifier deptIdentifier, DepartmentPath deptPath, int depth, List<DepartmentLocation> locationDepartments)
+        public void Update(DepartmentId? parentDepartmentId, DepartmentName deptName, DepartmentIdentifier deptIdentifier, DepartmentPath deptPath, int depth)
         {
             ParentId = parentDepartmentId;
             Name = deptName;
             Identifier = deptIdentifier;
             Path = deptPath;
             Depth = depth;
-            _locations = locationDepartments;
             UpdatedAt = DateTime.UtcNow;
         }
     }

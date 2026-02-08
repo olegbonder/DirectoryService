@@ -1,32 +1,32 @@
-import { positionsApi, positionsQueryOptions } from "@/entities/positions/api";
+import { departmentsApi, departmentsQueryOptions } from "@/entities/departments/api";
 import { EnvelopeError } from "@/shared/api/errors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useUpdatePosition() {
+export function useUpdateDepartment() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: positionsApi.updatePosition,
+    mutationFn: departmentsApi.updateDepartment,
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: [positionsQueryOptions.baseKey],
+        queryKey: [departmentsQueryOptions.baseKey],
       });
     },
     onError: (error) => {
       if (error instanceof EnvelopeError) {
         toast.error(error.message);
       } else {
-        toast.error("Ошибка при обновлении позиции");
+        toast.error("Ошибка при обновлении подразделения");
       }
     },
     onSuccess: () => {
-      toast.success("Позиция обновлена");
+      toast.success("Подразделение обновлено");
     },
   });
 
   return {
-    updatePosition: mutation.mutate,
+    updateDepartment: mutation.mutate,
     isError: mutation.isError,
     error: mutation.error instanceof EnvelopeError ? mutation.error : undefined,
     isPending: mutation.isPending,

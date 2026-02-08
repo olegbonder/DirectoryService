@@ -14,6 +14,7 @@ import {
   GetRootDepartmentsRequest,
   GetChildDepartmentsRequest,
   UpdateDepartmentRequest,
+  UpdateDepartmentLocationsRequest,
 } from "./types";
 import { DepartmentsFilterState } from "@/features/departments/model/departments-filters-store";
 
@@ -80,7 +81,7 @@ export const departmentsApi = {
   },
 
   updateDepartment: async (request: UpdateDepartmentRequest) => {
-    const response = await apiClient.patch<Envelope<string>>(
+    const response = await apiClient.put<Envelope<string>>(
       `/departments/${request.id}`,
       request,
     );
@@ -91,6 +92,17 @@ export const departmentsApi = {
   deleteDepartment: async (departmentId: string) => {
     const response = await apiClient.delete<Envelope<string>>(
       `/departments/${departmentId}`,
+    );
+
+    return response.data.result;
+  },
+
+  updateDepartmentLocations: async (
+    request: UpdateDepartmentLocationsRequest,
+  ) => {
+    const response = await apiClient.put<Envelope<string>>(
+      `/departments/${request.departmentId}/locations`,
+      request,
     );
 
     return response.data.result;
@@ -127,7 +139,7 @@ export const departmentsQueryOptions = {
           page: pageParam,
         });
       },
-      queryKey: [departmentsQueryOptions.baseKey, filter],
+      queryKey: ["departments-dictionary", filter],
       initialPageParam: 1,
       getNextPageParam: (response) => {
         return !response || response.page >= response.totalPages

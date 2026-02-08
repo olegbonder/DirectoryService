@@ -20,13 +20,6 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
                 .WithError(GeneralErrors.RequestIsNull());
             RuleFor(d => d.Request.Name).MustBeValueObject(DepartmentName.Create);
             RuleFor(d => d.Request.Identifier).MustBeValueObject(DepartmentIdentifier.Create);
-            RuleFor(d => d.Request.LocationIds)
-                .NotNull()
-                .WithError(DepartmentErrors.LocationIdsNotBeNull())
-                .NotEmpty()
-                .WithError(DepartmentErrors.LocationIdsNotBeEmpty())
-                .Must(d => d != null && d.Distinct().Count() == d.Count())
-                .WithError(DepartmentErrors.LocationIdsMustBeUnique());
         }
     }
 }

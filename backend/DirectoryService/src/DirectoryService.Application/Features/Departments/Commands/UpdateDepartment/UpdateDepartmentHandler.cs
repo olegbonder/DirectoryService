@@ -1,12 +1,8 @@
 ﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
-using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -91,18 +87,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
 
             var deptPath = DepartmentPath.Create(deptIdentifier, parentDepartment).Value;
 
-            var locationIds = request.LocationIds.Select(LocationId.Current).ToList();
-            var getLocationsRes = await _locationsRepository.GetLocationsByIds(locationIds, cancellationToken);
-            if (getLocationsRes.IsFailure)
-            {
-                transactionScope.RollBack();
-                return getLocationsRes.Errors;
-            }
-
-            var locations = getLocationsRes.Value;
-            var locationDepartments = locations.Select(l => new DepartmentLocation(existingDepartment.Id, l.Id)).ToList();
-
-            existingDepartment.Update(parentDepartmentId, deptName, deptIdentifier, deptPath, depth, locationDepartments);
+            existingDepartment.Update(parentDepartmentId, deptName, deptIdentifier, deptPath, depth);
 
             try
             {
