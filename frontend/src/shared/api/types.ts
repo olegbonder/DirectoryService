@@ -21,3 +21,5 @@ export interface PaginationRequest {
 }
 
 export const PAGE_SIZE = 4;
+
+export const PREFETCH = 3;

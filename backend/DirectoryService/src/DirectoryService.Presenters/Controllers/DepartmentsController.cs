@@ -101,7 +101,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("roots")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
-        public async Task<EndpointResult<GetRootDepartmentsResponse>> GetRootDepartments(
+        public async Task<EndpointResult<PaginationResponse<RootDepartmentDTO>>> GetRootDepartments(
             [FromQuery] GetRootDepartmentsRequest request,
             [FromServices] GetRootDepartmentsHandler handler,
             CancellationToken cancellationToken)
@@ -123,7 +123,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("{parentId:guid}/children")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
-        public async Task<EndpointResult<GetChildDepartmentsResponse>> GetChildDepartments(
+        public async Task<EndpointResult<PaginationResponse<ChildDepartmentDTO>>> GetChildDepartments(
             [FromRoute] Guid parentId,
             [FromQuery] PaginationRequest request,
             [FromServices] GetChildDepartmentsHandler handler,

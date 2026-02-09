@@ -6,12 +6,13 @@ using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.Caching;
 using Shared.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 
-public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsResponse, GetRootDepartmentsRequest>
+public class GetRootDepartmentsHandler : IQueryHandler<PaginationResponse<RootDepartmentDTO>, GetRootDepartmentsRequest>
 {
     private readonly IDBConnectionFactory _factory;
     private readonly ICacheService _cache;
@@ -32,7 +33,7 @@ public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsRespons
         _logger = logger;
     }
 
-    public async Task<Result<GetRootDepartmentsResponse>> Handle(
+    public async Task<Result<PaginationResponse<RootDepartmentDTO>>> Handle(
         GetRootDepartmentsRequest query,
         CancellationToken cancellationToken)
     {
@@ -55,13 +56,14 @@ public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsRespons
         return cachedDepartments!;
     }
 
-    private async Task<GetRootDepartmentsResponse> GetRootDepartments(
+    private async Task<PaginationResponse<RootDepartmentDTO>> GetRootDepartments(
         GetRootDepartmentsRequest query,
         CancellationToken cancellationToken)
     {
         var dbConnection = await _factory.CreateConnectionAsync(cancellationToken);
         List<RootDepartmentDTO> departments = [];
         int totalCount = 0;
+        int totalPages = 0;
         int offset = (query.Page - 1) * query.PageSize;
         string sql =
             """
@@ -110,6 +112,7 @@ public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsRespons
             totalCount =
                 await dbConnection.ExecuteScalarAsync<int>(
                     "SELECT COUNT(*) FROM departments WHERE parent_id is null", cancellationToken);
+            totalPages = (int)Math.Ceiling((double)totalCount / query.PageSize);
 
             await dbConnection.QueryAsync<RootDepartmentDTO, ChildDepartmentDTO?, RootDepartmentDTO>(
                 sql,
@@ -149,6 +152,6 @@ public class GetRootDepartmentsHandler : IQueryHandler<GetRootDepartmentsRespons
             _logger.LogError(ex, $"Ошибка получения данных о подразделениях с запросом {query}");
         }
 
-        return new GetRootDepartmentsResponse(departments, totalCount);
+        return new PaginationResponse<RootDepartmentDTO>(departments, totalCount, query.Page, query.PageSize, totalPages);
     }
 }

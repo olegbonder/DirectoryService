@@ -14,8 +14,8 @@ import Link from "next/link";
 
 type DepartmentCardProps = {
   department: Department;
-  onEdit: (department: Department) => void;
-  onDelete: () => void;
+  onEdit?: (department: Department) => void;
+  onDelete?: () => void;
 };
 
 export default function DepartmentCard({
@@ -26,7 +26,9 @@ export default function DepartmentCard({
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onEdit(department);
+    if (onEdit) {
+      onEdit(department);
+    }
   };
 
   return (
@@ -85,27 +87,37 @@ export default function DepartmentCard({
             )}
 
             {/* Action buttons */}
-            {department.isActive && (
+            {department.isActive && (onEdit || onDelete) ? (
               <div className="flex gap-2 pt-2 justify-end flex-wrap">
-                <Button
-                  onClick={handleEdit}
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 px-3 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors font-medium"
-                >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Редактировать
-                </Button>
-                <Button
-                  onClick={onDelete}
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 px-3 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors font-medium"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Удалить
-                </Button>
+                {onEdit && (
+                  <Button
+                    onClick={handleEdit}
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-3 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors font-medium"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Редактировать
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-3 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors font-medium"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Удалить
+                  </Button>
+                )}
               </div>
+            ) : (
+              <div className="h-11" /> /* Заглушка для поддержания высоты */
             )}
           </div>
         </CardContent>

@@ -4,12 +4,13 @@ import { useState } from "react";
 import useDepartment from "./model/use-department";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowLeft, Pencil, MapPin, Briefcase } from "lucide-react";
+import { ArrowLeft, Pencil, MapPin, Briefcase, Building2 } from "lucide-react";
 import Link from "next/link";
 import UpdateDepartmentDialog from "@/features/departments/update-department-dialog";
 import ManageDepartmentLocationsDialog from "@/features/departments/manage-department-locations-dialog";
 import PositionCard from "@/features/positions/position-card";
 import DepartmentPath from "./department-path";
+import ChildDepartmentsList from "./child-departments-list";
 
 type DepartmentDetailProps = {
   id: string;
@@ -155,7 +156,7 @@ export default function DepartmentDetail({ id }: DepartmentDetailProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
               <MapPin className="h-5 w-5 text-green-600" />
-              Локации подразделения
+              Локации подразделения ({department.locations?.length})
             </h2>
             {department.isActive && (
               <Button
@@ -192,7 +193,7 @@ export default function DepartmentDetail({ id }: DepartmentDetailProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
               <Briefcase className="h-5 w-5 text-blue-600" />
-              Позиции подразделения
+              Позиции подразделения ({department.positions?.length})
             </h2>
           </div>
           {department.positions && department.positions.length > 0 ? (
@@ -213,6 +214,9 @@ export default function DepartmentDetail({ id }: DepartmentDetailProps) {
             </div>
           )}
         </div>
+
+        {/* Child departments list */}
+        <ChildDepartmentsList parentId={id} />
       </div>
 
       {department && (

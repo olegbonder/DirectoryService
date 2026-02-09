@@ -3,7 +3,6 @@
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useState } from "react";
 import { EnvelopeError } from "@/shared/api/errors";
-import { Button } from "@/shared/components/ui/button";
 import { useGetGlobalFilter } from "@/shared/stores/global-search-store";
 import { useGetDepartmentsFilter } from "./model/departments-filters-store";
 import { useDepartmentsList } from "./model/use-departments-list";
@@ -13,7 +12,6 @@ import DepartmentSort from "./departments-sort";
 import DepartmentCard from "./department-card";
 import { Department } from "@/entities/departments/types";
 import DeleteDepartmentAlertDialog from "./delete-department-alert";
-import CreateDepartmentDialog from "./create-department-dialog";
 
 export default function DepartmentList() {
   const globalSearch = useGetGlobalFilter();
@@ -45,8 +43,6 @@ export default function DepartmentList() {
     orderDirection,
   });
 
-  const [createOpen, setCreateOpen] = useState(false);
-  const [updateOpen, setUpdateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<
     Department | undefined
@@ -59,34 +55,13 @@ export default function DepartmentList() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-4xl font-bold bg-linear-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent mb-2">
-              Подразделения
-            </h1>
-            <p className="text-slate-600">
-              Управление подразделениями в организации
-            </p>
-          </div>
-          {!isError && (
-            <Button
-              onClick={() => setCreateOpen(true)}
-              className="bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 h-auto rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <span className="mr-2 text-lg">+</span>
-              Создать подразделение
-            </Button>
-          )}
+    <div className="container">
+      {isError && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-800">
+          <p className="font-semibold">Ошибка загрузки</p>
+          <p className="text-sm mt-1">{getError(error!)}</p>
         </div>
-        {isError && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-800">
-            <p className="font-semibold">Ошибка загрузки</p>
-            <p className="text-sm mt-1">{getError(error!)}</p>
-          </div>
-        )}
-      </div>
+      )}
 
       {!isError && (
         <div className="mb-6 space-y-4">
@@ -131,7 +106,6 @@ export default function DepartmentList() {
               department={department}
               onEdit={() => {
                 setSelectedDepartment(department);
-                setUpdateOpen(true);
               }}
               onDelete={() => {
                 setSelectedDepartment(department);
@@ -141,16 +115,8 @@ export default function DepartmentList() {
           ))}
         </div>
       )}
-      <CreateDepartmentDialog open={createOpen} onOpenChange={setCreateOpen} />
       {selectedDepartment && (
         <div>
-          {/*          <UpdateLocationDialog
-            key={selectedLocation.id}
-            location={selectedLocation}
-            open={selectedLocation !== undefined && updateOpen}
-            onOpenChange={setUpdateOpen}
-          /> */}
-
           <DeleteDepartmentAlertDialog
             department={selectedDepartment}
             open={deleteOpen}

@@ -27,6 +27,31 @@ export type DepartmentDetail = {
   createdAt: Date;
 };
 
+export type ChildDepartment = {
+  id: string;
+  parentId?: string;
+  name: string;
+  identifier: string;
+  path: string;
+  depth: number;
+  isActive: boolean;
+  createdAt: Date;
+  hasMoreChildren: boolean;
+};
+
+export type RootDepartment = {
+  id: string;
+  parentId?: string;
+  name: string;
+  identifier: string;
+  path: string;
+  depth: number;
+  isActive: boolean;
+  createdAt: Date;
+  children: ChildDepartment[];
+  hasMoreChildren: boolean;
+};
+
 export type DepartmentOrderColumnn = "name" | "path" | "createdAt";
 
 export interface GetDepartmentsRequest extends PaginationRequest {
