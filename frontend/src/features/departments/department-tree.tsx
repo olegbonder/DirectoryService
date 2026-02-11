@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDepartmentRoots } from "./model/use-department-roots";
-import { departmentsApi } from "@/entities/departments/api";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
@@ -17,112 +16,89 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
-import { useQueryClient } from "@tanstack/react-query";
-
-type TreeNode = {
-  id: string;
-  name: string;
-  depth: number;
-  path: string;
-  isActive: boolean;
-  hasMoreChildren: boolean;
-  children?: TreeNode[];
-  isExpanded?: boolean;
-  isLoading?: boolean;
-  page?: number;
-  hasMore?: boolean;
-};
+import { useExpandedNodes, type TreeNode } from "./model/use-expanded-nodes";
+import { useTreeData } from "./model/use-tree-data";
 
 export default function DepartmentTree() {
-  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>(
-    {},
-  );
-  const [loadedNodes, setLoadedNodes] = useState<Record<string, TreeNode[]>>(
-    {},
-  );
-  const [loadingNodes, setLoadingNodes] = useState<Set<string>>(new Set());
-  const [loadingChildrenNodes, setLoadingChildrenNodes] = useState<Set<string>>(
-    new Set(),
-  );
-  const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
-  const queryClient = useQueryClient();
+  const {
+    expandedNodes,
+    toggleNode: toggleNodeFromHook,
+    getExpandedNodeIds,
+    isNodeExpanded,
+  } = useExpandedNodes();
+
+  const {
+    loadedNodes,
+    loadChildren,
+    loadMoreChildren,
+    hasLoadedChildren,
+    isNodeLoading,
+    isChildrenLoading,
+  } = useTreeData();
 
   const { rootDepartments, isPending, error, isError } = useDepartmentRoots();
 
-  const loadChildren = useCallback(
-    async (parentId: string, page: number = 1) => {
-      if (loadingNodes.has(parentId)) return;
+  // Подгрузка детей для раскрытых узлов
+  useEffect(() => {
+    const loadExpandedNodesChildren = async () => {
+      if (!rootDepartments) return;
 
-      setLoadingNodes((prev) => new Set(prev).add(parentId));
-      setLoadingChildrenNodes((prev) => new Set(prev).add(parentId));
-
-      try {
-        const response = await queryClient.fetchQuery({
-          queryKey: ["department-children", parentId, page],
-          queryFn: () =>
-            departmentsApi.getChildDepartments({
-              parentId,
-              page,
-              pageSize: 10,
-            }),
-          staleTime: 5 * 60 * 1000,
-        });
-
-        if (response) {
-          setLoadedNodes((prev) => ({
-            ...prev,
-            [parentId]: [...(prev[parentId] || []), ...(response.items || [])],
-          }));
-
-          setCurrentPage((prev) => ({
-            ...prev,
-            [parentId]: page,
-          }));
+      // Загружаем детей для корневых раскрытых узлов
+      for (const dept of rootDepartments) {
+        if (isNodeExpanded(dept.id) && !loadedNodes[dept.id]) {
+          await loadChildren(dept.id, 1);
         }
-      } catch (err) {
-        console.error("Error loading children:", err);
-      } finally {
-        setLoadingNodes((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(parentId);
-          return newSet;
-        });
-        setLoadingChildrenNodes((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(parentId);
-          return newSet;
-        });
       }
-    },
-    [loadingNodes, queryClient],
-  );
+
+      // Получаем все раскрытые узлы
+      const expandedNodeIds = getExpandedNodeIds();
+
+      // Загружаем детей для вложенных раскрытых узлов
+      for (const nodeId of expandedNodeIds) {
+        if (!loadedNodes[nodeId]) {
+          // Проверяем, является ли этот узел дочерним для какого-либо уже загруженного узла
+          let isChildOfLoadedNode = false;
+
+          for (const parentId in loadedNodes) {
+            if (loadedNodes[parentId]?.some((child) => child.id === nodeId)) {
+              isChildOfLoadedNode = true;
+              break;
+            }
+          }
+
+          // Если узел является дочерним для загруженного узла, но сам не загружен - загружаем его
+          if (isChildOfLoadedNode) {
+            await loadChildren(nodeId, 1);
+          }
+        }
+      }
+    };
+
+    loadExpandedNodesChildren();
+  }, [
+    expandedNodes,
+    rootDepartments,
+    loadedNodes,
+    loadChildren,
+    isNodeExpanded,
+    getExpandedNodeIds,
+  ]);
 
   const toggleNode = useCallback(
     async (nodeId: string, hasMoreChildren: boolean) => {
       if (!hasMoreChildren) return;
 
-      const isCurrentlyExpanded = expandedNodes[nodeId];
+      const isCurrentlyExpanded = isNodeExpanded(nodeId);
 
-      // Переключаем состояние раскрытия
-      setExpandedNodes((prev) => ({
-        ...prev,
-        [nodeId]: !isCurrentlyExpanded,
-      }));
+      // Переключаем состояние раскрытия с помощью хука
+      toggleNodeFromHook(nodeId);
 
       // Если узел раскрывается впервые и у него есть дети, загружаем их
       if (!isCurrentlyExpanded && !loadedNodes[nodeId]) {
         await loadChildren(nodeId, 1);
       }
     },
-    [expandedNodes, loadedNodes, loadChildren],
-  );
-
-  const loadMoreChildren = useCallback(
-    async (parentId: string) => {
-      const nextPage = (currentPage[parentId] || 1) + 1;
-      await loadChildren(parentId, nextPage);
-    },
-    [currentPage, loadChildren],
+    [isNodeExpanded, loadedNodes, loadChildren, toggleNodeFromHook],
   );
 
   if (isPending) {
@@ -143,10 +119,9 @@ export default function DepartmentTree() {
   }
 
   const renderTreeNode = (node: TreeNode, level = 0) => {
-    const hasLoadedChildren =
-      loadedNodes[node.id] && loadedNodes[node.id].length > 0;
-    const isExpanded = expandedNodes[node.id] || false;
-    const isLoading = loadingNodes.has(node.id);
+    const nodeHasLoadedChildren = hasLoadedChildren(node.id);
+    const isExpanded = isNodeExpanded(node.id);
+    const isLoading = isNodeLoading(node.id);
     const hasMoreChildren = node.hasMoreChildren;
 
     return (
@@ -158,7 +133,7 @@ export default function DepartmentTree() {
           style={{ paddingLeft: `${level * 20 + 8}px` }}
           onClick={() => toggleNode(node.id, hasMoreChildren)}
         >
-          {hasMoreChildren || hasLoadedChildren ? (
+          {hasMoreChildren || nodeHasLoadedChildren ? (
             isExpanded ? (
               <ChevronDown className="h-4 w-4 mr-1" />
             ) : (
@@ -168,7 +143,7 @@ export default function DepartmentTree() {
             <span className="w-5 h-4 mr-1"></span>
           )}
 
-          {hasMoreChildren || hasLoadedChildren ? (
+          {hasMoreChildren || nodeHasLoadedChildren ? (
             isExpanded ? (
               <FolderOpen className="h-4 w-4 mr-2" />
             ) : (
@@ -196,19 +171,21 @@ export default function DepartmentTree() {
 
         {isExpanded && (
           <div>
-            {loadingChildrenNodes.has(node.id) &&
-              !loadedNodes[node.id]?.length && (
-                <div style={{ paddingLeft: `${(level + 1) * 20 + 8}px` }}>
-                  {[...Array(3)].map((_, idx) => (
-                    <div key={idx} className="flex items-center py-2 px-2">
-                      <Skeleton className="w-4 h-4 mr-2" />
-                      <Skeleton className="h-4 flex-1" />
-                    </div>
-                  ))}
-                </div>
-              )}
+            {isChildrenLoading(node.id) && !loadedNodes[node.id]?.length && (
+              <div style={{ paddingLeft: `${(level + 1) * 20 + 8}px` }}>
+                {[...Array(3)].map((_, idx) => (
+                  <div
+                    key={`${node.id}-loading-${idx}`}
+                    className="flex items-center py-2 px-2"
+                  >
+                    <Skeleton className="w-4 h-4 mr-2" />
+                    <Skeleton className="h-4 flex-1" />
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {hasLoadedChildren &&
+            {nodeHasLoadedChildren &&
               loadedNodes[node.id]?.map((child) =>
                 renderTreeNode(child, level + 1),
               )}
@@ -220,7 +197,7 @@ export default function DepartmentTree() {
                   size="sm"
                   onClick={() => loadMoreChildren(node.id)}
                   className="text-xs h-6 px-2"
-                  disabled={loadingNodes.has(node.id)}
+                  disabled={isNodeLoading(node.id)}
                 >
                   Показать ещё
                 </Button>
