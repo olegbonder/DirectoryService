@@ -253,6 +253,13 @@ export const departmentsQueryOptions = {
     });
   },
 
+  getDepartmentRootsOptions: (request: GetRootDepartmentsRequest) => {
+    return queryOptions({
+      queryFn: () => departmentsApi.getRootDepartments(request),
+      queryKey: [departmentsQueryOptions.baseKey, "roots", request],
+    });
+  },
+
   getDepartmentRootsInfinityOptions: () => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
@@ -277,6 +284,18 @@ export const departmentsQueryOptions = {
         pageSize: data.pages[0]?.pageSize ?? PAGE_SIZE,
         totalPages: data.pages[0]?.totalPages ?? 0,
       }),
+    });
+  },
+
+  getDepartmentChildrenOptions: (parentId: string, page: number) => {
+    return queryOptions({
+      queryFn: () =>
+        departmentsApi.getChildDepartments({
+          pageSize: PAGE_SIZE,
+          parentId,
+          page,
+        }),
+      queryKey: [departmentsQueryOptions.baseKey, parentId, "children"],
     });
   },
 

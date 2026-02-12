@@ -1,5 +1,5 @@
 import { Spinner } from "@/shared/components/ui/spinner";
-import { useDepartmentChildren } from "@/features/departments/model/use-department-children";
+import { useDepartmentChildrenInfinity } from "@/features/departments/model/use-department-children-infinity";
 import DepartmentCard from "@/features/departments/department-card";
 import { Building2 } from "lucide-react";
 
@@ -10,8 +10,14 @@ type ChildDepartmentsListProps = {
 export default function ChildDepartmentsList({
   parentId,
 }: ChildDepartmentsListProps) {
-  const { childDepartments, isPending, isError, error } =
-    useDepartmentChildren(parentId);
+  const {
+    childDepartments,
+    isPending,
+    isError,
+    error,
+    cursorRef,
+    isFetchingNextPage,
+  } = useDepartmentChildrenInfinity(parentId);
 
   if (isPending) {
     return (
@@ -50,6 +56,9 @@ export default function ChildDepartmentsList({
           ))}
         </div>
       )}
+      <div ref={cursorRef} className="flex justify-center py-4">
+        {isFetchingNextPage && <Spinner />}
+      </div>
     </div>
   );
 }
