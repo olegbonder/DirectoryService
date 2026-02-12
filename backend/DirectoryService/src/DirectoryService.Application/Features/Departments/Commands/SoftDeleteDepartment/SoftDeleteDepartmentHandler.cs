@@ -102,7 +102,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
 
             // Обновляем данные дочерних сущностей
             var updateChildrenResult = await _departmentsRepository
-                .UpdateChildrenAndParentPaths(oldDepartmentPath, newDepartmentPath, departmentId.Value, cancellationToken);
+                .UpdateChildrenPaths(oldDepartmentPath, newDepartmentPath, departmentId.Value, cancellationToken);
             if (updateChildrenResult.IsFailure)
             {
                 transactionScope.RollBack();

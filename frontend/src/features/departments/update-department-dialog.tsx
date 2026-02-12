@@ -20,7 +20,7 @@ import {
   FieldError,
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { useUpdateDepartment } from "./model/use-update-department";
+import { useUpdateAndMoveDepartment } from "./model/use-update-move-department";
 import {
   UpdateDepartmentData,
   updateDepartmentSchema,
@@ -55,7 +55,7 @@ export default function UpdateDepartmentDialog({
     mode: "onChange",
   });
 
-  const { updateDepartment, isPending } = useUpdateDepartment();
+  const { updateDepartment, isPending } = useUpdateAndMoveDepartment();
 
   const {
     departments,

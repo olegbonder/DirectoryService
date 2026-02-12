@@ -22,6 +22,7 @@ import {
   UpdateDepartmentLocationsRequest,
   ChildDepartment,
   RootDepartment,
+  MoveDepartmentRequest,
 } from "./types";
 import { DepartmentsFilterState } from "@/features/departments/model/departments-filters-store";
 
@@ -88,8 +89,17 @@ export const departmentsApi = {
   },
 
   updateDepartment: async (request: UpdateDepartmentRequest) => {
-    const response = await apiClient.put<Envelope<string>>(
+    const response = await apiClient.patch<Envelope<string>>(
       `/departments/${request.id}`,
+      request,
+    );
+
+    return response.data.result;
+  },
+
+  moveDepartment: async (request: MoveDepartmentRequest) => {
+    const response = await apiClient.put<Envelope<string>>(
+      `/departments/${request.id}/parent`,
       request,
     );
 

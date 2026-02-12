@@ -79,10 +79,21 @@ export type CreateDepartmentRequest = {
   locationIds: string[];
 };
 
+export type UpdateAndMoveDepartmentRequest = {
+  id: string;
+  name: string;
+  identifier: string;
+  parentId?: string;
+};
+
 export type UpdateDepartmentRequest = {
   id: string;
   name: string;
   identifier: string;
+};
+
+export type MoveDepartmentRequest = {
+  id: string;
   parentId?: string;
 };
 

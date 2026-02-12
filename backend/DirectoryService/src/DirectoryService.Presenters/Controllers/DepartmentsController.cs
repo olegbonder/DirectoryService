@@ -147,7 +147,7 @@ namespace DirectoryService.Presenters.Controllers
             return await handler.Handle(query, cancellationToken);
         }
 
-        [HttpPut("{departmentId:guid}")]
+        [HttpPatch("{departmentId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
         public async Task<EndpointResult<Guid>> Update(

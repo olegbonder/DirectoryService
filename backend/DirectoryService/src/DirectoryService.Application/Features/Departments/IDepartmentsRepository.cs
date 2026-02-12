@@ -31,7 +31,7 @@ namespace DirectoryService.Application.Features.Departments
         Task<Result> UpdateChildrensForMove(
             DepartmentPath oldDepartmentPath, Department depatment, CancellationToken cancellationToken);
 
-        Task<Result> UpdateChildrenAndParentPaths(
+        Task<Result> UpdateChildrenPaths(
             string oldDepartmentPath, string newDepartmentPath, Guid newDepartmentId, CancellationToken cancellationToken);
     }
 }

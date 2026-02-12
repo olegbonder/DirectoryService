@@ -1,6 +1,5 @@
 ﻿using DirectoryService.Application.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
@@ -15,7 +14,6 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
-        private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<UpdateDepartmentCommand> _validator;
         private readonly ICacheService _cache;
         private readonly ILogger<UpdateDepartmentHandler> _logger;
@@ -23,13 +21,11 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
         public UpdateDepartmentHandler(
             ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
-            ILocationsRepository locationsRepository,
             IValidator<UpdateDepartmentCommand> validator,
             ICacheService cache,
             ILogger<UpdateDepartmentHandler> logger)
         {
             _transactionManager = transactionManager;
-            _locationsRepository = locationsRepository;
             _departmentsRepository = departmentsRepository;
             _validator = validator;
             _cache = cache;
@@ -55,39 +51,46 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
             var departmentIdValue = command.Id;
             var departmentId = DepartmentId.Current(departmentIdValue);
 
-            var existingDepartment = await _departmentsRepository.GetActiveDepartmentById(departmentId, cancellationToken);
-            if (existingDepartment == null)
+            var existingDepartmentRes = await _departmentsRepository.GetByIdWithLock(departmentId, cancellationToken);
+            if (existingDepartmentRes.IsFailure)
             {
                 transactionScope.RollBack();
                 return DepartmentErrors.NotFound(departmentIdValue);
             }
 
+            var existingDepartment = existingDepartmentRes.Value!;
             var request = command.Request;
 
             var deptName = DepartmentName.Create(request.Name).Value;
 
             var deptIdentifier = DepartmentIdentifier.Create(request.Identifier).Value;
 
-            var parentId = request.ParentId;
-            Department? parentDepartment = null;
-            DepartmentId? parentDepartmentId = null;
-            int depth = 0;
-            if (parentId.HasValue)
-            {
-                parentDepartmentId = DepartmentId.Current(parentId.Value);
-                parentDepartment = await _departmentsRepository.GetBy(d => d.Id == parentDepartmentId, cancellationToken);
-                if (parentDepartment == null)
-                {
-                    transactionScope.RollBack();
-                    return DepartmentErrors.NotFound(parentId.Value);
-                }
+            var oldDepartmentPath = existingDepartment.Path;
 
-                depth = parentDepartment.Depth + 1;
+            // Выбираем дочерние подразделения для пессимистичной блокировки
+            await _departmentsRepository.GetChildrensWithLock(oldDepartmentPath, cancellationToken);
+
+            Department? parentDepartment = null;
+            if (existingDepartment.ParentId != null)
+            {
+                parentDepartment = await _departmentsRepository.GetActiveDepartmentById(existingDepartment.ParentId, cancellationToken);
             }
 
-            var deptPath = DepartmentPath.Create(deptIdentifier, parentDepartment).Value;
+            var newDepartmentPath = DepartmentPath.Create(deptIdentifier, parentDepartment).Value;
 
-            existingDepartment.Update(parentDepartmentId, deptName, deptIdentifier, deptPath, depth);
+            // Обновляем данные дочерних сущностей
+            var updateChildrenResult = await _departmentsRepository.UpdateChildrenPaths(
+                oldDepartmentPath.Value,
+                newDepartmentPath.Value,
+                departmentIdValue,
+                cancellationToken);
+            if (updateChildrenResult.IsFailure)
+            {
+                transactionScope.RollBack();
+                return updateChildrenResult.Errors;
+            }
+
+            existingDepartment.Update(deptName, deptIdentifier);
 
             try
             {
