@@ -4,11 +4,10 @@ import { useState } from "react";
 import useDepartment from "./model/use-department";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowLeft, Pencil, MapPin, Briefcase, Building2 } from "lucide-react";
+import { ArrowLeft, Pencil, MapPin, Briefcase } from "lucide-react";
 import Link from "next/link";
 import UpdateDepartmentDialog from "@/features/departments/update-department-dialog";
 import ManageDepartmentLocationsDialog from "@/features/departments/manage-department-locations-dialog";
-import PositionCard from "@/features/positions/position-card";
 import DepartmentPath from "./department-path";
 import ChildDepartmentsList from "./child-departments-list";
 

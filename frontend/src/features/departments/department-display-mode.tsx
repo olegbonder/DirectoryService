@@ -14,7 +14,7 @@ export default function DepartmentDisplayMode() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div>
             <h1 className="text-4xl font-bold bg-linear-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent mb-2">
               Подразделения
