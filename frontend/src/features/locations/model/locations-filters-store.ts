@@ -11,6 +11,12 @@ export type LocationsFilterState = {
   order: OrderDirection;
 };
 
+export type LocationDictionaryState = {
+  search?: string;
+  pageSize: number;
+  locationIds?: string[];
+};
+
 type Actions = {
   setDepartmentIds: (ids: LocationsFilterState["departmentIds"]) => void;
   setSearch: (search: LocationsFilterState["search"]) => void;

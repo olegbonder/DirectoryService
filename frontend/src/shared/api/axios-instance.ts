@@ -7,6 +7,9 @@ export const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  paramsSerializer: {
+    indexes: null, // этот параметр заставляет axios использовать department=id1&department=id2
+  },
 });
 
 apiClient.interceptors.response.use(
@@ -27,5 +30,5 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );

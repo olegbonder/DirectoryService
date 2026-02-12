@@ -1,5 +1,3 @@
-import { PaginationRequest } from "@/shared/api/types";
-
 export type Address = {
   country: string;
   city: string;
@@ -15,32 +13,3 @@ export interface Location extends Address {
   isActive: boolean;
   createdAt: string;
 }
-
-export interface GetLocationsRequest extends PaginationRequest {
-  departmentIds?: string[];
-  search?: string;
-  isActive?: boolean;
-}
-
-export interface GetLocationDictionaryRequest extends PaginationRequest {
-  search?: string;
-}
-
-export type CreateLocationRequest = {
-  name: string;
-  address: Address;
-  timeZone: string;
-};
-
-export type UpdateLocationRequest = {
-  id: string;
-  name: string;
-  address: Address;
-  timeZone: string;
-};
-
-export type LocationDictionaryState = {
-  search?: string;
-  pageSize: number;
-  locationIds?: string[];
-};

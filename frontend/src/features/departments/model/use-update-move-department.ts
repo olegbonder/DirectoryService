@@ -1,8 +1,8 @@
 import {
   departmentsApi,
   departmentsQueryOptions,
+  UpdateAndMoveDepartmentRequest,
 } from "@/entities/departments/api";
-import { UpdateAndMoveDepartmentRequest } from "@/entities/departments/types";
 import { EnvelopeError } from "@/shared/api/errors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

@@ -2,29 +2,87 @@ import { apiClient } from "@/shared/api/axios-instance";
 import { Envelope } from "@/shared/api/envelope";
 import {
   DictionaryItemResponse,
+  OrderDirection,
   PAGE_SIZE,
+  PaginationRequest,
   PaginationResponse,
   PREFETCH,
 } from "@/shared/api/types";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import {
-  AddDepartmentsToPositionRequest,
-  CreateDepartmentRequest,
-  DeletePositionDepartmentRequest,
   Department,
   DepartmentDetail,
-  DepartmentDictionaryState,
-  GetDepartmentDictionaryRequest,
-  GetDepartmentsRequest,
-  GetRootDepartmentsRequest,
-  GetChildDepartmentsRequest,
-  UpdateDepartmentRequest,
-  UpdateDepartmentLocationsRequest,
   ChildDepartment,
   RootDepartment,
-  MoveDepartmentRequest,
 } from "./types";
-import { DepartmentsFilterState } from "@/features/departments/model/departments-filters-store";
+import {
+  DepartmentDictionaryState,
+  DepartmentOrderColumnn,
+  DepartmentsFilterState,
+} from "@/features/departments/model/departments-filters-store";
+
+export interface GetDepartmentsRequest extends PaginationRequest {
+  name?: string;
+  identifier?: string;
+  parentId?: string;
+  locationIds?: string[];
+  isActive?: boolean;
+  orderBy?: DepartmentOrderColumnn;
+  orderDirection?: OrderDirection;
+}
+
+export interface GetRootDepartmentsRequest extends PaginationRequest {
+  prefetch?: number;
+}
+
+export interface GetChildDepartmentsRequest extends PaginationRequest {
+  parentId: string;
+}
+
+export type CreateDepartmentRequest = {
+  name: string;
+  identifier: string;
+  parentId?: string;
+  locationIds: string[];
+};
+
+export type UpdateAndMoveDepartmentRequest = {
+  id: string;
+  name: string;
+  identifier: string;
+  parentId?: string;
+};
+
+export type UpdateDepartmentRequest = {
+  id: string;
+  name: string;
+  identifier: string;
+};
+
+export type MoveDepartmentRequest = {
+  id: string;
+  parentId?: string;
+};
+
+export type UpdateDepartmentLocationsRequest = {
+  departmentId: string;
+  locationIds: string[];
+};
+
+export interface GetDepartmentDictionaryRequest extends PaginationRequest {
+  search?: string;
+  showOnlyParents: boolean;
+}
+
+export type AddDepartmentsToPositionRequest = {
+  positionId: string;
+  departmentIds: string[];
+};
+
+export type DeletePositionDepartmentRequest = {
+  positionId: string;
+  departmentId: string;
+};
 
 export const departmentsApi = {
   getDepartmentDictionary: async (request: GetDepartmentDictionaryRequest) => {
@@ -32,9 +90,6 @@ export const departmentsApi = {
       Envelope<PaginationResponse<DictionaryItemResponse>>
     >("/departments/dictionary", {
       params: request,
-      paramsSerializer: {
-        indexes: null,
-      },
     });
     return response.data.result;
   },
@@ -44,9 +99,6 @@ export const departmentsApi = {
       Envelope<PaginationResponse<RootDepartment>>
     >("/departments/roots", {
       params: request,
-      paramsSerializer: {
-        indexes: null,
-      },
     });
     return response.data.result;
   },
@@ -65,9 +117,6 @@ export const departmentsApi = {
       Envelope<PaginationResponse<Department>>
     >("/departments", {
       params: request,
-      paramsSerializer: {
-        indexes: null,
-      },
     });
     return response.data.result;
   },

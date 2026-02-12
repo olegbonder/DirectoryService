@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { OrderDirection, PAGE_SIZE } from "@/shared/api/types";
-import { DepartmentOrderColumnn } from "@/entities/departments/types";
+
+export type DepartmentOrderColumnn = "name" | "path" | "createdAt";
 
 export type DepartmentsFilterState = {
   name?: string;
@@ -13,6 +14,13 @@ export type DepartmentsFilterState = {
   pageSize: number;
   orderBy?: DepartmentOrderColumnn;
   orderDirection?: OrderDirection;
+};
+
+export type DepartmentDictionaryState = {
+  search?: string;
+  departmentIds?: string[];
+  pageSize: number;
+  showOnlyParents: boolean;
 };
 
 type Actions = {

@@ -1,15 +1,27 @@
 import { apiClient } from "@/shared/api/axios-instance";
-import { PaginationResponse } from "@/shared/api/types";
-import {
-  CreatePositionRequest,
-  GetPositionsRequest,
-  Position,
-  PositionDetail,
-  UpdatePositionRequest,
-} from "./types";
+import { PaginationRequest, PaginationResponse } from "@/shared/api/types";
+import { Position, PositionDetail } from "./types";
 import { Envelope } from "@/shared/api/envelope";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { PositionsFilterState } from "@/features/positions/model/positions-filters-store";
+
+export interface GetPositionsRequest extends PaginationRequest {
+  departmentIds?: string[];
+  search?: string;
+  isActive?: boolean;
+}
+
+export type CreatePositionRequest = {
+  name: string;
+  description?: string;
+  departmentIds?: string[];
+};
+
+export type UpdatePositionRequest = {
+  id: string;
+  name: string;
+  description?: string;
+};
 
 export const positionsApi = {
   getPositions: async (request: GetPositionsRequest) => {
@@ -17,9 +29,6 @@ export const positionsApi = {
       Envelope<PaginationResponse<Position>>
     >("/positions", {
       params: request,
-      paramsSerializer: {
-        indexes: null,
-      },
     });
     return response.data.result;
   },

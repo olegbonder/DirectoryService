@@ -1,8 +1,4 @@
-import {
-  DictionaryItemResponse,
-  OrderDirection,
-  PaginationRequest,
-} from "@/shared/api/types";
+import { DictionaryItemResponse } from "@/shared/api/types";
 
 export type Department = {
   id: string;
@@ -50,76 +46,4 @@ export type RootDepartment = {
   createdAt: Date;
   children: ChildDepartment[];
   hasMoreChildren: boolean;
-};
-
-export type DepartmentOrderColumnn = "name" | "path" | "createdAt";
-
-export interface GetDepartmentsRequest extends PaginationRequest {
-  name?: string;
-  identifier?: string;
-  parentId?: string;
-  locationIds?: string[];
-  isActive?: boolean;
-  orderBy?: DepartmentOrderColumnn;
-  orderDirection?: OrderDirection;
-}
-
-export interface GetRootDepartmentsRequest extends PaginationRequest {
-  prefetch?: number;
-}
-
-export interface GetChildDepartmentsRequest extends PaginationRequest {
-  parentId: string;
-}
-
-export type CreateDepartmentRequest = {
-  name: string;
-  identifier: string;
-  parentId?: string;
-  locationIds: string[];
-};
-
-export type UpdateAndMoveDepartmentRequest = {
-  id: string;
-  name: string;
-  identifier: string;
-  parentId?: string;
-};
-
-export type UpdateDepartmentRequest = {
-  id: string;
-  name: string;
-  identifier: string;
-};
-
-export type MoveDepartmentRequest = {
-  id: string;
-  parentId?: string;
-};
-
-export type UpdateDepartmentLocationsRequest = {
-  departmentId: string;
-  locationIds: string[];
-};
-
-export interface GetDepartmentDictionaryRequest extends PaginationRequest {
-  search?: string;
-  showOnlyParents: boolean;
-}
-
-export type AddDepartmentsToPositionRequest = {
-  positionId: string;
-  departmentIds: string[];
-};
-
-export type DeletePositionDepartmentRequest = {
-  positionId: string;
-  departmentId: string;
-};
-
-export type DepartmentDictionaryState = {
-  search?: string;
-  departmentIds?: string[];
-  pageSize: number;
-  showOnlyParents: boolean;
 };

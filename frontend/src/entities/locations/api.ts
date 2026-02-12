@@ -1,16 +1,39 @@
 import { apiClient } from "@/shared/api/axios-instance";
-import { PaginationResponse, DictionaryItemResponse } from "@/shared/api/types";
 import {
-  CreateLocationRequest,
-  GetLocationsRequest,
-  GetLocationDictionaryRequest,
-  Location,
-  UpdateLocationRequest,
-  LocationDictionaryState,
-} from "./types";
+  PaginationResponse,
+  DictionaryItemResponse,
+  PaginationRequest,
+} from "@/shared/api/types";
+import { Location, Address } from "./types";
 import { Envelope } from "@/shared/api/envelope";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { LocationsFilterState } from "@/features/locations/model/locations-filters-store";
+import {
+  LocationDictionaryState,
+  LocationsFilterState,
+} from "@/features/locations/model/locations-filters-store";
+
+export interface GetLocationsRequest extends PaginationRequest {
+  departmentIds?: string[];
+  search?: string;
+  isActive?: boolean;
+}
+
+export interface GetLocationDictionaryRequest extends PaginationRequest {
+  search?: string;
+}
+
+export type CreateLocationRequest = {
+  name: string;
+  address: Address;
+  timeZone: string;
+};
+
+export type UpdateLocationRequest = {
+  id: string;
+  name: string;
+  address: Address;
+  timeZone: string;
+};
 
 export const locationsApi = {
   getLocations: async (request: GetLocationsRequest) => {
@@ -18,9 +41,6 @@ export const locationsApi = {
       Envelope<PaginationResponse<Location>>
     >("/locations", {
       params: request,
-      paramsSerializer: {
-        indexes: null, // этот параметр заставляет axios использовать department=id1&department=id2
-      },
     });
     return response.data.result;
   },
@@ -30,9 +50,6 @@ export const locationsApi = {
       Envelope<PaginationResponse<DictionaryItemResponse>>
     >("/locations/dictionary", {
       params: request,
-      paramsSerializer: {
-        indexes: null,
-      },
     });
     return response.data.result;
   },
