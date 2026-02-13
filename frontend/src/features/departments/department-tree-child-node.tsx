@@ -1,3 +1,4 @@
+import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   TreeExpander,
@@ -12,7 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
-import { useDepartmentChildrenQuery } from "./model/use-department-children-query";
+import { useDepartmentChildren } from "./model/use-department-children";
 
 type DepartmentTreeChildNodeProps = {
   parentId: string;
@@ -23,8 +24,15 @@ export default function DepartmentTreeChildNode({
   parentId,
   level,
 }: DepartmentTreeChildNodeProps) {
-  const { childDepartments, isPending, isError, error } =
-    useDepartmentChildrenQuery(parentId, 1);
+  const {
+    childDepartments,
+    isPending,
+    isError,
+    error,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useDepartmentChildren(parentId);
 
   if (isPending) {
     return (
@@ -58,7 +66,8 @@ export default function DepartmentTreeChildNode({
   return (
     <>
       {childDepartments.map((department, index) => {
-        const isLast = index == childDepartments.length - 1;
+        const isLast =
+          index == childDepartments.length - 1 && !isFetchingNextPage;
         return (
           <TreeNode
             key={department.id}
@@ -85,7 +94,7 @@ export default function DepartmentTreeChildNode({
               </TooltipContent>
             </Tooltip>
 
-            <TreeNodeContent hasChildren>
+            <TreeNodeContent hasChildren={!!department.hasMoreChildren}>
               <DepartmentTreeChildNode
                 parentId={department.id}
                 level={level + 1}
@@ -94,6 +103,18 @@ export default function DepartmentTreeChildNode({
           </TreeNode>
         );
       })}
+      {hasNextPage && (
+        <div className="py-2" style={{ paddingLeft: (level + 1) * 20 + 8 }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "Загрузка..." : "Показать ещё"}
+          </Button>
+        </div>
+      )}
     </>
   );
 }

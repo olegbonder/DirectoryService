@@ -253,13 +253,6 @@ export const departmentsQueryOptions = {
     });
   },
 
-  getDepartmentRootsOptions: (request: GetRootDepartmentsRequest) => {
-    return queryOptions({
-      queryFn: () => departmentsApi.getRootDepartments(request),
-      queryKey: [departmentsQueryOptions.baseKey, "roots", request],
-    });
-  },
-
   getDepartmentRootsInfinityOptions: () => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
@@ -287,23 +280,11 @@ export const departmentsQueryOptions = {
     });
   },
 
-  getDepartmentChildrenOptions: (parentId: string, page: number) => {
-    return queryOptions({
-      queryFn: () =>
-        departmentsApi.getChildDepartments({
-          pageSize: PAGE_SIZE,
-          parentId,
-          page,
-        }),
-      queryKey: [departmentsQueryOptions.baseKey, parentId, "children"],
-    });
-  },
-
   getDepartmentChildrenInfinityOptions: (parentId: string) => {
     return infiniteQueryOptions({
       queryFn: ({ pageParam }) => {
         return departmentsApi.getChildDepartments({
-          pageSize: PAGE_SIZE,
+          pageSize: 1,
           parentId,
           page: pageParam,
         });

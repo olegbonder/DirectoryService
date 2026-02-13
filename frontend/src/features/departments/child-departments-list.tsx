@@ -1,7 +1,8 @@
 import { Spinner } from "@/shared/components/ui/spinner";
-import { useDepartmentChildrenInfinity } from "@/features/departments/model/use-department-children-infinity";
+import { useDepartmentChildren } from "@/features/departments/model/use-department-children";
 import DepartmentCard from "@/features/departments/department-card";
 import { Building2 } from "lucide-react";
+import useCursorRef from "@/shared/hooks/use-cursor-ref";
 
 type ChildDepartmentsListProps = {
   parentId: string;
@@ -15,9 +16,16 @@ export default function ChildDepartmentsList({
     isPending,
     isError,
     error,
-    cursorRef,
     isFetchingNextPage,
-  } = useDepartmentChildrenInfinity(parentId);
+    hasNextPage,
+    fetchNextPage,
+  } = useDepartmentChildren(parentId);
+
+  const cursorRef = useCursorRef({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
   if (isPending) {
     return (

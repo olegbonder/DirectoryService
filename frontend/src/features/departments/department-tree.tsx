@@ -10,6 +10,7 @@ import {
   TreeProvider,
   TreeView,
 } from "@/shared/components/ui/tree";
+import { Button } from "@/shared/components/ui/button";
 import { Spinner } from "@/shared/components/ui/spinner";
 import {
   Tooltip,
@@ -18,20 +19,23 @@ import {
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
 import DepartmentTreeChildNode from "./department-tree-child-node";
-import { useDepartmentRootsQuery } from "./model/use-department-roots-query";
-import { PAGE_SIZE } from "@/shared/api/types";
 import {
   setDepartmentsTreeExpandedNodes,
   useDepartmentsExpandedNodes,
 } from "./model/departments-tree-store";
+import { useDepartmentRoots } from "./model/use-department-roots";
 
 export default function DepartmentTree() {
   const { expandedNodes } = useDepartmentsExpandedNodes();
-  const { rootDepartments, isPending, error, isError } =
-    useDepartmentRootsQuery({
-      pageSize: PAGE_SIZE,
-      page: 1,
-    });
+  const {
+    rootDepartments,
+    isPending,
+    isError,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useDepartmentRoots();
 
   if (isPending) {
     return (
@@ -50,7 +54,7 @@ export default function DepartmentTree() {
     );
   }
 
-  if (!isPending && (!rootDepartments || rootDepartments.length === 0)) {
+  if (!rootDepartments || rootDepartments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="text-slate-400 text-center">
@@ -73,7 +77,8 @@ export default function DepartmentTree() {
           <TooltipProvider>
             <TreeView>
               {rootDepartments.map((department, index) => {
-                const isLast = index === rootDepartments.length - 1;
+                const isLast =
+                  index === rootDepartments.length - 1 && !isFetchingNextPage;
                 return (
                   <TreeNode
                     key={department.id}
@@ -108,6 +113,18 @@ export default function DepartmentTree() {
                   </TreeNode>
                 );
               })}
+              {hasNextPage && (
+                <div className="py-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? "Загрузка..." : "Показать ещё"}
+                  </Button>
+                </div>
+              )}
             </TreeView>
           </TooltipProvider>
         </TreeProvider>
