@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { departmentsQueryOptions } from "@/entities/departments/api";
-import { DepartmentsTreeState } from "./departments-tree-store";
+import {
+  departmentsQueryOptions,
+  GetRootDepartmentsRequest,
+} from "@/entities/departments/api";
 
-export function useDepartmentRootsQuery(filter: DepartmentsTreeState) {
+export function useDepartmentRootsQuery(filter: GetRootDepartmentsRequest) {
   const { data, isPending, error, isError, refetch } = useQuery({
     ...departmentsQueryOptions.getDepartmentRootsOptions(filter),
   });

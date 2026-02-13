@@ -19,11 +19,17 @@ import {
 } from "@/shared/components/ui/tooltip";
 import DepartmentTreeChildNode from "./department-tree-child-node";
 import { useDepartmentRootsQuery } from "./model/use-department-roots-query";
+import { PAGE_SIZE } from "@/shared/api/types";
+import {
+  setDepartmentsTreeExpandedNodes,
+  useDepartmentsExpandedNodes,
+} from "./model/departments-tree-store";
 
 export default function DepartmentTree() {
+  const { expandedNodes } = useDepartmentsExpandedNodes();
   const { rootDepartments, isPending, error, isError } =
     useDepartmentRootsQuery({
-      pageSize: 100,
+      pageSize: PAGE_SIZE,
       page: 1,
     });
 
@@ -59,37 +65,49 @@ export default function DepartmentTree() {
   if (!isPending && rootDepartments && rootDepartments.length > 0) {
     return (
       <>
-        <TreeProvider multiSelect={false}>
+        <TreeProvider
+          multiSelect={false}
+          defaultExpandedIds={expandedNodes}
+          onExpandChange={setDepartmentsTreeExpandedNodes}
+        >
           <TooltipProvider>
             <TreeView>
-              {rootDepartments.map((department) => (
-                <TreeNode
-                  key={department.id}
-                  nodeId={department.id}
-                  className={department.isActive ? "" : "text-red-500"}
-                >
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <TreeNodeTrigger>
-                        <TreeExpander
-                          hasChildren={!!department.children?.length}
-                        />
-                        <TreeIcon hasChildren={!!department.children?.length} />
-                        <TreeLabel>{department.name}</TreeLabel>
-                      </TreeNodeTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Путь: {department.path}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <TreeNodeContent hasChildren={!!department.children?.length}>
-                    <DepartmentTreeChildNode
-                      parentId={department.id}
-                      level={1}
-                    />
-                  </TreeNodeContent>
-                </TreeNode>
-              ))}
+              {rootDepartments.map((department, index) => {
+                const isLast = index === rootDepartments.length - 1;
+                return (
+                  <TreeNode
+                    key={department.id}
+                    nodeId={department.id}
+                    className={department.isActive ? "" : "text-red-500"}
+                    isLast={isLast}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TreeNodeTrigger>
+                          <TreeExpander
+                            hasChildren={!!department.children?.length}
+                          />
+                          <TreeIcon
+                            hasChildren={!!department.children?.length}
+                          />
+                          <TreeLabel>{department.name}</TreeLabel>
+                        </TreeNodeTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Путь: {department.path}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <TreeNodeContent
+                      hasChildren={!!department.children?.length}
+                    >
+                      <DepartmentTreeChildNode
+                        parentId={department.id}
+                        level={1}
+                      />
+                    </TreeNodeContent>
+                  </TreeNode>
+                );
+              })}
             </TreeView>
           </TooltipProvider>
         </TreeProvider>

@@ -1,46 +1,48 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { PAGE_SIZE } from "@/shared/api/types";
 
 export type DepartmentsTreeState = {
-  page: number;
-  pageSize: number;
+  expandedNodes: string[];
 };
 
 type Actions = {
-  setPage: (page: DepartmentsTreeState["page"]) => void;
+  setExpandedNodes: (
+    expandedNodes: DepartmentsTreeState["expandedNodes"],
+  ) => void;
 };
 
 type DepartmentsTreeStore = DepartmentsTreeState & Actions;
 
 const initialState: DepartmentsTreeState = {
-  page: 1,
-  pageSize: PAGE_SIZE,
+  expandedNodes: [],
 };
 
-const useDepartmentsTreeFilterStore = create<DepartmentsTreeStore>()(
+const useDepartmentsTreeStore = create<DepartmentsTreeStore>()(
   persist(
     (set) => ({
       ...initialState,
-      setPage: (page: DepartmentsTreeState["page"]) => set({ page: page }),
+      setExpandedNodes: (
+        expandedNodes: DepartmentsTreeState["expandedNodes"],
+      ) => set({ expandedNodes }),
     }),
     {
-      name: "ds-departments-tree-filters",
+      name: "ds-departments-tree-nodes",
       storage: createJSONStorage(() => localStorage),
     },
   ),
 );
 
-export const useGetDepartmentsTreeFilter = () => {
-  return useDepartmentsTreeFilterStore(
+export const useDepartmentsExpandedNodes = () => {
+  return useDepartmentsTreeStore(
     useShallow((state) => ({
-      pageSize: state.pageSize,
-      page: state.page,
+      expandedNodes: state.expandedNodes,
     })),
   );
 };
 
-export const setDepartmentsTreePage = (page: DepartmentsTreeState["page"]) => {
-  useDepartmentsTreeFilterStore.getState().setPage(page);
+export const setDepartmentsTreeExpandedNodes = (
+  expandedNodes: DepartmentsTreeState["expandedNodes"],
+) => {
+  useDepartmentsTreeStore.getState().setExpandedNodes(expandedNodes);
 };

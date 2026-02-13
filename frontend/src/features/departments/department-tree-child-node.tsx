@@ -57,35 +57,43 @@ export default function DepartmentTreeChildNode({
 
   return (
     <>
-      {childDepartments.map((department) => (
-        <TreeNode key={department.id} nodeId={department.id} level={level}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <TreeNodeTrigger
-                className={department.isActive ? "" : "text-red-500"}
-              >
-                <TreeExpander hasChildren={!!department.hasMoreChildren} />
-                <TreeIcon hasChildren={!!department.hasMoreChildren} />
-                <TreeLabel
+      {childDepartments.map((department, index) => {
+        const isLast = index == childDepartments.length - 1;
+        return (
+          <TreeNode
+            key={department.id}
+            nodeId={department.id}
+            level={level}
+            isLast={isLast}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TreeNodeTrigger
                   className={department.isActive ? "" : "text-red-500"}
                 >
-                  {department.name} {!department.isActive && "(неактивно)"}
-                </TreeLabel>
-              </TreeNodeTrigger>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Путь: {department.path}</p>
-            </TooltipContent>
-          </Tooltip>
+                  <TreeExpander hasChildren={!!department.hasMoreChildren} />
+                  <TreeIcon hasChildren={!!department.hasMoreChildren} />
+                  <TreeLabel
+                    className={department.isActive ? "" : "text-red-500"}
+                  >
+                    {department.name} {!department.isActive && "(неактивно)"}
+                  </TreeLabel>
+                </TreeNodeTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Путь: {department.path}</p>
+              </TooltipContent>
+            </Tooltip>
 
-          <TreeNodeContent hasChildren>
-            <DepartmentTreeChildNode
-              parentId={department.id}
-              level={level + 1}
-            />
-          </TreeNodeContent>
-        </TreeNode>
-      ))}
+            <TreeNodeContent hasChildren>
+              <DepartmentTreeChildNode
+                parentId={department.id}
+                level={level + 1}
+              />
+            </TreeNodeContent>
+          </TreeNode>
+        );
+      })}
     </>
   );
 }
