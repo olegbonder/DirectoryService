@@ -1,138 +1,82 @@
-import * as React from "react";
-import { useDepartmentDictionary } from "./model/use-department-dictionary";
-import { MultiSelect } from "@/shared/components/ui/multi-select";
+import {
+  SelectContent,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+} from "@/shared/components/ui/select";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { DictionaryItemResponse } from "@/shared/api/types";
+import { DictionaryItemResponse, PaginationResponse } from "@/shared/api/types";
+import useCursorRef from "@/shared/hooks/use-cursor-ref";
+import {
+  FetchNextPageOptions,
+  InfiniteQueryObserverResult,
+} from "@tanstack/react-query";
 
-const PAGE_SIZE = 3;
-type DepartmentProps = {
-  selectedDepartmentIds?: string[];
-  excludeDepartmentIds?: string[];
-  onDepartmentChange: (departmentIds: string[]) => void;
+type DepartmentSelectProps = {
+  departments: DictionaryItemResponse[];
+  selectedId?: string;
+  onChange: (selectedId?: string) => void;
+  isPending: boolean;
+  isError: boolean;
+  error: Error | null;
+  fetchNextPage: (
+    options?: FetchNextPageOptions | undefined,
+  ) => Promise<
+    InfiniteQueryObserverResult<
+      PaginationResponse<DictionaryItemResponse>,
+      Error
+    >
+  >;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
 };
-
 export default function DepartmentSelect({
-  selectedDepartmentIds,
-  excludeDepartmentIds,
-  onDepartmentChange,
-}: DepartmentProps) {
-  const {
-    departments: selectedDepartments,
-    isPending: isSelectedPending,
-    isError: isSelectedError,
-  } = useDepartmentDictionary({
-    pageSize: PAGE_SIZE,
-    departmentIds:
-      selectedDepartmentIds && selectedDepartmentIds.length > 0
-        ? selectedDepartmentIds
-        : undefined,
+  departments,
+  selectedId,
+  onChange,
+  isPending,
+  isError,
+  error,
+  fetchNextPage,
+  isFetchingNextPage,
+  hasNextPage,
+}: DepartmentSelectProps) {
+  const cursorRef = useCursorRef({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   });
-
-  // Загружаем все департаменты постранично
-  const {
-    departments: allDepartments,
-    isPending: isAllPending,
-    isError: isAllError,
-    error: allError,
-    isFetchingNextPage: isAllFetchingNextPage,
-    hasNextPage: isAllHasNextPage,
-    fetchNextPage: allFetchNextPage,
-  } = useDepartmentDictionary({
-    pageSize: PAGE_SIZE,
-  });
-
-  // Объединяем загруженные департаменты
-  const combinedDepartments = React.useMemo(() => {
-    const allDeptMap = new Map<string, boolean>();
-    const result: DictionaryItemResponse[] = [];
-
-    // Добавляем сначала выбранные департаменты, чтобы они были доступны
-    if (selectedDepartments) {
-      selectedDepartments.forEach((dept) => {
-        if (!allDeptMap.has(dept.id)) {
-          result.push(dept);
-          allDeptMap.set(dept.id, true);
-        }
-      });
-    }
-
-    // Затем добавляем остальные департаменты
-    if (allDepartments) {
-      allDepartments.forEach((dept) => {
-        if (!allDeptMap.has(dept.id)) {
-          result.push(dept);
-          allDeptMap.set(dept.id, true);
-        }
-      });
-    }
-
-    // Фильтруем результат по excludeDepartmentIds
-    let filteredResult = result;
-    if (excludeDepartmentIds && excludeDepartmentIds.length > 0) {
-      filteredResult = result.filter((dept) => !excludeDepartmentIds.includes(dept.id));
-    }
-
-    return filteredResult;
-  }, [selectedDepartments, allDepartments, excludeDepartmentIds]);
-
-  const multiSelectOptions = React.useMemo(() => {
-    return combinedDepartments.map((dept) => ({
-      value: dept.id,
-      label: dept.name,
-    }));
-  }, [combinedDepartments]);
-
-  // Фильтруем defaultValue, чтобы он содержал только те ID, которые представлены в options
-  const filteredDefaultValues = React.useMemo(() => {
-    if (!selectedDepartmentIds || !selectedDepartmentIds.length) return [];
-    const availableIds = new Set(multiSelectOptions.map(option => option.value));
-    return selectedDepartmentIds.filter(id => availableIds.has(id));
-  }, [selectedDepartmentIds, multiSelectOptions]);
-
-  // Определяем, показывать ли компонент
-  const showComponent =
-    !isAllPending &&
-    !isAllError &&
-    !isSelectedPending &&
-    !isSelectedError &&
-    combinedDepartments &&
-    combinedDepartments.length > 0;
 
   return (
     <>
-      {isAllPending && <Spinner />}
-      {!isAllPending && allError && (
+      {isPending && <Spinner />}
+      {!isPending && isError && (
         <p className="text-red-500">
-          Ошибка загрузки подразделений: {allError?.message}
+          Ошибка загрузки подразделений: {error?.message}
         </p>
       )}
-      {showComponent && (
-        <MultiSelect
-          className="flex-1"
-          options={multiSelectOptions}
-          onValueChange={onDepartmentChange}
-          defaultValue={filteredDefaultValues}
-          placeholder="Выберите подразделение"
-          searchPlaceholder="Поиск..."
-          morePlaceholder="ещё"
-          notFoundPlaceholder="Ничего не найдено"
-          disabled={isAllFetchingNextPage}
-          loadMore={allFetchNextPage}
-          hasNextPage={isAllHasNextPage}
-          isLoadingMore={isAllFetchingNextPage}
-          maxDisplayCount={3}
-        />
-      )}
-      {!isAllPending &&
-        !isAllError &&
-        !isSelectedPending &&
-        !isSelectedError &&
-        combinedDepartments &&
-        combinedDepartments.length === 0 && (
-          <p className="text-muted-foreground">
-            Все доступные подразделения уже добавлены.
-          </p>
-        )}
+      <Select
+        onValueChange={(value) =>
+          onChange(value === "none" ? undefined : value)
+        }
+        value={selectedId || "none"}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Выберите подразделение" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="none">Без подразделения</SelectItem>
+          {departments?.map((department) => (
+            <SelectItem key={department.id} value={department.id}>
+              {department.name}
+            </SelectItem>
+          ))}
+          <div ref={cursorRef} className="flex justify-center py-2">
+            {isFetchingNextPage && <Spinner />}
+          </div>
+        </SelectContent>
+      </Select>
     </>
   );
 }

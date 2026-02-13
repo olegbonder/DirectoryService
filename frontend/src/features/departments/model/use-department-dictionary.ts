@@ -1,6 +1,6 @@
 import { departmentsQueryOptions } from "@/entities/departments/api";
-import { DepartmentDictionaryState } from "@/entities/departments/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { DepartmentDictionaryState } from "./departments-filters-store";
 
 export function useDepartmentDictionary(filter: DepartmentDictionaryState) {
   const {

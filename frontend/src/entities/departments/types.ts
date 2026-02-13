@@ -1,21 +1,49 @@
-export type GetDepartmentDictionaryRequest = {
-  search?: string;
-  page: number;
-  pageSize: number;
+import { DictionaryItemResponse } from "@/shared/api/types";
+
+export type Department = {
+  id: string;
+  parentId?: string;
+  name: string;
+  identifier: string;
+  path: string;
+  isActive: boolean;
+  createdAt: Date;
 };
 
-export type DepartmentDictionaryState = {
-  search?: string;
-  departmentIds?: string[];
-  pageSize: number;
+export type DepartmentDetail = {
+  id: string;
+  parentId?: string;
+  name: string;
+  identifier: string;
+  path: string;
+  depth: number;
+  locations: DictionaryItemResponse[];
+  positions: string[];
+  isActive: boolean;
+  createdAt: Date;
 };
 
-export type AddDepartmentsToPositionRequest = {
-  positionId: string;
-  departmentIds: string[];
+export type ChildDepartment = {
+  id: string;
+  parentId?: string;
+  name: string;
+  identifier: string;
+  path: string;
+  depth: number;
+  isActive: boolean;
+  createdAt: Date;
+  hasMoreChildren: boolean;
 };
 
-export type DeletePositionDepartmentRequest = {
-  positionId: string;
-  departmentId: string;
+export type RootDepartment = {
+  id: string;
+  parentId?: string;
+  name: string;
+  identifier: string;
+  path: string;
+  depth: number;
+  isActive: boolean;
+  createdAt: Date;
+  children: ChildDepartment[];
+  hasMoreChildren: boolean;
 };

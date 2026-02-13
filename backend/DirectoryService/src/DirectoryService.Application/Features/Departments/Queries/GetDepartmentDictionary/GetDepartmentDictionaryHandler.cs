@@ -68,14 +68,17 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                 {
                     var departmentIds = departmentIdValues.Select(DepartmentId.Current).ToList();
                     query = query.Where(d => departmentIds.Contains(d.Id));
-
-                    totalCount = await query.CountAsync(cancellationToken);
                 }
 
                 query = query.Where(d => d.IsActive);
                 if (string.IsNullOrWhiteSpace(request.Search) == false)
                 {
                     query = query.Where(l => l.Name.Value.ToLower().Contains(request.Search.ToLower()));
+                }
+
+                if (request.ShowOnlyParents)
+                {
+                    query = query.Where(d => d.Children.Any());
                 }
 
                 totalCount = await query.CountAsync(cancellationToken);

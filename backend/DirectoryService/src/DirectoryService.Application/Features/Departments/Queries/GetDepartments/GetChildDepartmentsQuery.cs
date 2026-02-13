@@ -1,15 +1,5 @@
-﻿using DirectoryService.Contracts.Departments.GetChildDepartments;
+﻿using DirectoryService.Contracts;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 
-public record GetChildDepartmentsQuery
-{
-    public GetChildDepartmentsQuery(Guid parentId, GetChildDepartmentsRequest? request)
-    {
-        ParentId = parentId;
-        Request = request ?? new GetChildDepartmentsRequest();
-    }
-
-    public Guid ParentId { get; init; }
-    public GetChildDepartmentsRequest Request { get; init; }
-}
+public record GetChildDepartmentsQuery(Guid ParentId, PaginationRequest Request);

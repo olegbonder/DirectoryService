@@ -1,7 +1,7 @@
 ﻿using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
-using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.IntegrationTests.Infrasructure;
+using Shared;
 using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
@@ -27,7 +27,7 @@ public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
          // assert
          Assert.True(result.IsSuccess);
          Assert.NotNull(result.Value);
-         var getRootDepartments = result.Value.Departments;
+         var getRootDepartments = result.Value.Items;
          Assert.NotEmpty(getRootDepartments);
          Assert.Equal(1, result.Value.TotalCount);
          Assert.Single(getRootDepartments);
@@ -59,7 +59,7 @@ public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
         // assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        var getRootDepartments = result.Value.Departments;
+        var getRootDepartments = result.Value.Items;
         Assert.NotEmpty(getRootDepartments);
         Assert.Equal(1, result.Value.TotalCount);
         Assert.Single(getRootDepartments);
@@ -86,7 +86,7 @@ public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
 
          // assert
          Assert.True(result.IsSuccess);
-         Assert.Empty(result.Value.Departments);
+         Assert.Empty(result.Value.Items);
          Assert.Equal(1, result.Value.TotalCount);
     }
 
@@ -108,7 +108,7 @@ public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
 
         // assert
         Assert.True(result.IsSuccess);
-        var rootDepartments = result.Value.Departments;
+        var rootDepartments = result.Value.Items;
         Assert.NotEmpty(rootDepartments);
         Assert.Equal(2, result.Value.TotalCount);
         Assert.Single(rootDepartments);
@@ -126,11 +126,12 @@ public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
 
         // assert
         Assert.True(result.IsSuccess);
-        Assert.Empty(result.Value.Departments);
+        Assert.Empty(result.Value.Items);
         Assert.Equal(0, result.Value.TotalCount);
+        Assert.Equal(0, result.Value.TotalPages);
     }
 
-    private async Task<Result<GetRootDepartmentsResponse>> GetRootDepartments(
+    private async Task<Result<PaginationResponse<RootDepartmentDTO>>> GetRootDepartments(
          int? page = null,
          int? size = null,
          int? prefetch = null,
@@ -138,14 +139,11 @@ public class GetRootDepartmentsTests(DirectoryTestWebFactory factory)
      {
          var result = await TestData.ExecuteHandler(async (GetRootDepartmentsHandler sut) =>
          {
-             var query = new GetRootDepartmentsRequest()
+             var query = new GetRootDepartmentsRequest
              {
                  Prefetch = prefetch,
-                 Pagination = new PaginationRequest
-                 {
-                     Page = page ?? 1,
-                     PageSize = size ?? 20
-                 }
+                 Page = page ?? 1,
+                 PageSize = size ?? 20
              };
              return await sut.Handle(query, cancellationToken);
          });

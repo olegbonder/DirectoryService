@@ -16,23 +16,3 @@ export type PositionDetail = {
   isActive: boolean;
   createdAt: string;
 };
-
-export type GetPositionsRequest = {
-  departmentIds?: string[];
-  search?: string;
-  isActive?: boolean;
-  page: number;
-  pageSize: number;
-};
-
-export type CreatePositionRequest = {
-  name: string;
-  description?: string;
-  departmentIds?: string[];
-};
-
-export type UpdatePositionRequest = {
-  id: string;
-  name: string;
-  description?: string;
-};

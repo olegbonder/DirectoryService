@@ -2,7 +2,10 @@
 using DirectoryService.Application.Features.Locations.Commands.SoftDeleteLocation;
 using DirectoryService.Application.Features.Locations.Commands.UpdateLocation;
 using DirectoryService.Application.Features.Locations.Queries.GetLocations;
+using DirectoryService.Application.Features.Locations.Queries.GettLocationDictionary;
+using DirectoryService.Contracts;
 using DirectoryService.Contracts.Locations.CreateLocation;
+using DirectoryService.Contracts.Locations.GetLocationDictionary;
 using DirectoryService.Contracts.Locations.GetLocations;
 using DirectoryService.Presenters.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
@@ -37,6 +40,17 @@ namespace DirectoryService.Presenters.Controllers
         public async Task<EndpointResult<PaginationResponse<LocationDTO>>> GetLocations(
             [FromQuery] GetLocationsRequest request,
             [FromServices] GetLocationsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            return await handler.Handle(request, cancellationToken);
+        }
+
+        [HttpGet("dictionary")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(404)]
+        public async Task<EndpointResult<PaginationResponse<DictionaryItemResponse>>> GetLocationDictionary(
+            [FromQuery] GetLocationDictionaryRequest request,
+            [FromServices] GettLocationDictionaryHandler handler,
             CancellationToken cancellationToken)
         {
             return await handler.Handle(request, cancellationToken);

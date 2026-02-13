@@ -110,5 +110,12 @@ namespace DirectoryService.Domain.Departments
             UpdatedAt = DeletedAt.Value;
             Path = DepartmentPath.CreateForSoftDelete(Identifier);
         }
+
+        public void Update(DepartmentName deptName, DepartmentIdentifier deptIdentifier)
+        {
+            Name = deptName;
+            Identifier = deptIdentifier;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

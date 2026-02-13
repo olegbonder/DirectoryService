@@ -13,24 +13,3 @@ export interface Location extends Address {
   isActive: boolean;
   createdAt: string;
 }
-
-export type GetLocationsRequest = {
-  departmentIds?: string[];
-  search?: string;
-  isActive?: boolean;
-  page: number;
-  pageSize: number;
-};
-
-export type CreateLocationRequest = {
-  name: string;
-  address: Address;
-  timeZone: string;
-};
-
-export type UpdateLocationRequest = {
-  id: string;
-  name: string;
-  address: Address;
-  timeZone: string;
-};

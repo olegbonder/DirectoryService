@@ -11,6 +11,7 @@ import {
 import { Location } from "@/entities/locations/types";
 import { useDeleteLocation } from "./model/use-delete-location";
 import { AlertTriangle } from "lucide-react";
+import DeleteAlertDialog from "../dialog/delete-alert-dialog";
 
 type DeleteLocationDialogProps = {
   location: Location;
@@ -24,43 +25,24 @@ export default function DeleteLocationAlertDialog({
   onOpenChange,
 }: DeleteLocationDialogProps) {
   const { deleteLocation, isPending } = useDeleteLocation();
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    deleteLocation(location.id, { onSuccess: () => onOpenChange(false) });
-  };
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="sm:max-w-lg">
-        <AlertDialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-red-100">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
-            <AlertDialogTitle className="text-lg">
-              Удалить локацию?
-            </AlertDialogTitle>
-          </div>
-          <AlertDialogDescription className="text-base">
-            Вы уверены, что хотите удалить локацию{" "}
-            <span className="font-semibold text-slate-900">
-              {`"${location.name}"`}
-            </span>
-            ? Это действие невозможно отменить.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="gap-3">
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isPending}
-            className="bg-red-600 text-white hover:bg-red-700"
-            onClick={handleDelete}
-          >
-            {isPending ? "Удаление..." : "Удалить"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <DeleteAlertDialog
+      title="Удалить локацию?"
+      message={
+        <>
+          Вы уверены, что хотите удалить локацию
+          <span className="font-semibold text-slate-900">
+            {`"${location.name}"`}
+          </span>
+          ?
+        </>
+      }
+      isPending={isPending}
+      open={open}
+      onOpenChange={onOpenChange}
+      onConfirm={() =>
+        deleteLocation(location.id, { onSuccess: () => onOpenChange(false) })
+      }
+    />
   );
 }

@@ -156,7 +156,7 @@ namespace DirectoryService.Infrastructure.Postgres.Departments
             }
         }
 
-        public async Task<Result> UpdateChildrenAndParentPaths(
+        public async Task<Result> UpdateChildrenPaths(
             string oldDepartmentPath, string newDepartmentPath, Guid newDepartmentId, CancellationToken cancellationToken)
         {
             try

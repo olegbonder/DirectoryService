@@ -7,10 +7,4 @@
         public bool? IsActive { get; init; }
         public OrderDirection? Order { get; init; }
     }
-
-    public enum OrderDirection
-    {
-        Asc,
-        Desc
-    }
 }

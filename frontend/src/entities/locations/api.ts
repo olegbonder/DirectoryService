@@ -1,14 +1,39 @@
 import { apiClient } from "@/shared/api/axios-instance";
-import { PaginationResponse } from "@/shared/api/types";
 import {
-  CreateLocationRequest,
-  GetLocationsRequest,
-  Location,
-  UpdateLocationRequest,
-} from "./types";
+  PaginationResponse,
+  DictionaryItemResponse,
+  PaginationRequest,
+} from "@/shared/api/types";
+import { Location, Address } from "./types";
 import { Envelope } from "@/shared/api/envelope";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { LocationsFilterState } from "@/features/locations/model/locations-filters-store";
+import {
+  LocationDictionaryState,
+  LocationsFilterState,
+} from "@/features/locations/model/locations-filters-store";
+
+export interface GetLocationsRequest extends PaginationRequest {
+  departmentIds?: string[];
+  search?: string;
+  isActive?: boolean;
+}
+
+export interface GetLocationDictionaryRequest extends PaginationRequest {
+  search?: string;
+}
+
+export type CreateLocationRequest = {
+  name: string;
+  address: Address;
+  timeZone: string;
+};
+
+export type UpdateLocationRequest = {
+  id: string;
+  name: string;
+  address: Address;
+  timeZone: string;
+};
 
 export const locationsApi = {
   getLocations: async (request: GetLocationsRequest) => {
@@ -16,9 +41,15 @@ export const locationsApi = {
       Envelope<PaginationResponse<Location>>
     >("/locations", {
       params: request,
-      paramsSerializer: {
-        indexes: null, // этот параметр заставляет axios использовать department=id1&department=id2
-      },
+    });
+    return response.data.result;
+  },
+
+  getLocationDictionary: async (request: GetLocationDictionaryRequest) => {
+    const response = await apiClient.get<
+      Envelope<PaginationResponse<DictionaryItemResponse>>
+    >("/locations/dictionary", {
+      params: request,
     });
     return response.data.result;
   },
@@ -63,6 +94,32 @@ export const locationsQueryOptions = {
     return queryOptions({
       queryFn: () => locationsApi.getLocations(request),
       queryKey: [locationsQueryOptions.baseKey, request],
+    });
+  },
+
+  getLocationDictionaryInfinityOptions: (filter: LocationDictionaryState) => {
+    return infiniteQueryOptions({
+      queryFn: ({ pageParam }) => {
+        return locationsApi.getLocationDictionary({
+          ...filter,
+          page: pageParam,
+        });
+      },
+      queryKey: [locationsQueryOptions.baseKey, filter],
+      initialPageParam: 1,
+      getNextPageParam: (response) => {
+        return !response || response.page >= response.totalPages
+          ? undefined
+          : response.page + 1;
+      },
+
+      select: (data): PaginationResponse<DictionaryItemResponse> => ({
+        items: data.pages.flatMap((page) => page?.items ?? []),
+        totalCount: data.pages[0]?.totalCount ?? 0,
+        page: data.pages[0]?.page ?? 1,
+        pageSize: data.pages[0]?.pageSize ?? filter.pageSize,
+        totalPages: data.pages[0]?.totalPages ?? 0,
+      }),
     });
   },
 

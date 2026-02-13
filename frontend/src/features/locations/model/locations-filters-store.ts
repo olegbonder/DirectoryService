@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { PAGE_SIZE } from "./use-locations-list";
-import { OrderDirection } from "@/features/sort/sort-select";
+import { OrderDirection, PAGE_SIZE } from "@/shared/api/types";
 
 export type LocationsFilterState = {
   departmentIds: string[];
@@ -10,6 +9,12 @@ export type LocationsFilterState = {
   isActive?: boolean;
   pageSize: number;
   order: OrderDirection;
+};
+
+export type LocationDictionaryState = {
+  search?: string;
+  pageSize: number;
+  locationIds?: string[];
 };
 
 type Actions = {

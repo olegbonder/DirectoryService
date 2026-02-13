@@ -3,6 +3,7 @@ using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
+using Shared;
 using Shared.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
@@ -29,7 +30,7 @@ public class GetChildDepartmentsTests(DirectoryTestWebFactory factory)
          // assert
          Assert.True(result.IsSuccess);
          Assert.NotNull(result.Value);
-         var getDepartments = result.Value.Departments;
+         var getDepartments = result.Value.Items;
          Assert.NotEmpty(getDepartments);
          Assert.Equal(2, result.Value.TotalCount);
          Assert.Equal(2, getDepartments.Count);
@@ -55,7 +56,7 @@ public class GetChildDepartmentsTests(DirectoryTestWebFactory factory)
 
          // assert
          Assert.True(result.IsSuccess);
-         Assert.Empty(result.Value.Departments);
+         Assert.Empty(result.Value.Items);
          Assert.Equal(1, result.Value.TotalCount);
     }
 
@@ -78,7 +79,7 @@ public class GetChildDepartmentsTests(DirectoryTestWebFactory factory)
 
         // assert
         Assert.True(result.IsSuccess);
-        var getDepartments = result.Value.Departments;
+        var getDepartments = result.Value.Items;
         Assert.NotEmpty(getDepartments);
         Assert.Equal(2, result.Value.TotalCount);
         Assert.Single(getDepartments);
@@ -97,11 +98,12 @@ public class GetChildDepartmentsTests(DirectoryTestWebFactory factory)
 
         // assert
         Assert.True(result.IsSuccess);
-        Assert.Empty(result.Value.Departments);
+        Assert.Empty(result.Value.Items);
         Assert.Equal(0, result.Value.TotalCount);
+        Assert.Equal(0, result.Value.TotalPages);
     }
 
-    private async Task<Result<GetChildDepartmentsResponse>> GetChildDepartments(
+    private async Task<Result<PaginationResponse<ChildDepartmentDTO>>> GetChildDepartments(
          Guid parentId,
          int? page = null,
          int? size = null,
@@ -109,10 +111,7 @@ public class GetChildDepartmentsTests(DirectoryTestWebFactory factory)
      {
          var result = await TestData.ExecuteHandler(async (GetChildDepartmentsHandler sut) =>
          {
-             var request = new GetChildDepartmentsRequest()
-             {
-                 Pagination = new PaginationRequest { Page = page ?? 1, PageSize = size ?? 20 }
-             };
+             var request = new PaginationRequest { Page = page ?? 1, PageSize = size ?? 20 };
              var query = new GetChildDepartmentsQuery(parentId, request);
              return await sut.Handle(query, cancellationToken);
          });
