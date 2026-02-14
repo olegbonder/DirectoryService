@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.Departments
 {

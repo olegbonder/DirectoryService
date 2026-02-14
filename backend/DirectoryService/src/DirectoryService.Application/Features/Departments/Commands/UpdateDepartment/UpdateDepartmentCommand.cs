@@ -1,4 +1,4 @@
-﻿using DirectoryService.Application.Abstractions;
+﻿using Core.Abstractions;
 using DirectoryService.Contracts.Departments.UpdateDepartment;
 
 namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepartment

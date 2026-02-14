@@ -1,4 +1,7 @@
-﻿using DirectoryService.Web.Middlewares;
+﻿using Framework.Cors;
+using Framework.Logging;
+using Framework.Middlewares;
+using Framework.Swagger;
 using Serilog;
 
 namespace DirectoryService.Web.Configuration
@@ -12,19 +15,12 @@ namespace DirectoryService.Web.Configuration
 
             if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docker")
             {
-                app.MapOpenApi();
-                app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DirectoryService.Web"));
+                app.ConfigureOpenApiSpec("/openapi/v1.json", "DirectoryService.Web");
             }
 
             app.MapControllers();
 
-            app.UseCors(builder =>
-            {
-                builder
-                    .WithOrigins("http://localhost:3000")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            });
+            app.ConfigureCors("http://localhost:3000");
 
             return app;
         }

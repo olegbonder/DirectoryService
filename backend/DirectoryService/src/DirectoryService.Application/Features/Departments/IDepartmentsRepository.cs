@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DirectoryService.Domain.Departments;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Departments
 {

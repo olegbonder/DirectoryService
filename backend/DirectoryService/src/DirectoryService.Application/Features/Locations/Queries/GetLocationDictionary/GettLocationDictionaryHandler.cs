@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
-using DirectoryService.Application.Abstractions;
+using Core.Abstractions;
+using Core.Caching;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Locations.GetLocationDictionary;
@@ -8,8 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared;
-using Shared.Caching;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Locations.Queries.GettLocationDictionary
 {

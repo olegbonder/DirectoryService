@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using Core.Database;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Infrastructure.Postgres;
 using DirectoryService.Infrastructure.Postgres.Database;
@@ -61,7 +62,7 @@ namespace DirectoryService.IntegrationTests.Infrasructure
             {
                 services.RemoveAll<IReadDbContext>();
                 services.RemoveAll<ApplicationDbContext>();
-                services.RemoveAll<IDBConnectionFactory>();
+                services.RemoveAll<IDbConnectionFactory>();
 
                 var connectionString = _dbContainer.GetConnectionString();
                 services.AddScoped(_ =>
@@ -69,7 +70,7 @@ namespace DirectoryService.IntegrationTests.Infrasructure
                 services.AddScoped<IReadDbContext, ApplicationDbContext>(_ =>
                     new ApplicationDbContext(connectionString));
 
-                services.AddSingleton<IDBConnectionFactory, NpgsqlConnectionFactory>(s =>
+                services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>(s =>
                     new NpgsqlConnectionFactory(connectionString!));
             });
         }

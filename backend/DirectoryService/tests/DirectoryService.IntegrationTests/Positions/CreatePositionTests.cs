@@ -2,7 +2,7 @@
 using DirectoryService.Domain.Positions;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Positions
 {

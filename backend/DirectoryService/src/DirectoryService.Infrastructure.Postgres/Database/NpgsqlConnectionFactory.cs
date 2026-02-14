@@ -1,11 +1,11 @@
 ﻿using System.Data;
-using DirectoryService.Application.Abstractions.Database;
+using Core.Database;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace DirectoryService.Infrastructure.Postgres.Database
 {
-    public class NpgsqlConnectionFactory : IDBConnectionFactory, IDisposable, IAsyncDisposable
+    public class NpgsqlConnectionFactory : IDbConnectionFactory, IDisposable, IAsyncDisposable
     {
         private readonly NpgsqlDataSource _dataSource;
 

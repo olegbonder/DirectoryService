@@ -1,5 +1,5 @@
 ﻿using DirectoryService.Domain.Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Locations
 {

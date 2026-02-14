@@ -1,4 +1,4 @@
-﻿using DirectoryService.Application.Abstractions;
+﻿using Core.Abstractions;
 using DirectoryService.Contracts.Locations.UpdatePosition;
 
 namespace DirectoryService.Application.Features.Positions.Commands.UpdatePosition

@@ -1,5 +1,5 @@
 ﻿using DirectoryService.Domain.Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Positions
 {
@@ -14,7 +14,7 @@ namespace DirectoryService.Domain.Positions
 
         public static Result<PositionDesription> Create(string? desription)
         {
-            var max = LengthConstants.LENGTH_1000;
+            int max = LengthConstants.LENGTH_1000;
             if (string.IsNullOrWhiteSpace(desription) == false && desription.Length > max)
             {
                 return PositionErrors.DescriptionLengthOutOfRange(max);

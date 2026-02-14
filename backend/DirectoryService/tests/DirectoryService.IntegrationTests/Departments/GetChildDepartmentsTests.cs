@@ -4,7 +4,7 @@ using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
 

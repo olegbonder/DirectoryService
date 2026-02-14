@@ -3,7 +3,7 @@ using DirectoryService.Contracts.Departments.MoveDepartment;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Departments
 {

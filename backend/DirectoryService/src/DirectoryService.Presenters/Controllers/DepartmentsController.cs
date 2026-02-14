@@ -18,9 +18,10 @@ using DirectoryService.Contracts.Departments.GetTopDepartments;
 using DirectoryService.Contracts.Departments.MoveDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
-using DirectoryService.Presenters.EndpointResult;
+using Framework.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using SharedKernel;
 
 namespace DirectoryService.Presenters.Controllers
 {

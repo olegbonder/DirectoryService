@@ -1,5 +1,6 @@
 ﻿using DirectoryService.Domain.Shared;
-using Shared.Result;
+using SharedKernel;
+using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Positions
 {

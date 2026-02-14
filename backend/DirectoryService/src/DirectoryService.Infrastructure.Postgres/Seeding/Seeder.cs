@@ -4,7 +4,7 @@ using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.Seeding
 {

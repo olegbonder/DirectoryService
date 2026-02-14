@@ -1,24 +1,24 @@
 ﻿using System.Text.Json;
+using Core.Abstractions;
+using Core.Caching;
+using Core.Database;
 using Dapper;
-using DirectoryService.Application.Abstractions;
-using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetTopDepartments;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Shared.Caching;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
 
 public sealed class GetTopDepartmentsHandler: IQueryHandler<GetTopDepartmentsResponse, GetTopDepartmentsRequest>
 {
-    private readonly IDBConnectionFactory _factory;
+    private readonly IDbConnectionFactory _factory;
     private readonly ICacheService _cache;
     private readonly ILogger<GetTopDepartmentsHandler> _logger;
     private readonly DistributedCacheEntryOptions _cacheOptions;
 
     public GetTopDepartmentsHandler(
-        IDBConnectionFactory factory,
+        IDbConnectionFactory factory,
         ICacheService cache,
         ILogger<GetTopDepartmentsHandler> logger)
     {

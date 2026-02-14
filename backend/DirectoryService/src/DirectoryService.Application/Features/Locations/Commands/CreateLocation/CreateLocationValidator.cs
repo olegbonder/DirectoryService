@@ -1,7 +1,7 @@
-﻿using DirectoryService.Application.Validation;
+﻿using Core.Validation;
 using DirectoryService.Domain.Locations;
 using FluentValidation;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Locations.Commands.CreateLocation
 {

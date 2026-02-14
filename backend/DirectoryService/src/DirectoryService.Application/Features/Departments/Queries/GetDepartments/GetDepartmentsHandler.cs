@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
-using DirectoryService.Application.Abstractions;
+using Core.Abstractions;
+using Core.Caching;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetDepartments;
 using DirectoryService.Domain.Departments;
@@ -9,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared;
-using Shared.Caching;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments
 {

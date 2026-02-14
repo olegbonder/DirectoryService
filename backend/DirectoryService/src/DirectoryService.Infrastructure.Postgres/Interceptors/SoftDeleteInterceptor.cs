@@ -1,6 +1,6 @@
-﻿using DirectoryService.Domain.Shared;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Postgres.Interceptors;
 

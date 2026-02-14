@@ -2,7 +2,7 @@
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;
 

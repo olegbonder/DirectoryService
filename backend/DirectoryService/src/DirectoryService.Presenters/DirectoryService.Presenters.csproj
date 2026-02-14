@@ -9,4 +9,8 @@
     <ProjectReference Include="..\DirectoryService.Contracts\DirectoryService.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="manuilov.framework" />
+  </ItemGroup>
+
 </Project>

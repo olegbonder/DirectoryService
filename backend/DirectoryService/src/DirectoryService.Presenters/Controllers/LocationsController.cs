@@ -7,9 +7,10 @@ using DirectoryService.Contracts;
 using DirectoryService.Contracts.Locations.CreateLocation;
 using DirectoryService.Contracts.Locations.GetLocationDictionary;
 using DirectoryService.Contracts.Locations.GetLocations;
-using DirectoryService.Presenters.EndpointResult;
+using Framework.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using SharedKernel;
 
 namespace DirectoryService.Presenters.Controllers
 {
