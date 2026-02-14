@@ -1,15 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState, cloneElement } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Building2, List } from "lucide-react";
 import DepartmentTree from "@/features/departments/department-tree";
 import DepartmentList from "@/features/departments/departments-list";
 import CreateDepartmentDialog from "@/features/departments/create-department-dialog";
+import {
+  DepartmentsViewMode,
+  setDepartmentsViewMode,
+  useDepartmentsViewMode,
+} from "./model/departments-show-mode-store";
 
 export default function DepartmentDisplayMode() {
+  const { viewMode } = useDepartmentsViewMode();
   const [createOpen, setCreateOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"tree" | "list">("tree");
+  type departmentViewModeButtons = {
+    value: DepartmentsViewMode;
+    label: string;
+    icon: ReactNode;
+  };
+
+  const viewModeButtons: departmentViewModeButtons[] = [
+    { value: "tree", label: "Дерево", icon: <Building2 /> },
+    { value: "list", label: "Список", icon: <List /> },
+  ];
 
   return (
     <div className="container mx-auto py-8">
@@ -32,30 +47,21 @@ export default function DepartmentDisplayMode() {
               Создать подразделение
             </Button>
             <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 items-center">
-              <Button
-                variant="ghost"
-                onClick={() => setViewMode("tree")}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors h-9 ${
-                  viewMode === "tree"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                Дерево
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setViewMode("list")}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors h-9 ${
-                  viewMode === "list"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                <List className="h-4 w-4 mr-2" />
-                Список
-              </Button>
+              {viewModeButtons.map((button) => (
+                <Button
+                  key={button.value}
+                  variant="ghost"
+                  onClick={() => setDepartmentsViewMode(button.value)}
+                  className={`rounded-md px-4 py-2 text-sm font-medium transition-colors h-9 ${
+                    viewMode === button.value
+                      ? "bg-white text-blue-600 shadow-sm"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {button.icon || <span className="h-4 w-4 mr-2" />}
+                  {button.label}
+                </Button>
+              ))}
             </div>
           </div>
         </div>

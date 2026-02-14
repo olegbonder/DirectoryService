@@ -8,8 +8,8 @@ import {
   SelectValue,
   SelectItem,
 } from "@/shared/components/ui/select";
-import { DepartmentOrderColumnn } from "@/entities/departments/types";
 import {
+  DepartmentOrderColumnn,
   setDepartmentsOrderBy,
   setDepartmentsOrderDirection,
   useGetDepartmentsFilter,
