@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Manuilov.SharedKernel</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Manuilov Oleg</Authors>
+    <PackageDescription>General Project</PackageDescription>
+    <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>
+  </PropertyGroup>
+  
+</Project>
