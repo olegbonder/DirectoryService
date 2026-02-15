@@ -1,5 +1,5 @@
 ﻿using DirectoryService.Domain.Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Departments
 {
@@ -19,8 +19,8 @@ namespace DirectoryService.Domain.Departments
                 return DepartmentErrors.NameIsEmpty();
             }
 
-            var min = LengthConstants.LENGTH_3;
-            var max = LengthConstants.LENGTH_150;
+            int min = LengthConstants.LENGTH_3;
+            int max = LengthConstants.LENGTH_150;
             if (name.Length < min || name.Length > max)
             {
                 return DepartmentErrors.NameLengthOutOfRange(min, max);

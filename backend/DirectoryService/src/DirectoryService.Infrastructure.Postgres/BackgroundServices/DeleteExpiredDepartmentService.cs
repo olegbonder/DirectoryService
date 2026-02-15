@@ -1,10 +1,10 @@
-﻿using DirectoryService.Domain.Departments;
+﻿using Core.Caching;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using DirectoryService.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Caching;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.BackgroundServices;
 

@@ -1,4 +1,4 @@
-﻿using Shared.Result;
+﻿using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Shared
 {

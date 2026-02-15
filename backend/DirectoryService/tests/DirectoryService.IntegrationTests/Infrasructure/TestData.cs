@@ -1,20 +1,15 @@
 ﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
 using DirectoryService.Application.Features.Locations.Commands.CreateLocation;
 using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
-using DirectoryService.Contracts.Departments;
 using DirectoryService.Contracts.Departments.CreateDepartment;
-using DirectoryService.Contracts.Locations;
 using DirectoryService.Contracts.Locations.CreateLocation;
-using DirectoryService.Contracts.Positions;
 using DirectoryService.Contracts.Positions.CreatePosition;
-using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.Positions;
 using DirectoryService.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Infrasructure
 {

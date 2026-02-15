@@ -7,7 +7,7 @@ using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.Positions
 {

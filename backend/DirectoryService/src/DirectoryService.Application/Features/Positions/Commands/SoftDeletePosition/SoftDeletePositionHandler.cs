@@ -1,13 +1,12 @@
-using DirectoryService.Application.Abstractions;
-using DirectoryService.Application.Abstractions.Database;
-using DirectoryService.Application.Validation;
-using DirectoryService.Domain.Locations;
+using Core.Abstractions;
+using Core.Caching;
+using Core.Database;
+using Core.Validation;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
-using Shared.Caching;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Positions.Commands.SoftDeletePosition
 {

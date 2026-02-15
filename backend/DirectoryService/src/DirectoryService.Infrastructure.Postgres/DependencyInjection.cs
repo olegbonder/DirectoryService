@@ -1,4 +1,5 @@
-﻿using DirectoryService.Application.Abstractions.Database;
+﻿using Core.Database;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Features.Positions;
@@ -8,7 +9,6 @@ using DirectoryService.Infrastructure.Postgres.Departments;
 using DirectoryService.Infrastructure.Postgres.Locations;
 using DirectoryService.Infrastructure.Postgres.Positions;
 using DirectoryService.Infrastructure.Postgres.Seeding;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +21,7 @@ namespace DirectoryService.Infrastructure.Postgres
             var connectionString = configuration.GetConnectionString(Constants.DATABASE_CONNECTIONSTRING);
             services.AddScoped(s => new ApplicationDbContext(connectionString!));
             services.AddScoped<IReadDbContext, ApplicationDbContext>(s => new ApplicationDbContext(connectionString!));
-            services.AddSingleton<IDBConnectionFactory, NpgsqlConnectionFactory>(s => new NpgsqlConnectionFactory(connectionString!));
+            services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>(s => new NpgsqlConnectionFactory(connectionString!));
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             services.AddScoped<ITransactionManager, TransactionManager>();
             services.AddScoped<TransactionManager>();

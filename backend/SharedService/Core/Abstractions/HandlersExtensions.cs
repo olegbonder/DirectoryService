@@ -1,0 +1,19 @@
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Core.Abstractions;
+
+public static class HandlersExtensions
+{
+    public static IServiceCollection AddHandlers(this IServiceCollection services, params Assembly[] assemblies)
+    {
+        // Поищет в текущей сборке все реализации для ICommandHandler
+        services.Scan(scan => scan.FromAssemblies(assemblies)
+            .AddClasses(classes => classes
+                .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>), typeof(IQueryHandler<,>), typeof(IQueryHandler<>)))
+            .AsSelfWithInterfaces()
+            .WithScopedLifetime());
+
+        return services;
+    }
+}

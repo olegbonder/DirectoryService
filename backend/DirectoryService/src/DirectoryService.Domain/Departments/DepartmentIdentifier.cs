@@ -1,12 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using DirectoryService.Domain.Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Departments
 {
     public sealed record DepartmentIdentifier
     {
-        public const string ONLY_LATIN_REGEX = @"^[a-z]+$";
+        private const string ONLY_LATIN_REGEX = @"^[a-z]+$";
 
         private DepartmentIdentifier(string value)
         {
@@ -22,8 +22,8 @@ namespace DirectoryService.Domain.Departments
                 return DepartmentErrors.IdentifierIsEmpty();
             }
 
-            var min = LengthConstants.LENGTH_3;
-            var max = LengthConstants.LENGTH_150;
+            int min = LengthConstants.LENGTH_3;
+            int max = LengthConstants.LENGTH_150;
             if (identifier.Length < min || identifier.Length > max)
             {
                 return DepartmentErrors.IdentifierLengthOutOfRange(min, max);

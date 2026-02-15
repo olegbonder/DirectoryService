@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+    <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+  
+    <ItemGroup>
+      <ProjectReference Include="..\Core\Core.csproj" />
+      <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Exceptions" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.Seq" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackageId>Manuilov.Framework</PackageId>
+    <Version>0.0.2</Version>
+    <Authors>Manuilov Oleg</Authors>
+    <PackageDescription>General Framework Project</PackageDescription>
+    <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>

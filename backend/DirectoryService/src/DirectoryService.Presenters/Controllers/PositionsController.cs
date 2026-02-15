@@ -1,5 +1,4 @@
-﻿using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
-using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
+﻿using DirectoryService.Application.Features.Positions.Commands.CreatePosition;
 using DirectoryService.Application.Features.Positions.Commands.CreatePositionDepartments;
 using DirectoryService.Application.Features.Positions.Commands.DeletePositionDepartment;
 using DirectoryService.Application.Features.Positions.Commands.SoftDeletePosition;
@@ -11,9 +10,10 @@ using DirectoryService.Contracts.Positions.CreatePosition;
 using DirectoryService.Contracts.Positions.CreatePositionDepartments;
 using DirectoryService.Contracts.Positions.GetPosition;
 using DirectoryService.Contracts.Positions.GetPositions;
-using DirectoryService.Presenters.EndpointResult;
+using Framework.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using SharedKernel;
 
 namespace DirectoryService.Presenters.Controllers
 {

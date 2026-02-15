@@ -1,12 +1,11 @@
-﻿using DirectoryService.Application.Abstractions;
+﻿using Core.Abstractions;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.GetDepartment;
-using DirectoryService.Contracts.Positions.GetPosition;
 using DirectoryService.Domain.Departments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmentDetail
 {

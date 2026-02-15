@@ -1,6 +1,6 @@
 ﻿using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Locations
 {

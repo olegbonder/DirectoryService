@@ -1,26 +1,26 @@
 ﻿using System.Text.Json;
+using Core.Abstractions;
+using Core.Caching;
+using Core.Database;
 using Dapper;
-using DirectoryService.Application.Abstractions;
-using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Contracts.Departments.GetRootDepartments;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared;
-using Shared.Caching;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 
 public class GetRootDepartmentsHandler : IQueryHandler<PaginationResponse<RootDepartmentDTO>, GetRootDepartmentsRequest>
 {
-    private readonly IDBConnectionFactory _factory;
+    private readonly IDbConnectionFactory _factory;
     private readonly ICacheService _cache;
     private readonly ILogger<GetRootDepartmentsHandler> _logger;
     private readonly DistributedCacheEntryOptions _cacheOptions;
 
     public GetRootDepartmentsHandler(
-        IDBConnectionFactory factory,
+        IDbConnectionFactory factory,
         ICacheService cache,
         ILogger<GetRootDepartmentsHandler> logger)
     {

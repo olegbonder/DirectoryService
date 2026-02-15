@@ -1,7 +1,7 @@
 ﻿using System.Data;
-using DirectoryService.Application.Abstractions.Database;
+using Core.Database;
 using Microsoft.Extensions.Logging;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Infrastructure.Postgres.Database
 {

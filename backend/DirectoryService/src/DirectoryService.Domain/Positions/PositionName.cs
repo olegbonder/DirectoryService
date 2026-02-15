@@ -1,5 +1,5 @@
 ﻿using DirectoryService.Domain.Shared;
-using Shared.Result;
+using SharedKernel.Result;
 
 namespace DirectoryService.Domain.Positions
 {
@@ -19,8 +19,8 @@ namespace DirectoryService.Domain.Positions
                 return PositionErrors.NameIsEmpty();
             }
 
-            var min = LengthConstants.LENGTH_3;
-            var max = LengthConstants.LENGTH_100;
+            int min = LengthConstants.LENGTH_3;
+            int max = LengthConstants.LENGTH_100;
             if (name.Length < min || name.Length > max)
             {
                 return PositionErrors.NameLengthOutOfRange(min, max);
