@@ -22,7 +22,7 @@
 
   <PropertyGroup>
     <PackageId>Manuilov.Framework</PackageId>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Authors>Manuilov Oleg</Authors>
     <PackageDescription>General Framework Project</PackageDescription>
     <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>

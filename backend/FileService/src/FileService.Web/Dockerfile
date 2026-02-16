@@ -6,7 +6,16 @@ EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG NUGET_USERNAME
+ARG NUGET_PASSWORD
 WORKDIR /src
+
+RUN dotnet nuget add source https://nuget.pkg.github.com/olegbonder/index.json \
+    -n github \
+    --username $NUGET_USERNAME \
+    --password $NUGET_PASSWORD \
+    --store-password-in-clear-text \
+    
 COPY ["src/FileService.Web/FileService.Web.csproj", "src/FileService.Web/"]
 COPY ["src/FileService.Contracts/FileService.Contracts.csproj", "src/FileService.Contracts/"]
 COPY ["src/FileService.Core/FileService.Core.csproj", "src/FileService.Core/"]

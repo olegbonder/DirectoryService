@@ -1,0 +1,60 @@
+﻿services:
+  fs-backend-prod:
+    container_name: fs-backend-prod
+    build:
+      context: .
+      dockerfile: src/FileService.Web/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    ports:
+      - "8091:8090"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8090
+    restart: always
+    depends_on:
+      - fs-postgres-prod
+      - fs-seq-prod
+
+  fs-postgres-prod:
+    container_name: fs-postgres-prod
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: file_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5438:5432"
+    volumes:
+      - fs-postgres-prod-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fs-seq-prod:
+    container_name: fs-seq-prod
+    image: datalust/seq:latest
+    ports:
+      - "5345:5341"
+      - "8084:80"
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    restart: always
+    volumes:
+      - fs-seq-prod-data:/data
+
+networks:
+  fs-prod-network:
+    driver: bridge
+    name: fs-prod-network
+
+volumes:
+  fs-postgres-prod-data:
+    name: fs-postgres-prod-data
+  fs-seq-prod-data:
+    name: fs-seq-prod-data

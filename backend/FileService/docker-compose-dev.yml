@@ -1,0 +1,46 @@
+﻿services:
+  fs-postgres-dev:
+    container_name: fs-postgres-dev
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: file_service_db_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5437:5432"
+    volumes:
+      - fs-postgres-dev-data:/var/lib/postgresql/data
+    networks:
+      - fs-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  fs-seq-dev:
+    container_name: fs-seq-dev
+    image: datalust/seq:latest
+    ports:
+      - "5344:5341"
+      - "8083:80"
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    restart: always
+    volumes:
+      - fs-seq-dev-data:/data
+    networks:
+      - fs-dev-network
+
+networks:
+  fs-dev-network:
+    driver: bridge
+    name: fs-dev-network
+
+volumes:
+  fs-postgres-dev-data:
+    name: fs-postgres-dev-data
+  fs-seq-dev-data:
+    name: fs-seq-dev-data
