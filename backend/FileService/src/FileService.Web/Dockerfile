@@ -14,8 +14,10 @@ RUN dotnet nuget add source https://nuget.pkg.github.com/olegbonder/index.json \
     -n github \
     --username $NUGET_USERNAME \
     --password $NUGET_PASSWORD \
-    --store-password-in-clear-text \
-    
+    --store-password-in-clear-text
+
+COPY ["Directory.Build.props", "."]
+COPY ["Directory.Packages.props", "."]
 COPY ["src/FileService.Web/FileService.Web.csproj", "src/FileService.Web/"]
 COPY ["src/FileService.Contracts/FileService.Contracts.csproj", "src/FileService.Contracts/"]
 COPY ["src/FileService.Core/FileService.Core.csproj", "src/FileService.Core/"]
@@ -25,11 +27,11 @@ COPY ["src/FileService.Infrastructure.S3/FileService.Infrastructure.S3.csproj", 
 RUN dotnet restore "src/FileService.Web/FileService.Web.csproj"
 COPY . .
 WORKDIR "/src/src/FileService.Web"
-RUN dotnet build "./FileService.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "FileService.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./FileService.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "FileService.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

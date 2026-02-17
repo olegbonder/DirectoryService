@@ -1,0 +1,122 @@
+﻿services:
+  ds-backend-prod:
+    container_name: ds-backend-prod
+    build:
+      context: ./DirectoryService
+      dockerfile: src/DirectoryService.Web/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8090
+    networks:
+      - prod-network
+    restart: always
+    depends_on:
+      - ds-postgres-prod
+      - seq-prod
+      - redis-prod
+
+  fs-backend-prod:
+    container_name: fs-backend-prod
+    build:
+      context: ./FileService
+      dockerfile: src/FileService.Web/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    ports:
+      - "8091:8090"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8090
+    networks:
+      - prod-network
+    restart: always
+    depends_on:
+      - fs-postgres-prod
+      - seq-prod
+
+  ds-postgres-prod:
+    container_name: ds-postgres-prod
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: directory_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres-prod-data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fs-postgres-prod:
+    container_name: fs-postgres-prod
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: file_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres-prod-data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  seq-prod:
+    container_name: seq-prod
+    image: datalust/seq:latest
+    ports:
+      - "5343:5341"
+      - "8082:80"
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    networks:
+      - prod-network
+    restart: always
+    volumes:
+      - seq-prod-data:/data
+
+  redis-prod:
+    container_name: redis-prod
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-prod-data:/data
+    networks:
+      - prod-network
+    restart: always
+
+networks:
+  prod-network:
+    driver: bridge
+    name: prod-network
+
+volumes:
+  postgres-prod-data:
+    name: postgres-prod-data
+  seq-prod-data:
+    name: seq-prod-data
+  redis-prod-data:
+    name: redis-prod-data
