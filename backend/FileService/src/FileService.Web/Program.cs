@@ -1,4 +1,5 @@
 using FileService.Infrastructure.Postgres;
+using FileService.Infrastructure.Postgres.Migrations;
 using FileService.Web.Configuration;
 using Serilog;
 
@@ -23,6 +24,11 @@ try
     var app = builder.Build();
 
     app.ConfigureApp();
+
+    if (app.Environment.IsDevelopment())
+    {
+        await app.Services.RunMigrating();
+    }
 
     app.Run();
 }

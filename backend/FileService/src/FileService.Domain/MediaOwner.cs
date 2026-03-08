@@ -11,6 +11,11 @@ public sealed record MediaOwner
     public string Context { get; }
     public Guid EntityId { get; }
 
+    // EF-Core
+    private MediaOwner()
+    {
+    }
+
     private MediaOwner(string context, Guid entityId)
     {
         Context = context;
