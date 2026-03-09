@@ -14,6 +14,8 @@ namespace FileService.Domain
             Extension = extension;
         }
 
+        public override string ToString() => $"{Name}.{Extension}";
+
         private static Result<FileName> Create(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))

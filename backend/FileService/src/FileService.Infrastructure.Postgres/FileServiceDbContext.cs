@@ -23,6 +23,8 @@ public class FileServiceDbContext(string connectionString): DbContext
         return LoggerFactory.Create(builder => builder.AddConsole());
     }
 
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
+
     public DbSet<PreviewAsset> PreviewAssets => Set<PreviewAsset>();
 
     public DbSet<VideoAsset> VideoAssets => Set<VideoAsset>();
