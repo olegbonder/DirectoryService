@@ -10,4 +10,8 @@
     <ProjectReference Include="..\FileService.Core\FileService.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
