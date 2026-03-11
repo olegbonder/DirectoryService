@@ -1,6 +1,8 @@
 using FileService.Infrastructure.Postgres;
 using FileService.Infrastructure.Postgres.Migrations;
+using FileService.Infrastructure.S3;
 using FileService.Web.Configuration;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()

@@ -18,7 +18,9 @@ namespace FileService.Web.Configuration
                 app.ConfigureOpenApiSpec("/openapi/v1.json", "FileService.Web");
             }
 
-            app.MapEndpoints();
+            var apiGroup = app.MapGroup("/api").WithOpenApi();
+
+            app.MapEndpoints(apiGroup);
 
             app.ConfigureCors("http://localhost:3000");
 

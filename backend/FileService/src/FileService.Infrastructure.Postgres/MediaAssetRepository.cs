@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using FileService.Core;
+using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +48,7 @@ public class MediaAssetRepository : IMediaAssetRepository
 
     public async Task<Result<MediaAsset>> GetById(Guid mediaAssetId, CancellationToken cancellationToken)
     {
-        var mediaAsset = await GetBy(m => m.Id == mediaAssetId, cancellationToken);
+        var mediaAsset = await GetBy(m => m.Id == mediaAssetId && m.Status != MediaStatus.DELETED, cancellationToken);
         if (mediaAsset == null)
             return GeneralErrors.NotFound("media_asset", mediaAssetId);
 
@@ -79,5 +80,10 @@ public class MediaAssetRepository : IMediaAssetRepository
             _logger.LogError(ex, "Ошибка удаления медиа-файла {fileInfo}", fileInfo);
             return MediaAssetErrors.DatabaseError();
         }
+    }
+
+    public async Task SaveChanges(CancellationToken cancellationToken)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

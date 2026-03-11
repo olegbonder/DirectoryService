@@ -32,7 +32,7 @@ public class PreviewAsset: MediaAsset
             return Error.Validation("image.invalid.extension", $"File extension must be one of: {string.Join(", ", _allowedExtensions)}");
         }
 
-        if (mediaData.ContentType.Category == MediaType.IMAGE)
+        if (mediaData.ContentType.Category != MediaType.IMAGE)
         {
             return Error.Validation("image.invalid.content-type", $"File content type must be {ALLOWED_CONTENT_TYPE}");
         }

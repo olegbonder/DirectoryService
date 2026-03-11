@@ -17,7 +17,7 @@
                 "preview" => AssetType.PREVIEW,
                 "avatar" => AssetType.AVATAR,
                 _ => throw new ArgumentException($"Invalid asset type: {value}")
-            };   
+            };
         }
     }
 }
