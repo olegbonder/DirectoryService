@@ -1,5 +1,6 @@
 ﻿using Core.Caching;
 using FileService.Core;
+using FileService.Infrastructure.S3;
 using Framework.Endpoints;
 using Framework.Logging;
 using Framework.Swagger;
@@ -16,7 +17,8 @@ namespace FileService.Web.Configuration
                 .AddOpenApiSpec()
                 .AddApplication()
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
-                .AddCors();
+                .AddCors()
+                .AddS3(configuration);
 
             return services;
         }

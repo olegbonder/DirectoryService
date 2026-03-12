@@ -2,15 +2,12 @@
 
   <ItemGroup>
     <PackageReference Include="manuilov.core" />
+    <PackageReference Include="Manuilov.Framework" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FileService.Contracts\FileService.Contracts.csproj" />
     <ProjectReference Include="..\FileService.Domain\FileService.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\" />
   </ItemGroup>
 
 </Project>

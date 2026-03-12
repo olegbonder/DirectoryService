@@ -16,7 +16,7 @@ namespace FileService.Domain
 
         public override string ToString() => $"{Name}.{Extension}";
 
-        private static Result<FileName> Create(string fileName)
+        public static Result<FileName> Create(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {

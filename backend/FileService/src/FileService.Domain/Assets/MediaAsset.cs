@@ -46,6 +46,23 @@ namespace FileService.Domain.Assets
             UpdatedAt = CreatedAt;
         }
 
+        public static Result<MediaAsset> CreateForUpload(MediaData mediaData,  AssetType assetType, MediaOwner owner)
+        {
+            var assetId = Guid.NewGuid();
+
+            switch (assetType)
+            {
+                case AssetType.VIDEO:
+                    var videoResult = VideoAsset.CreateForUpload(assetId, mediaData, owner);
+                    return videoResult.IsFailure ? videoResult.Errors : videoResult.Value;
+                case AssetType.PREVIEW:
+                    var previewResult = PreviewAsset.CreateForUpload(assetId, mediaData, owner);
+                    return previewResult.IsFailure ? previewResult.Errors : previewResult.Value;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(assetType), assetType, null);
+            }
+        }
+
         public Result MarkUploaded(DateTime uploadedAt)
         {
             if (Status == MediaStatus.UPLOADED)

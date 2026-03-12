@@ -13,4 +13,6 @@ public interface IMediaAssetRepository
     Task<Result<MediaAsset>> GetById(Guid mediaAssetId, CancellationToken cancellationToken);
 
     Task<Result> Delete(Guid mediaAssetId, CancellationToken cancellationToken);
+
+    Task SaveChanges(CancellationToken cancellationToken);
 }
