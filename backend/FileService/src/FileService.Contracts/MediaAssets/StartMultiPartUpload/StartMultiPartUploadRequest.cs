@@ -1,4 +1,4 @@
-﻿namespace FileService.Contracts;
+﻿namespace FileService.Contracts.MediaAssets.StartMultiPartUpload;
 
 public record StartMultiPartUploadRequest
 (

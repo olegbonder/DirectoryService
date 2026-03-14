@@ -18,4 +18,39 @@ public static class MediaAssetErrors
     {
         return Error.Validation("asset_type.failed", "Неправильный тип медиа-файла");
     }
+
+    public static Error MediaAssetIdNotBeNull()
+    {
+        return GeneralErrors.ValueIsRequired("MediaAssetId");
+    }
+
+    public static Error MediaAssetIdNotBeEmpty()
+    {
+        return GeneralErrors.PropertyIsEmpty("MediaAssetId", "медиа-файл");
+    }
+
+    public static Error UploadIdNotBeNull()
+    {
+        return GeneralErrors.ValueIsRequired("UploadId");
+    }
+
+    public static Error UploadIdNotBeEmpty()
+    {
+        return GeneralErrors.PropertyIsEmpty("UploadId", "Идентификатор загрузки медиа-файла");
+    }
+
+    public static Error PartNumberMustBePositive()
+    {
+        return Error.Validation("partNumber", "Номер чанка должен быть положительным");
+    }
+
+    public static Error PartETagsСountMustBePositive()
+    {
+        return Error.Validation("partETags.count", "Количество чанков должно быть положительным");
+    }
+
+    public static Error ExpectedChunksCount()
+    {
+        return Error.Validation("partETags.count", "PartETags count must be equal to expected chunks count.");
+    }
 }

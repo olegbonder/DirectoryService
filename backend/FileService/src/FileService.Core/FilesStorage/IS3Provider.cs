@@ -1,8 +1,9 @@
-﻿using FileService.Contracts;
+﻿using FileService.Contracts.MediaAssets;
+using FileService.Contracts.MediaAssets.ListMultipartUpload;
 using FileService.Domain;
 using SharedKernel.Result;
 
-namespace FileService.Core;
+namespace FileService.Core.FilesStorage;
 
 public interface IS3Provider
 {
@@ -22,33 +23,43 @@ public interface IS3Provider
         MediaData mediaData,
         CancellationToken cancellationToken);
 
-    Task<Result<string>> GenerateUploadUrlAsync(string bucketName, string key);
+    Task<Result<string>> GenerateUploadUrlAsync(StorageKey storageKey);
 
     Task<Result<string>> GenerateDownloadUrlAsync(StorageKey storageKey);
-
-    Task<Result<string>> GenerateDownloadUrlAsync(string bucketName, string key);
 
     Task<Result<IReadOnlyList<string>>> GenerateDownloadUrlsAsync(
         IEnumerable<StorageKey> storageKeys,
         CancellationToken cancellationToken);
 
     Task<Result<string>> StartMultiPartUploadAsync(
-        string bucketName,
-        string key,
-        string contentType,
+        StorageKey storageKey,
+        MediaData mediaData,
         CancellationToken cancellationToken);
 
-    Task<Result<IReadOnlyList<string>>> GenerateAllChunksUploadUrlsAsync(
-        string bucketName,
-        string key,
+    Task<Result<string>> GenerateChunkUploadUrlAsync(
+        StorageKey storageKey,
+        string uploadId,
+        int partNumber,
+        CancellationToken cancellationToken);
+
+    Task<Result<IReadOnlyList<ChunkUploadUrl>>> GenerateAllChunksUploadUrlsAsync(
+        StorageKey storageKey,
         string uploadId,
         int totalChunks,
         CancellationToken cancellationToken);
 
-    Task<Result<string>> CompleteMultiPartUploadAsync(
-        string bucketName,
-        string key,
+    Task<Result> CompleteMultiPartUploadAsync(
+        StorageKey storageKey,
         string uploadId,
         IReadOnlyList<PartEtagDto> partETags,
+        CancellationToken cancellationToken);
+
+    Task<Result> AbortMultipartUploadAsync(
+        StorageKey storageKey,
+        string uploadId,
+        CancellationToken cancellationToken);
+
+    Task<Result<MultipartUploadsResponse>> ListMultipartUploadAsync(
+        string bucketName,
         CancellationToken cancellationToken);
 }

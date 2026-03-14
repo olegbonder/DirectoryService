@@ -1,7 +1,6 @@
 ﻿using Core.Abstractions;
-using Core.Database;
 using Core.Validation;
-using FileService.Contracts.MediaAssets.UploadFile;
+using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FluentValidation;
@@ -48,7 +47,11 @@ public class UploadFileHandler : ICommandHandler<Guid, UploadFileCommand>
             return mediaDataResult.Errors;
 
         var mediaData = mediaDataResult.Value;
-        var owner = MediaOwner.Create(request.Context, request.ContextId);
+        var ownerResult = MediaOwner.Create(request.Context, request.ContextId);
+        if (ownerResult.IsFailure)
+            return ownerResult.Errors;
+
+        var owner = ownerResult.Value;
         var mediaAssetResult = MediaAsset.CreateForUpload(mediaData, assetType, owner);
         if (mediaAssetResult.IsFailure)
             return mediaAssetResult.Errors;

@@ -1,6 +1,6 @@
 ﻿using Core.Abstractions;
-using Core.Database;
 using Core.Validation;
+using FileService.Core.FilesStorage;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;

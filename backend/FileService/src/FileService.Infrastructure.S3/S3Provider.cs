@@ -1,7 +1,8 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using FileService.Contracts;
-using FileService.Core;
+using FileService.Contracts.MediaAssets;
+using FileService.Contracts.MediaAssets.ListMultipartUpload;
+using FileService.Core.FilesStorage;
 using FileService.Domain;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -171,16 +172,17 @@ public class S3Provider : IS3Provider
     }
 
     public async Task<Result<string>> StartMultiPartUploadAsync(
-        string bucketName,
-        string key,
-        string contentType,
+        StorageKey storageKey,
+        MediaData mediaData,
         CancellationToken cancellationToken)
     {
         try
         {
             var request = new InitiateMultipartUploadRequest
             {
-                BucketName = bucketName, Key = key, ContentType = contentType
+                BucketName = storageKey.Bucket,
+                Key = storageKey.Value,
+                ContentType = mediaData.ContentType.Value
             };
             var result = await _s3Client.InitiateMultipartUploadAsync(request, cancellationToken);
 
@@ -194,9 +196,36 @@ public class S3Provider : IS3Provider
         }
     }
 
-    public async Task<Result<IReadOnlyList<string>>> GenerateAllChunksUploadUrlsAsync(
-        string bucketName,
-        string key,
+    public async Task<Result<string>> GenerateChunkUploadUrlAsync(
+        StorageKey storageKey,
+        string uploadId,
+        int partNumber,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = storageKey.Bucket,
+                Key = storageKey.Value,
+                Verb = HttpVerb.PUT,
+                UploadId = uploadId,
+                PartNumber = partNumber,
+                Expires = DateTime.UtcNow.AddMinutes(_s3Options.UploadUrlExpirationMinutes),
+                Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP
+            };
+            string? url = await _s3Client.GetPreSignedURLAsync(request);
+            return url;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating chunk upload url");
+            return S3ErrorMapper.ToError(ex);
+        }
+    }
+
+    public async Task<Result<IReadOnlyList<ChunkUploadUrl>>> GenerateAllChunksUploadUrlsAsync(
+        StorageKey storageKey,
         string uploadId,
         int totalChunks,
         CancellationToken cancellationToken)
@@ -211,8 +240,8 @@ public class S3Provider : IS3Provider
                     {
                         var request = new GetPreSignedUrlRequest
                         {
-                            BucketName = bucketName,
-                            Key = key,
+                            BucketName = storageKey.Bucket,
+                            Key = storageKey.Value,
                             Verb = HttpVerb.PUT,
                             UploadId = uploadId,
                             PartNumber = partNumber,
@@ -221,7 +250,7 @@ public class S3Provider : IS3Provider
                         };
                         string? url = await _s3Client.GetPreSignedURLAsync(request);
 
-                        return url;
+                        return new ChunkUploadUrl(partNumber, url);
                     }
                     finally
                     {
@@ -229,7 +258,7 @@ public class S3Provider : IS3Provider
                     }
                 });
 
-            string[] results = await Task.WhenAll(tasks);
+            ChunkUploadUrl[] results = await Task.WhenAll(tasks);
             return results;
         }
         catch (Exception ex)
@@ -239,36 +268,14 @@ public class S3Provider : IS3Provider
         }
     }
 
-    public async Task<Result<string>> GenerateDownloadUrlAsync(string bucketName, string key)
+    public async Task<Result<string>> GenerateUploadUrlAsync(StorageKey storageKey)
     {
         try
         {
             var request = new GetPreSignedUrlRequest
             {
-                BucketName = bucketName,
-                Key = key,
-                Verb = HttpVerb.GET,
-                Expires = DateTime.UtcNow.AddHours(_s3Options.DownloadExpirationHours),
-                Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP
-            };
-            string? response = await _s3Client.GetPreSignedURLAsync(request);
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            return S3ErrorMapper.ToError(ex);
-        }
-    }
-
-    public async Task<Result<string>> GenerateUploadUrlAsync(string bucketName, string key)
-    {
-        try
-        {
-            var request = new GetPreSignedUrlRequest
-            {
-                BucketName = bucketName,
-                Key = key,
+                BucketName = storageKey.Bucket,
+                Key = storageKey.Value,
                 Verb = HttpVerb.PUT,
                 Expires = DateTime.UtcNow.AddHours(_s3Options.DownloadExpirationHours),
                 Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP
@@ -279,13 +286,13 @@ public class S3Provider : IS3Provider
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error generating upload url");
             return S3ErrorMapper.ToError(ex);
         }
     }
 
-    public async Task<Result<string>> CompleteMultiPartUploadAsync(
-        string bucketName,
-        string key,
+    public async Task<Result> CompleteMultiPartUploadAsync(
+        StorageKey storageKey,
         string uploadId,
         IReadOnlyList<PartEtagDto> partETags,
         CancellationToken cancellationToken)
@@ -294,18 +301,63 @@ public class S3Provider : IS3Provider
         {
             var request = new CompleteMultipartUploadRequest
             {
-                BucketName = bucketName,
-                Key = key,
+                BucketName = storageKey.Bucket,
+                Key = storageKey.Value,
                 UploadId = uploadId,
                 PartETags = partETags.Select(p => new PartETag { ETag = p.ETag, PartNumber = p.PartNumber }).ToList(),
             };
 
-            var response = await _s3Client.CompleteMultipartUploadAsync(request, cancellationToken);
+            await _s3Client.CompleteMultipartUploadAsync(request, cancellationToken);
 
-            return response.Key;
+            return Result.Success();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error completing multipart upload for {uploadId}", uploadId);
+            return S3ErrorMapper.ToError(ex);
+        }
+    }
+
+    public async Task<Result> AbortMultipartUploadAsync(
+        StorageKey storageKey,
+        string uploadId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var request = new AbortMultipartUploadRequest
+            {
+                BucketName = storageKey.Bucket,
+                Key = storageKey.Value,
+                UploadId = uploadId
+            };
+
+            await _s3Client.AbortMultipartUploadAsync(request, cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error aborting multipart upload for {uploadId}", uploadId);
+            return S3ErrorMapper.ToError(ex);
+        }
+    }
+
+    public async Task<Result<MultipartUploadsResponse>> ListMultipartUploadAsync(string bucketName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var request = new ListMultipartUploadsRequest
+            {
+                BucketName = bucketName
+            };
+            var multipartUploadsResponse = await _s3Client.ListMultipartUploadsAsync(request, cancellationToken);
+            var multipartUploads = multipartUploadsResponse.MultipartUploads.Select(u => new MultipartUploadDto(u.UploadId, u.Key)).ToList();
+            return new MultipartUploadsResponse(multipartUploads);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing multipart uploads");
             return S3ErrorMapper.ToError(ex);
         }
     }
