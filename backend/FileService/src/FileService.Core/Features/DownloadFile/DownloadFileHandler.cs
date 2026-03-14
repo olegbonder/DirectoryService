@@ -1,6 +1,6 @@
 ﻿using Core.Abstractions;
-using Core.Database;
 using FileService.Contracts.MediaAssets.DownloadFile;
+using FileService.Core.FilesStorage;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
@@ -26,6 +26,9 @@ public class DownloadFileHandler : IQueryHandler<string, DownloadFileRequest>
         DownloadFileRequest request, CancellationToken cancellationToken)
     {
         var fileId = request.FileId;
+        if (fileId == Guid.Empty)
+            return GeneralErrors.PropertyIsEmpty("FileId", "FileId");
+
         var mediaAssetResult = await _mediaAssetRepository.GetById(fileId, cancellationToken);
         if (mediaAssetResult.IsFailure)
             return mediaAssetResult.Errors;
