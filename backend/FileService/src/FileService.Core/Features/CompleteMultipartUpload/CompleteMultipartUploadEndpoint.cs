@@ -1,4 +1,5 @@
-﻿using FileService.Contracts.MediaAssets.CompleteMultiPartUpload;
+﻿using FileService.Contracts.MediaAssets;
+using FileService.Contracts.MediaAssets.CompleteMultiPartUpload;
 using FileService.Core.Features.CompleteMultiPartUpload;
 using Framework.EndpointResult;
 using Framework.Endpoints;
@@ -12,7 +13,7 @@ public sealed class CompleteMultipartUploadEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("/files/multipart/complete", async Task<EndpointResult<Guid>>(
+        routeBuilder.MapPost("/files/multipart/end", async Task<EndpointResult<MediaAssetResponse>>(
                 [FromBody] CompleteMultiPartUploadRequest request,
                 [FromServices] CompleteMultiPartUploadHandler handler,
                 CancellationToken cancellationToken) =>

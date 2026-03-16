@@ -2,4 +2,4 @@
 
 namespace FileService.Core.Features.DeleteFile;
 
-public record DeleteFileCommand(Guid FileId) : ICommand;
+public record DeleteFileCommand(Guid MediaAssetId) : ICommand;

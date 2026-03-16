@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using FileService.Contracts.MediaAssets;
 using FileService.Contracts.MediaAssets.ListMultipartUpload;
 using FileService.Core.FilesStorage;
+using FileService.Core.Models;
 using FileService.Domain;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -134,7 +135,7 @@ public class S3Provider : IS3Provider
         }
     }
 
-    public async Task<Result<IReadOnlyList<string>>> GenerateDownloadUrlsAsync(
+    public async Task<Result<IReadOnlyList<MediaUrl>>> GenerateDownloadUrlsAsync(
         IEnumerable<StorageKey> storageKeys,
         CancellationToken cancellationToken)
     {
@@ -154,15 +155,15 @@ public class S3Provider : IS3Provider
                         Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
                     };
                     string? result = await _s3Client.GetPreSignedURLAsync(request);
-                    return result;
+                    return new MediaUrl(storageKey, result);
                 }
                 finally
                 {
                     _requestsSemaphore.Release();
                 }
             });
-            string[] results = await Task.WhenAll(tasks);
-            return Result<IReadOnlyList<string>>.Success(results);
+            MediaUrl[] results = await Task.WhenAll(tasks);
+            return Result<IReadOnlyList<MediaUrl>>.Success(results);
         }
         catch (Exception ex)
         {

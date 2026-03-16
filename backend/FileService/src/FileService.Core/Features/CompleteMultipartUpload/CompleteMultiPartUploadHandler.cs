@@ -12,7 +12,7 @@ using SharedKernel.Result;
 
 namespace FileService.Core.Features.CompleteMultiPartUpload;
 
-public sealed class CompleteMultiPartUploadHandler : ICommandHandler<Guid, CompleteMultipartUploadCommand>
+public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetResponse, CompleteMultipartUploadCommand>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly ILogger<CompleteMultiPartUploadHandler> _logger;
@@ -31,7 +31,7 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<Guid, Compl
         _s3Provider = s3Provider;
     }
 
-    public async Task<Result<Guid>> Handle(CompleteMultipartUploadCommand command, CancellationToken cancellationToken)
+    public async Task<Result<MediaAssetResponse>> Handle(CompleteMultipartUploadCommand command, CancellationToken cancellationToken)
     {
         var validResult = await _validator.ValidateAsync(command, cancellationToken);
         if (validResult.IsValid == false)
@@ -65,6 +65,6 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<Guid, Compl
         await _mediaAssetRepository.SaveChanges(cancellationToken);
         _logger.LogInformation("Media Asset completed uploading: {MediaAssetId} with key: {StorageKey}", mediaAsset.Id, mediaAsset.RawKey);
 
-        return mediaAsset.Id;
+        return new MediaAssetResponse(mediaAsset.Id);
     }
 }

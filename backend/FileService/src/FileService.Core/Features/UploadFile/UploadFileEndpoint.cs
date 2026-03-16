@@ -11,7 +11,7 @@ public class UploadFileEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/files/upload", async Task<EndpointResult<Guid>>(
+        app.MapPost("/file/upload", async Task<EndpointResult<Guid>>(
                 [FromForm] UploadFileRequest request,
                 [FromServices] UploadFileHandler handler,
                 CancellationToken cancellationToken) =>

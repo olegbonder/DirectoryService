@@ -1,5 +1,6 @@
 ﻿using FileService.Contracts.MediaAssets;
 using FileService.Contracts.MediaAssets.ListMultipartUpload;
+using FileService.Core.Models;
 using FileService.Domain;
 using SharedKernel.Result;
 
@@ -27,7 +28,7 @@ public interface IS3Provider
 
     Task<Result<string>> GenerateDownloadUrlAsync(StorageKey storageKey);
 
-    Task<Result<IReadOnlyList<string>>> GenerateDownloadUrlsAsync(
+    Task<Result<IReadOnlyList<MediaUrl>>> GenerateDownloadUrlsAsync(
         IEnumerable<StorageKey> storageKeys,
         CancellationToken cancellationToken);
 

@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="manuilov.core" />
     <PackageReference Include="Manuilov.Framework" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
   </ItemGroup>
 
   <ItemGroup>
