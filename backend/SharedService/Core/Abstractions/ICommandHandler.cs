@@ -13,4 +13,10 @@ namespace Core.Abstractions
     {
         Task Handle(TCommand command, CancellationToken cancellationToken);
     }
+
+    public interface IResultCommandHandler<in TCommand>
+        where TCommand : ICommand
+    {
+        Task<Result> Handle(TCommand command, CancellationToken cancellationToken);
+    }
 }
