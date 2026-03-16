@@ -1,4 +1,5 @@
-﻿using Core.Validation;
+﻿using Core.Abstractions;
+using Core.Validation;
 using FileService.Contracts.MediaAssets.AbortMultipartUpload;
 using FileService.Core.FilesStorage;
 using FileService.Domain.Assets;
@@ -8,7 +9,7 @@ using SharedKernel.Result;
 
 namespace FileService.Core.Features.AbortMultipartUpload;
 
-public sealed class AbortMultipartUploadHandler
+public sealed class AbortMultipartUploadHandler : IResultCommandHandler<AbortMultipartUploadCommand>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly ILogger<AbortMultipartUploadHandler> _logger;

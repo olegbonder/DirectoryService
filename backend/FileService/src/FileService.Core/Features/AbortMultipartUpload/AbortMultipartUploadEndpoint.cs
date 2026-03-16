@@ -1,4 +1,5 @@
 ﻿using FileService.Contracts.MediaAssets.AbortMultipartUpload;
+using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +11,13 @@ public sealed class AbortMultipartUploadEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("/files/multipart/abort", async Task(
+        routeBuilder.MapPost("/files/multipart/abort", async Task<EndpointResult>(
                 [FromBody] AbortMultipartUploadRequest request,
                 [FromServices] AbortMultipartUploadHandler handler,
                 CancellationToken cancellationToken) =>
         {
             var command = new AbortMultipartUploadCommand(request);
-            await handler.Handle(command, cancellationToken);
+            return await handler.Handle(command, cancellationToken);
         });
     }
 }

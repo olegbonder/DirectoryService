@@ -3,6 +3,20 @@ using SharedKernel;
 
 namespace Framework.EndpointResult
 {
+    public sealed class SuccessResult : IResult
+    {
+        public async Task ExecuteAsync(HttpContext httpContext)
+        {
+            ArgumentNullException.ThrowIfNull(httpContext);
+
+            var envelope = Envelope.Ok(null);
+
+            httpContext.Response.StatusCode = (int)StatusCodes.Status200OK;
+
+            await httpContext.Response.WriteAsJsonAsync(envelope);
+        }
+    }
+
     public sealed class SuccessResult<TValue> : IResult
     {
         private readonly TValue _value;
