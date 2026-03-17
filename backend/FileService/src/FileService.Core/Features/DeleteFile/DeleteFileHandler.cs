@@ -1,13 +1,15 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
+using FileService.Contracts.MediaAssets;
 using FileService.Core.FilesStorage;
+using FileService.Domain;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
 namespace FileService.Core.Features.DeleteFile;
 
-public class DeleteFileHandler : ICommandHandler<Guid, DeleteFileCommand>
+public class DeleteFileHandler : ICommandHandler<MediaAssetResponse, DeleteFileCommand>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly IS3Provider _s3Provider;
@@ -26,7 +28,7 @@ public class DeleteFileHandler : ICommandHandler<Guid, DeleteFileCommand>
         _logger = logger;
     }
 
-    public async Task<Result<Guid>> Handle(DeleteFileCommand command, CancellationToken cancellationToken)
+    public async Task<Result<MediaAssetResponse>> Handle(DeleteFileCommand command, CancellationToken cancellationToken)
     {
         var validResult = await _validator.ValidateAsync(command, cancellationToken);
         if (validResult.IsValid == false)
@@ -34,28 +36,34 @@ public class DeleteFileHandler : ICommandHandler<Guid, DeleteFileCommand>
             return validResult.ToList();
         }
 
-        var fileId = command.FileId;
-        var mediaAssetResult = await _mediaAssetRepository.GetById(fileId, cancellationToken);
+        var mediaAssetId = command.MediaAssetId;
+        var mediaAssetResult = await _mediaAssetRepository.GetById(mediaAssetId, cancellationToken);
         if (mediaAssetResult.IsFailure)
             return mediaAssetResult.Errors;
 
         var mediaAsset = mediaAssetResult.Value;
 
-        var deleteResult = await _s3Provider.DeleteFileAsync(
-            mediaAsset.RawKey,
-            cancellationToken);
-        if (deleteResult.IsFailure)
+        var deleteKeys = new List<StorageKey> { mediaAsset.RawKey };
+        if (mediaAsset.FinalKey != null)
+        {
+            deleteKeys.Add(mediaAsset.FinalKey);
+        }
+
+        var tasks = deleteKeys.Select(key => _s3Provider.DeleteFileAsync(key, cancellationToken));
+        var deleteResults = await Task.WhenAll(tasks);
+        var failedResults = deleteResults.Where(deleteResult => deleteResult.IsFailure);
+        if (failedResults.Any())
         {
             mediaAsset.MarkFailed(DateTime.UtcNow);
             await _mediaAssetRepository.SaveChanges(cancellationToken);
-            return deleteResult.Errors;
+            return new Errors(failedResults.SelectMany(deleteResult => deleteResult.Errors));
         }
 
         mediaAsset.MarkDeleted(DateTime.UtcNow);
         await _mediaAssetRepository.SaveChanges(cancellationToken);
 
-        _logger.LogInformation("Deleted file with id:{fileId}", fileId);
+        _logger.LogInformation("Deleted file with id:{fileId}", mediaAssetId);
 
-        return fileId;
+        return new MediaAssetResponse(mediaAssetId);
     }
 }

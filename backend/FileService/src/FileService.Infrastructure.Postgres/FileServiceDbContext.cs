@@ -1,10 +1,11 @@
-﻿using FileService.Domain.Assets;
+﻿using FileService.Core;
+using FileService.Domain.Assets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FileService.Infrastructure.Postgres;
 
-public class FileServiceDbContext(string connectionString): DbContext
+public class FileServiceDbContext(string connectionString): DbContext, IReadDbContext
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -28,4 +29,6 @@ public class FileServiceDbContext(string connectionString): DbContext
     public DbSet<PreviewAsset> PreviewAssets => Set<PreviewAsset>();
 
     public DbSet<VideoAsset> VideoAssets => Set<VideoAsset>();
+
+    public IQueryable<MediaAsset> MediaAssetsQuery => MediaAssets.AsQueryable().AsNoTracking();
 }

@@ -11,6 +11,8 @@ namespace FileService.Infrastructure.Postgres
         {
             string? connectionString = configuration.GetConnectionString(Constants.DATABASE_CONNECTIONSTRING);
             services.AddScoped(s => new FileServiceDbContext(connectionString!));
+            services.AddScoped<IReadDbContext, FileServiceDbContext>(s => new FileServiceDbContext(connectionString!));
+            
             services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
 
             return services;

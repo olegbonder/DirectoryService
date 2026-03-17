@@ -4,6 +4,7 @@ namespace FileService.Domain
 {
     public sealed record FileName
     {
+        public string Value { get; }
         public string Name { get; }
 
         public string Extension { get; }
@@ -12,9 +13,8 @@ namespace FileService.Domain
         {
             Name = name;
             Extension = extension;
+            Value = name + "." + extension;
         }
-
-        public override string ToString() => $"{Name}.{Extension}";
 
         public static Result<FileName> Create(string fileName)
         {

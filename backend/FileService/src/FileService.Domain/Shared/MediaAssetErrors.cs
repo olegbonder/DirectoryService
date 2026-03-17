@@ -53,4 +53,19 @@ public static class MediaAssetErrors
     {
         return Error.Validation("partETags.count", "PartETags count must be equal to expected chunks count.");
     }
+
+    public static Error MediaAssetIdsNotBeNull()
+    {
+        return GeneralErrors.ValueIsRequired("mediaAssetIds");
+    }
+
+    public static Error MediaAssetIdsNotBeEmpty()
+    {
+        return Error.Validation("mediaAssetIds.not.empty", "Список медиа-файлов не может быть пустым");
+    }
+
+    public static Error MediaAssetIdsMustBeUnique()
+    {
+        return Error.Validation("mediaAssetIds.must.be.unique", "Список медиа-файлов должен быть уникальным");
+    }
 }

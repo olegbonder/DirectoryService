@@ -10,7 +10,12 @@ public static class HandlersExtensions
         // Поищет в текущей сборке все реализации для ICommandHandler
         services.Scan(scan => scan.FromAssemblies(assemblies)
             .AddClasses(classes => classes
-                .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>), typeof(IQueryHandler<,>), typeof(IQueryHandler<>)))
+                .AssignableToAny(
+                    typeof(ICommandHandler<,>), 
+                    typeof(ICommandHandler<>), 
+                    typeof(IResultCommandHandler<>), 
+                    typeof(IQueryHandler<,>), 
+                    typeof(IQueryHandler<>)))
             .AsSelfWithInterfaces()
             .WithScopedLifetime());
 

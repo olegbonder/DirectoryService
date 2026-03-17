@@ -1,12 +1,13 @@
 ﻿using Core.Validation;
+using FileService.Contracts.MediaAssets.GetMediaAsset;
 using FileService.Domain.Shared;
 using FluentValidation;
 
-namespace FileService.Core.Features.DeleteFile;
+namespace FileService.Core.Features;
 
-public class DeleteFileValidator : AbstractValidator<DeleteFileCommand>
+public class GetMediaAssetInfoValidator : AbstractValidator<GetMediaAssetInfoRequest>
 {
-    public DeleteFileValidator()
+    public GetMediaAssetInfoValidator()
     {
         RuleFor(f => f.MediaAssetId)
             .NotNull()

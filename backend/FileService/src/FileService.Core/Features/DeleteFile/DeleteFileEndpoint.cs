@@ -1,4 +1,5 @@
-﻿using Framework.EndpointResult;
+﻿using FileService.Contracts.MediaAssets;
+using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,12 @@ public class DeleteFileEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/files/{id:guid}", async Task<EndpointResult<Guid>>(
-                [FromRoute] Guid id,
+        app.MapDelete("/files/{mediaAssetId:guid}", async Task<EndpointResult<MediaAssetResponse>>(
+                [FromRoute] Guid mediaAssetId,
                 [FromServices] DeleteFileHandler handler,
                 CancellationToken cancellationToken) =>
         {
-            var command = new DeleteFileCommand(id);
+            var command = new DeleteFileCommand(mediaAssetId);
             return await handler.Handle(command, cancellationToken);
         });
     }

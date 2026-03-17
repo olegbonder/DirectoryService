@@ -11,7 +11,7 @@ public sealed class AbortMultipartUploadEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("/files/multipart/abort", async Task<EndpointResult>(
+        routeBuilder.MapPost("/files/multipart/cancel", async Task<EndpointResult>(
                 [FromBody] AbortMultipartUploadRequest request,
                 [FromServices] AbortMultipartUploadHandler handler,
                 CancellationToken cancellationToken) =>
