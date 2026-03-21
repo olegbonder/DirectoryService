@@ -1,4 +1,5 @@
-﻿using SharedKernel.Result;
+﻿using System.Text.Json.Serialization;
+using SharedKernel.Result;
 
 namespace SharedKernel
 {
@@ -9,6 +10,7 @@ namespace SharedKernel
         public bool IsError => ErrorList != null || (ErrorList != null && ErrorList.Any());
         public DateTime TimeGenerated { get; }
 
+        [JsonConstructor]
         private Envelope(object? result, Errors? errorList)
         {
             Result = result;
@@ -30,6 +32,7 @@ namespace SharedKernel
         public bool IsError => ErrorList != null || (ErrorList != null && ErrorList.Any());
         public DateTime TimeGenerated { get; }
 
+        [JsonConstructor]
         private Envelope(T? result, Errors? errorList)
         {
             Result = result;

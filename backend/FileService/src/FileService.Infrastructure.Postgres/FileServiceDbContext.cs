@@ -5,13 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace FileService.Infrastructure.Postgres;
 
-public class FileServiceDbContext(string connectionString): DbContext, IReadDbContext
+public class FileServiceDbContext: DbContext, IReadDbContext
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public FileServiceDbContext(DbContextOptions<FileServiceDbContext> options)
+        : base(options)
     {
-        optionsBuilder.UseNpgsql(connectionString);
-        optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
-        optionsBuilder.EnableSensitiveDataLogging();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

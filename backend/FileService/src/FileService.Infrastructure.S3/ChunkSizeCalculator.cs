@@ -13,13 +13,13 @@ namespace FileService.Infrastructure.S3
             _options = options.Value;
         }
 
-        public Result<(long ChunkSize, int TotalChunks)> CalculateChunkSize(long fileSize)
+        public Result<(int ChunkSize, int TotalChunks)> CalculateChunkSize(long fileSize)
         {
             if (_options.RecommendedChunkSizeBytes <= 0 || _options.MaxChunks <= 0)
                 return GeneralErrors.ValueIsRequired("настройки чанков");
 
             if (fileSize <= _options.RecommendedChunkSizeBytes)
-                return (fileSize, 1);
+                return ((int)fileSize, 1);
 
             int calculatedChunks = (int)Math.Ceiling((double)fileSize / _options.RecommendedChunkSizeBytes);
 
@@ -27,7 +27,7 @@ namespace FileService.Infrastructure.S3
 
             long chunkSize = (fileSize + totalChunks - 1) / totalChunks;
 
-            return (chunkSize, totalChunks);
+            return ((int)chunkSize, totalChunks);
         }
     }
 }
