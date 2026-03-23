@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FileService.Core.Features.GetDownloadUrl;
 
-public sealed class GetDownloadUrlHandlerEndpoint : IEndpoint
+public sealed class GetDownloadUrlEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {

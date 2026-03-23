@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Json;
-using SharedKernel;
+using System.Text.Json;
 using SharedKernel.Result;
 
 namespace FileService.Core.HttpCommunication;
@@ -9,40 +9,44 @@ public static class HttpResponseMessageExtensions
     public static async Task<Result<TResponse>> HandleResponseAsync<TResponse>(
         this HttpResponseMessage response,
         CancellationToken cancellationToken = default)
-        where TResponse : class
     {
         try
         {
-            Envelope<TResponse>? startMultiPartResponse = await response.Content
-            .ReadFromJsonAsync<Envelope<TResponse>?>(cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
+            /*var options = new JsonSerializerOptions
             {
-                return startMultiPartResponse?.ErrorList
-                       ?? GeneralErrors.Failure("Error while reading response");
-            }
+                Converters = { new ErrorsJsonConverter() }
+            };*/
+            var envelope = await response.Content
+                .ReadFromJsonAsync<Envelope<TResponse>?>(cancellationToken);
 
-            if (startMultiPartResponse is null)
+            /*if (!response.IsSuccessStatusCode)
             {
-                return GeneralErrors.Failure("Error while reading response");
-            }
+                return envelope != null && envelope.ErrorList != null
+                    ? Result<TResponse>.Failure(new SharedKernel.Result.Errors(envelope.ErrorList.ToArray()))
+                       : GeneralErrors.Failure("Error while reading response");
+            }*/
 
-            if (startMultiPartResponse.ErrorList is not null)
-            {
-                return startMultiPartResponse.ErrorList;
-            }
-
-            if (startMultiPartResponse.Result is null)
+            if (envelope is null)
             {
                 return GeneralErrors.Failure("Error while reading response");
             }
 
-            return startMultiPartResponse.Result;
+            if (envelope.ErrorList is not null)
+            {
+                return Result<TResponse>.Failure(new SharedKernel.Result.Errors(envelope.ErrorList.ToArray()));
+            }
+
+            /*if (envelope.Result is null)
+            {
+                return GeneralErrors.Failure("Error while reading response");
+            }*/
+
+            return envelope.Result;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            throw;
-            //return GeneralErrors.Failure("Error while reading response");
+            Console.WriteLine(ex.Message);
+            return GeneralErrors.Failure("Error while reading response");
         }
     }
 
@@ -52,23 +56,24 @@ public static class HttpResponseMessageExtensions
     {
         try
         {
-            Envelope? startMultiPartResponse = await response.Content
+            Envelope? envelope = await response.Content
                 .ReadFromJsonAsync<Envelope>(cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
+            /*if (!response.IsSuccessStatusCode)
             {
-                return startMultiPartResponse?.ErrorList
-                ?? GeneralErrors.Failure("Error while reading response");
-            }
+                return envelope != null && envelope.ErrorList != null
+                    ? Result.Failure(new SharedKernel.Result.Errors(envelope.ErrorList.ToArray()))
+                    : GeneralErrors.Failure("Error while reading response");
+            }*/
 
-            if (startMultiPartResponse is null)
+            if (envelope is null)
             {
                 return GeneralErrors.Failure("Error while reading response");
             }
 
-            if (startMultiPartResponse.ErrorList is not null)
+            if (envelope.ErrorList is not null)
             {
-                return startMultiPartResponse.ErrorList;
+                return Result.Failure(new SharedKernel.Result.Errors(envelope.ErrorList.ToArray()));
             }
 
             return Result.Success();

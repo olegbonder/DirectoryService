@@ -1,5 +1,6 @@
 ﻿using Core.Caching;
 using FileService.Core;
+using FileService.Core.HttpCommunication;
 using FileService.Infrastructure.S3;
 using Framework.Endpoints;
 using Framework.Logging;
@@ -19,6 +20,12 @@ namespace FileService.Web.Configuration
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
                 .AddCors()
                 .AddS3(configuration);
+            /*services.AddControllers().AddJsonOptions(opt =>
+                opt.JsonSerializerOptions.Converters.Add(new ErrorsJsonConverter()));*/
+            /*services.ConfigureHttpJsonOptions(options =>
+            {
+                options.SerializerOptions.GetConverter(typeof(ErrorsJsonConverter));
+            });*/
 
             return services;
         }

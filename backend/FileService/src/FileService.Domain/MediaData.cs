@@ -1,4 +1,5 @@
-﻿using SharedKernel.Result;
+﻿using FileService.Domain.Shared;
+using SharedKernel.Result;
 
 namespace FileService.Domain
 {
@@ -29,7 +30,7 @@ namespace FileService.Domain
         {
             if (size <= 0)
             {
-                return GeneralErrors.ValueIsRequired("size");
+                return MediaAssetErrors.FileLength();
             }
 
             if (expectedChunksCount <= 0)

@@ -1,4 +1,5 @@
-﻿using SharedKernel.Result;
+﻿using FileService.Domain.Shared;
+using SharedKernel.Result;
 
 namespace FileService.Domain;
 
@@ -25,14 +26,14 @@ public sealed record MediaOwner
     public static Result<MediaOwner> Create(string context, Guid entityId)
     {
         if (string.IsNullOrWhiteSpace(context) || context.Length > 50)
-            return GeneralErrors.ValueIsRequired(nameof(context));
+            return GeneralErrors.PropertyOutOfRange(nameof(context), 1, 50);
 
         string normalizedContext = context.Trim().ToLowerInvariant();
         if (!AllowedContexts.Contains(normalizedContext))
-            return GeneralErrors.ValueIsRequired(nameof(context));
+            return MediaAssetErrors.FailedContext();
 
         if (entityId == Guid.Empty)
-            return GeneralErrors.ValueIsRequired(nameof(entityId));
+            return GeneralErrors.PropertyIsEmpty(nameof(entityId), nameof(entityId));
 
         return new MediaOwner(context, entityId);
     }

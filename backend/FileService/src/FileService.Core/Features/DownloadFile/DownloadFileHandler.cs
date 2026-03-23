@@ -6,7 +6,7 @@ using SharedKernel.Result;
 
 namespace FileService.Core.Features.DownloadFile;
 
-public class DownloadFileHandler : IQueryHandler<string, DownloadFileRequest>
+public class DownloadFileHandler : IQueryHandler<DownloadFileResponse, DownloadFileRequest>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly IS3Provider _s3Provider;
@@ -22,7 +22,7 @@ public class DownloadFileHandler : IQueryHandler<string, DownloadFileRequest>
         _logger = logger;
     }
 
-    public async Task<Result<string>> Handle(
+    public async Task<Result<DownloadFileResponse>> Handle(
         DownloadFileRequest request, CancellationToken cancellationToken)
     {
         var fileId = request.FileId;
@@ -46,6 +46,6 @@ public class DownloadFileHandler : IQueryHandler<string, DownloadFileRequest>
 
         _logger.LogInformation("Download file with id:{fileId}", fileId);
 
-        return downloadResult.Value;
+        return new DownloadFileResponse(downloadResult.Value);
     }
 }
