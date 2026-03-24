@@ -1,5 +1,5 @@
 ﻿using Core.Abstractions;
-using FileService.Contracts.MediaAssets.AbortMultipartUpload;
+using FileService.Contracts.Dtos.MediaAssets.AbortMultipartUpload;
 
 namespace FileService.Core.Features.AbortMultipartUpload;
 

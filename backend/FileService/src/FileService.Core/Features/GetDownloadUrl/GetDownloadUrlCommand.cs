@@ -1,5 +1,5 @@
 ﻿using Core.Abstractions;
-using FileService.Contracts.MediaAssets.GetDownloadUrl;
+using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
 
 namespace FileService.Core.Features.GetDownloadUrl;
 

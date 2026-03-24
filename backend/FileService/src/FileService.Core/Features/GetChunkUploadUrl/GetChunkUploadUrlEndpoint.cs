@@ -1,5 +1,5 @@
-﻿using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.GetChunkUploadUrl;
+﻿using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.GetChunkUploadUrl;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;

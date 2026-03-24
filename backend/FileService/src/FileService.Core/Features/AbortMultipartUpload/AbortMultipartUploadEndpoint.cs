@@ -1,4 +1,4 @@
-﻿using FileService.Contracts.MediaAssets.AbortMultipartUpload;
+﻿using FileService.Contracts.Dtos.MediaAssets.AbortMultipartUpload;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;

@@ -1,6 +1,6 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
-using FileService.Contracts.MediaAssets.GetDownloadUrl;
+using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
 using FileService.Core.Features.GetChunkUploadUrl;
 using FileService.Core.FilesStorage;
 using FileService.Domain.Assets;

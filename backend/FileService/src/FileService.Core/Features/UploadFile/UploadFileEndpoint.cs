@@ -1,4 +1,4 @@
-﻿using FileService.Contracts.MediaAssets.UploadFile;
+﻿using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;

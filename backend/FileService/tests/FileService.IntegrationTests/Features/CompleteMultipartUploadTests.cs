@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
-using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.CompleteMultiPartUpload;
-using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;

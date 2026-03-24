@@ -1,6 +1,6 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
-using FileService.Contracts.MediaAssets.GetMediaAsset;
+using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FluentValidation;
@@ -9,7 +9,7 @@ using SharedKernel.Result;
 
 namespace FileService.Core.Features.GetMediaAssetInfo
 {
-    public sealed class GetMediaAssetInfoHandler : IQueryHandler<GetMediaAssetDto?, GetMediaAssetInfoRequest>
+    public sealed class GetMediaAssetInfoHandler : IQueryHandler<GetMediaAssetResponse?, GetMediaAssetInfoRequest>
     {
         private readonly IReadDbContext _readDbContext;
         private readonly IValidator<GetMediaAssetInfoRequest> _validator;
@@ -25,7 +25,7 @@ namespace FileService.Core.Features.GetMediaAssetInfo
             _s3Provider = s3Provider;
         }
 
-        public async Task<Result<GetMediaAssetDto?>> Handle(GetMediaAssetInfoRequest request, CancellationToken cancellationToken)
+        public async Task<Result<GetMediaAssetResponse?>> Handle(GetMediaAssetInfoRequest request, CancellationToken cancellationToken)
         {
             var validResult = await _validator.ValidateAsync(request, cancellationToken);
             if (validResult.IsValid == false)
@@ -38,7 +38,7 @@ namespace FileService.Core.Features.GetMediaAssetInfo
                 .FirstOrDefaultAsync(m => m.Id == mediaAssetId, cancellationToken);
 
             if (mediaAsset == null)
-                return Result<GetMediaAssetDto?>.Success(null);
+                return Result<GetMediaAssetResponse?>.Success(null);
 
             string? url = null;
 
@@ -52,7 +52,7 @@ namespace FileService.Core.Features.GetMediaAssetInfo
             }
 
             var fileInfo = new FileInfoDto(mediaAsset.MediaData.FileName.Value, mediaAsset.MediaData.ContentType.Value, mediaAsset.MediaData.Size);
-            var mediaAssetDto = new GetMediaAssetDto(
+            var mediaAssetDto = new GetMediaAssetResponse(
                     mediaAsset.Id,
                     mediaAsset.Status.ToString().ToLowerInvariant(),
                     mediaAsset.AssetType.ToString().ToLowerInvariant(),

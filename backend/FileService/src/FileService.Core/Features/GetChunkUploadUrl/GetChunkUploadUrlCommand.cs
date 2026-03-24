@@ -1,5 +1,5 @@
 ﻿using Core.Abstractions;
-using FileService.Contracts.MediaAssets.GetChunkUploadUrl;
+using FileService.Contracts.Dtos.MediaAssets.GetChunkUploadUrl;
 
 namespace FileService.Core.Features.GetChunkUploadUrl;
 

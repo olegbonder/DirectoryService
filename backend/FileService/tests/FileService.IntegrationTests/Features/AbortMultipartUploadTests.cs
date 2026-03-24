@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 using Amazon.S3;
-using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
@@ -8,7 +8,7 @@ using FileService.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Result;
-using AbortMultipartUploadRequest = FileService.Contracts.MediaAssets.AbortMultipartUpload.AbortMultipartUploadRequest;
+using AbortMultipartUploadRequest = FileService.Contracts.Dtos.MediaAssets.AbortMultipartUpload.AbortMultipartUploadRequest;
 
 namespace FileService.IntegrationTests.Features
 {

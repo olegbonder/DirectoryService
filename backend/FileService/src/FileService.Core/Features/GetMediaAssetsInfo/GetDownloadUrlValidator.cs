@@ -1,5 +1,5 @@
 ﻿using Core.Validation;
-using FileService.Contracts.MediaAssets.GetMediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.GetMediaAssets;
 using FileService.Domain.Shared;
 using FluentValidation;
 

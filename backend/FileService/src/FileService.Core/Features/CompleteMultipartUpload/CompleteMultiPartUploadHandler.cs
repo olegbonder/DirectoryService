@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
-using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.CompleteMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
 using FileService.Core.Features.CompleteMultipartUpload;
 using FileService.Core.FilesStorage;
 using FileService.Domain.Assets;

@@ -1,5 +1,5 @@
 ﻿using Core.Abstractions;
-using FileService.Contracts.MediaAssets.UploadFile;
+using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 
 namespace FileService.Core.Features.UploadFile;
 

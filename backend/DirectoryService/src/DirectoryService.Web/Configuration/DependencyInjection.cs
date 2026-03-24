@@ -1,5 +1,6 @@
 ﻿using Core.Caching;
 using DirectoryService.Application;
+using FileService.Contracts.HttpCommunication;
 using Framework.Logging;
 using Framework.Swagger;
 
@@ -15,6 +16,7 @@ namespace DirectoryService.Web.Configuration
                 .AddOpenApiSpec()
                 .AddApplication()
                 .AddCors()
+                .AddFileHttpCommunication(configuration)
                 .AddControllers();
 
             return services;

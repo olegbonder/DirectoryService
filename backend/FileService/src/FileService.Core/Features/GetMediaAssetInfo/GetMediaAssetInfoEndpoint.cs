@@ -1,5 +1,4 @@
-﻿using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.GetMediaAsset;
+﻿using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +11,7 @@ public class GetMediaAssetInfoEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapGet("/files/{mediaAssetId:guid}", async Task<EndpointResult<GetMediaAssetDto?>>(
+        routeBuilder.MapGet("/files/{mediaAssetId:guid}", async Task<EndpointResult<GetMediaAssetResponse?>>(
             Guid mediaAssetId,
             [FromServices] GetMediaAssetInfoHandler handler,
             CancellationToken cancellationToken) =>

@@ -1,7 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.ListMultipartUpload;
+using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.ListMultipartUpload;
 using FileService.Core.FilesStorage;
 using FileService.Core.Models;
 using FileService.Domain;
