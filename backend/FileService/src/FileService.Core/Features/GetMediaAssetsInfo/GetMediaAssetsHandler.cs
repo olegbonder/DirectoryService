@@ -1,6 +1,6 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
-using FileService.Contracts.MediaAssets.GetMediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.GetMediaAssets;
 using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FileService.Domain.Assets;

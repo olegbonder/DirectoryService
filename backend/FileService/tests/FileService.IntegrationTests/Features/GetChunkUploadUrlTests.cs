@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Json;
 using Amazon.S3.Model;
-using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.GetChunkUploadUrl;
-using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.GetChunkUploadUrl;
+using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;

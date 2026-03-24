@@ -1,6 +1,6 @@
 ﻿using Amazon.S3.Model;
-using FileService.Contracts.MediaAssets;
-using FileService.Contracts.MediaAssets.UploadFile;
+using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;

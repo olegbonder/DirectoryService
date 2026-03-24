@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
-using FileService.Contracts.MediaAssets.GetDownloadUrl;
-using FileService.Contracts.MediaAssets.UploadFile;
+using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
+using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;

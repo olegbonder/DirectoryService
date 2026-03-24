@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" />
     <PackageReference Include="manuilov.core" />
+    <PackageReference Include="manuilov.fileservice.contracts" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
   </ItemGroup>
   

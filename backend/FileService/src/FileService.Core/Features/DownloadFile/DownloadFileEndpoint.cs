@@ -1,4 +1,4 @@
-﻿using FileService.Contracts.MediaAssets.DownloadFile;
+﻿using FileService.Contracts.Dtos.MediaAssets.DownloadFile;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;

@@ -1,4 +1,4 @@
-﻿using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+﻿using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;

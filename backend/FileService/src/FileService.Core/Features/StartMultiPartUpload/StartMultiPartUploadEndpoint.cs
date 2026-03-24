@@ -1,4 +1,4 @@
-﻿using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+﻿using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;

@@ -1,5 +1,5 @@
-﻿using FileService.Contracts.MediaAssets.DownloadFile;
-using FileService.Contracts.MediaAssets.UploadFile;
+﻿using FileService.Contracts.Dtos.MediaAssets.DownloadFile;
+using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;

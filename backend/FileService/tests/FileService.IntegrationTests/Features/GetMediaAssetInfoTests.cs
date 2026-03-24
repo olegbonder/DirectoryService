@@ -1,5 +1,5 @@
-﻿using FileService.Contracts.MediaAssets.GetMediaAsset;
-using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+﻿using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
+using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Core.HttpCommunication;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
@@ -78,7 +78,7 @@ namespace FileService.IntegrationTests.Features
             Assert.Null(result.Value);
         }
 
-        private async Task<Result<GetMediaAssetDto?>> GetMediaAssetInfo(
+        private async Task<Result<GetMediaAssetResponse?>> GetMediaAssetInfo(
             Guid mediaAssetId,
             CancellationToken cancellationToken)
         {
@@ -87,7 +87,7 @@ namespace FileService.IntegrationTests.Features
                 cancellationToken);
 
             var mediaAssetInfoResult = await mediaAssetInfoResponse
-                .HandleResponseAsync<GetMediaAssetDto?>(cancellationToken);
+                .HandleResponseAsync<GetMediaAssetResponse?>(cancellationToken);
 
             return mediaAssetInfoResult;
         }

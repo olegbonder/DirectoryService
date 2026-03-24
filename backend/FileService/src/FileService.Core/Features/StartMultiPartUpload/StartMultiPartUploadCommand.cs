@@ -1,5 +1,5 @@
 ﻿using Core.Abstractions;
-using FileService.Contracts.MediaAssets.StartMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 
 namespace FileService.Core.Features.StartMultiPartUpload;
 

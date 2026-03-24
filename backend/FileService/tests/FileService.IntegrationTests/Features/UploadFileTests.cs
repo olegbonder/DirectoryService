@@ -1,4 +1,4 @@
-﻿using FileService.Contracts.MediaAssets.UploadFile;
+﻿using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using FileService.Contracts.MediaAssets.StartMultiPartUpload;
-using FileService.Contracts.MediaAssets.UploadFile;
+using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
+using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using FileService.Core.HttpCommunication;
 using SharedKernel.Result;
 
