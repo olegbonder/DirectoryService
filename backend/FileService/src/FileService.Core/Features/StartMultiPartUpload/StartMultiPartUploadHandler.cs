@@ -48,7 +48,7 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
         if (chunkCalculationResult.IsFailure)
             return chunkCalculationResult.Errors;
 
-        (long chunkSize, int totalChunks) = chunkCalculationResult.Value;
+        (int chunkSize, int totalChunks) = chunkCalculationResult.Value;
 
         var mediaDataResult = MediaData.Create(fileName, contentType, request.Size, totalChunks);
         if (mediaDataResult.IsFailure)
@@ -69,7 +69,7 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
         if (startUploadResult.IsFailure)
             return startUploadResult.Errors;
 
-        var uploadId = startUploadResult.Value;
+        string uploadId = startUploadResult.Value;
         var chunksUploadUrlsResult = await _s3Provider.GenerateAllChunksUploadUrlsAsync(
             mediaAsset.RawKey,
             uploadId,

@@ -20,7 +20,7 @@ namespace FileService.Domain
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                return GeneralErrors.ValueIsRequired(nameof(fileName));
+                return GeneralErrors.PropertyIsEmpty(nameof(fileName), "file name");
             }
 
             int lastDot = fileName.LastIndexOf('.');

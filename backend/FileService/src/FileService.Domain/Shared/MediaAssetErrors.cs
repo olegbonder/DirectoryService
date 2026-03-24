@@ -19,6 +19,16 @@ public static class MediaAssetErrors
         return Error.Validation("asset_type.failed", "Неправильный тип медиа-файла");
     }
 
+    public static Error FailedContext()
+    {
+        return Error.Validation("context.failed", "Неправильный тип контекста медиа-файла");
+    }
+
+    public static Error Context()
+    {
+        return Error.Validation("context.failed", "Неправильный тип контекста медиа-файла");
+    }
+
     public static Error MediaAssetIdNotBeNull()
     {
         return GeneralErrors.ValueIsRequired("MediaAssetId");
@@ -51,7 +61,7 @@ public static class MediaAssetErrors
 
     public static Error ExpectedChunksCount()
     {
-        return Error.Validation("partETags.count", "PartETags count must be equal to expected chunks count.");
+        return Error.Validation("expected.chunks.count", "PartETags count must be equal to expected chunks count.");
     }
 
     public static Error MediaAssetIdsNotBeNull()

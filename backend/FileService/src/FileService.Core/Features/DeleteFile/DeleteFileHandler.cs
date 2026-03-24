@@ -56,7 +56,7 @@ public class DeleteFileHandler : ICommandHandler<MediaAssetResponse, DeleteFileC
         {
             mediaAsset.MarkFailed(DateTime.UtcNow);
             await _mediaAssetRepository.SaveChanges(cancellationToken);
-            return new Errors(failedResults.SelectMany(deleteResult => deleteResult.Errors));
+            return new Errors(failedResults.SelectMany(deleteResult => deleteResult.Errors).ToArray());
         }
 
         mediaAsset.MarkDeleted(DateTime.UtcNow);

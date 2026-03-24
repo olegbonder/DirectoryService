@@ -4,13 +4,13 @@
     {
         public static Error ValueIsRequired(string? name = null)
         {
-            var label = name == null ? string.Empty : $" {name} ";
+            string label = name == null ? string.Empty : $" {name} ";
             return Error.Validation($"value.is.null", $"Поле {label} должно быть заполнено!");
         }
 
         public static Error NotFound(string entity, Guid? id)
         {
-            var forId = id == null ? string.Empty : $" для id: '{id}'";
+            string forId = id == null ? string.Empty : $" для id: '{id}'";
             return Error.NotFound($"{entity}.not.found", $"Запись не найдена {forId}");
         }
 
@@ -30,7 +30,7 @@
 
         public static Error AllreadyExists(string? entity = null)
         {
-            var label = entity ?? "record";
+            string label = entity ?? "record";
             return Error.Validation($"{label}.already.exist", "Запись уже существует");
         }
 
@@ -47,6 +47,11 @@
         public static Error ConcurrentOperation(string property)
         {
             return Error.Conflict($"{property}.database.update.concurrent", "Другой пользователь параллельно изменил эту же запись");
+        }
+
+        public static Error Failure(string? message = null)
+        {
+            return Error.Failure("server.failure", message ?? "Серверная ошибка");
         }
     }
 }

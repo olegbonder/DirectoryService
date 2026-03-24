@@ -11,7 +11,7 @@ public class DownloadFileEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/file/{id:guid}", async Task<EndpointResult<string>>(
+        app.MapGet("/file/{id:guid}", async Task<EndpointResult<DownloadFileResponse>>(
                 [FromRoute] Guid id,
                 [FromServices] DownloadFileHandler handler,
                 CancellationToken cancellationToken) =>

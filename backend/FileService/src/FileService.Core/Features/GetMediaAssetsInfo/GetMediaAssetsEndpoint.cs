@@ -11,7 +11,7 @@ namespace FileService.Core.Features.GetMediaAssetsInfo
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("/files/batch", async Task<EndpointResult<GetMediaAssetsResponse>> (
+            routeBuilder.MapPost("/files/batch", async Task<EndpointResult<GetMediaAssetsResponse>>(
                     [FromBody] GetMediaAssetsRequest request,
                     [FromServices] GetMediaAssetsHandler handler,
                     CancellationToken cancellationToken) =>
