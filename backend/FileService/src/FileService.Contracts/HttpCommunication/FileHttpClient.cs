@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using FileService.Contracts.Dtos.MediaAssets.CheckMediaAssetExists;
 using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using FileService.Contracts.Dtos.MediaAssets.GetMediaAssets;
 using Microsoft.Extensions.Logging;
@@ -46,6 +47,22 @@ internal sealed class FileHttpClient : IFileCommunicationService
         {
             _logger.LogError(ex, "Error getting media assets for {MediaAssetIds}",  request.MediaAssetIds);
             return Error.Failure("server.error", "Failed to get media assets");
+        }
+    }
+
+    public async Task<Result<CheckMediaAssetExistsResponse>> CheckMediaAssetExists(
+        Guid mediaAssetId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/files/{mediaAssetId}/exists", cancellationToken);
+            return await response.HandleResponseAsync<CheckMediaAssetExistsResponse>(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error exists media asset for {MediaAssetId}",  mediaAssetId);
+            return Error.Failure("server.error", "Failed to get media asset exists");
         }
     }
 }

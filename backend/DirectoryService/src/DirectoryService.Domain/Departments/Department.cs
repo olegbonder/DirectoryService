@@ -52,6 +52,8 @@ namespace DirectoryService.Domain.Departments
 
         public bool IsActive { get; private set; }
 
+        public Guid? VideoId { get; private set; }
+
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
@@ -116,6 +118,12 @@ namespace DirectoryService.Domain.Departments
         {
             Name = deptName;
             Identifier = deptIdentifier;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateVideo(Guid? videoId)
+        {
+            VideoId = videoId;
             UpdatedAt = DateTime.UtcNow;
         }
     }

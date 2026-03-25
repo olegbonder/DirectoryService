@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="manuilov.fileservice.contracts" Version="0.0.1" />
+    <PackageVersion Include="manuilov.fileservice.contracts" Version="0.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="manuilov.sharedkernel" Version="0.0.2" />

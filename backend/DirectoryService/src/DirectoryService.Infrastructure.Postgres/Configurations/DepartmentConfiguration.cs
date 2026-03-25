@@ -70,6 +70,10 @@ namespace DirectoryService.Infrastructure.Postgres.Configurations
 
             builder.Property(d => d.ParentId)
                 .HasColumnName("parent_id");
+
+            builder.Property(d => d.VideoId)
+                .IsRequired(false)
+                .HasColumnName("video_id");
         }
     }
 }

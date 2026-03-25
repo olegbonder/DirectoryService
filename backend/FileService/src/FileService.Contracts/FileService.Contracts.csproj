@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <PackageId>Manuilov.FileService.Contracts</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Authors>Manuilov Oleg</Authors>
     <PackageDescription>Communication FileService project</PackageDescription>
     <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>
