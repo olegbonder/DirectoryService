@@ -90,6 +90,10 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<Guid?>("VideoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("video_id");
+
                     b.HasKey("Id")
                         .HasName("pk_departments");
 

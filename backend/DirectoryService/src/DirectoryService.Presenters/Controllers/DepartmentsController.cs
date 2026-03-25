@@ -1,4 +1,5 @@
-﻿using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
+﻿using DirectoryService.Application.Features.Departments.Commands.AttachDepartmentVideo;
+using DirectoryService.Application.Features.Departments.Commands.CreateDepartment;
 using DirectoryService.Application.Features.Departments.Commands.MoveDepartment;
 using DirectoryService.Application.Features.Departments.Commands.SoftDeleteDepartment;
 using DirectoryService.Application.Features.Departments.Commands.UpdateDepartment;
@@ -8,6 +9,7 @@ using DirectoryService.Application.Features.Departments.Queries.GetDepartmentDic
 using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 using DirectoryService.Application.Features.Departments.Queries.GetTopDepartments;
 using DirectoryService.Contracts;
+using DirectoryService.Contracts.Departments.AttachDepartmentVideo;
 using DirectoryService.Contracts.Departments.CreateDepartment;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Contracts.Departments.GetDepartment;
@@ -170,6 +172,21 @@ namespace DirectoryService.Presenters.Controllers
             CancellationToken cancellationToken)
         {
             var command = new SoftDeleteDepartmentCommand(departmentId);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpPatch("{departmentId:guid}/video")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<Guid>> AttachDepartmentVideo(
+            [FromRoute] Guid departmentId,
+            [FromBody] AttachDepartmentVideoRequest request,
+            [FromServices] AttachDepartmentVideoHanlder handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new AttachDepartmentVideoCommand(departmentId, request);
             return await handler.Handle(command, cancellationToken);
         }
     }

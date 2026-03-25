@@ -110,5 +110,10 @@ namespace DirectoryService.Domain.Shared
         {
             return GeneralErrors.NotFound("departments", null);
         }
+
+        public static Result<Guid> VideoAssetNotFound(Guid videoId)
+        {
+            return GeneralErrors.NotFound("department.video_asset", videoId);
+        }
     }
 }

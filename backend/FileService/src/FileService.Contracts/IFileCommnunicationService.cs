@@ -1,4 +1,5 @@
-﻿using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
+﻿using FileService.Contracts.Dtos.MediaAssets.CheckMediaAssetExists;
+using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using FileService.Contracts.Dtos.MediaAssets.GetMediaAssets;
 using SharedKernel.Result;
 
@@ -8,5 +9,10 @@ public interface IFileCommunicationService
 {
     Task<Result<GetMediaAssetResponse>> GetMediaAssetInfo(Guid mediaAssetId, CancellationToken cancellationToken);
 
-    Task<Result<GetMediaAssetsResponse>> GetMediaAssetsInfo(GetMediaAssetsRequest request, CancellationToken cancellationToken);
+    Task<Result<GetMediaAssetsResponse>> GetMediaAssetsInfo(
+        GetMediaAssetsRequest request, CancellationToken cancellationToken);
+
+    Task<Result<CheckMediaAssetExistsResponse>> CheckMediaAssetExists(
+        Guid mediaAssetId,
+        CancellationToken cancellationToken);
 }
