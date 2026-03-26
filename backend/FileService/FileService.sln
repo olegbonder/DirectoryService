@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7AB2AF4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileService.IntegrationTests", "tests\FileService.IntegrationTests\FileService.IntegrationTests.csproj", "{126FA16C-0857-4A2A-9893-C6F2EFE26201}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileService.UnitTests", "tests\FileService.UnitTests\FileService.UnitTests.csproj", "{02C65F07-5A68-4796-A59F-68DCA11A5BE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,8 +60,13 @@ Global
 		{126FA16C-0857-4A2A-9893-C6F2EFE26201}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{126FA16C-0857-4A2A-9893-C6F2EFE26201}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{126FA16C-0857-4A2A-9893-C6F2EFE26201}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02C65F07-5A68-4796-A59F-68DCA11A5BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02C65F07-5A68-4796-A59F-68DCA11A5BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02C65F07-5A68-4796-A59F-68DCA11A5BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02C65F07-5A68-4796-A59F-68DCA11A5BE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{126FA16C-0857-4A2A-9893-C6F2EFE26201} = {E7AB2AF4-4E40-4B24-A58F-BE3CB3677BF0}
+		{02C65F07-5A68-4796-A59F-68DCA11A5BE5} = {E7AB2AF4-4E40-4B24-A58F-BE3CB3677BF0}
 	EndGlobalSection
 EndGlobal
