@@ -28,7 +28,7 @@ public class VideoAsset: MediaAsset
     private const string MASTER_PLAYLIST_NAME = "master.m3u8";
     private static readonly string[] _allowedExtensions = ["mp4", "mkv", "avi", "mov"];
 
-    public static Result ValidateForUpload(MediaData mediaData)
+    private static Result ValidateForUpload(MediaData mediaData)
     {
         if (!_allowedExtensions.Contains(mediaData.FileName.Extension))
         {

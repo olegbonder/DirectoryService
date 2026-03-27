@@ -14,13 +14,15 @@ namespace FileService.Domain.Assets
 
         public DateTime UpdatedAt { get; protected set; } = DateTime.UtcNow;
 
-        public StorageKey RawKey { get; protected set; } = null!;
+        public StorageKey? RawKey { get; protected set; }
 
         public StorageKey? FinalKey { get; protected set; }
 
         public MediaOwner Owner { get; protected set; } = null!;
 
         public MediaStatus Status { get; protected set; }
+
+        public StorageKey? UploadKey => RequiredProcessing() ? RawKey : FinalKey;
 
         protected MediaAsset()
         {
@@ -32,18 +34,24 @@ namespace FileService.Domain.Assets
             MediaStatus status,
             AssetType assetType,
             MediaOwner owner,
-            StorageKey rawKey,
-            StorageKey? finalKey = null)
+            StorageKey key,
+            bool isDirectUpload = false)
         {
             Id = id;
             MediaData = mediaData;
             Status = status;
             AssetType = assetType;
             Owner = owner;
-            RawKey = rawKey;
-            FinalKey = finalKey;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = CreatedAt;
+            if (isDirectUpload)
+            {
+                FinalKey = key;
+            }
+            else
+            {
+                RawKey = key;
+            }
         }
 
         public static Result<MediaAsset> CreateForUpload(MediaData mediaData,  AssetType assetType, MediaOwner owner)
@@ -62,6 +70,8 @@ namespace FileService.Domain.Assets
                     throw new ArgumentOutOfRangeException(nameof(assetType), assetType, null);
             }
         }
+
+        public virtual bool RequiredProcessing() => false;
 
         public Result MarkUploaded(DateTime uploadedAt)
         {
