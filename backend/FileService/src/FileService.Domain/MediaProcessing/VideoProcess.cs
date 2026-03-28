@@ -17,7 +17,7 @@ namespace FileService.Domain.MediaProcessing
 
         public double TotalProgress { get; private set; }
 
-        public MetaData? MetaData { get; private set; }
+        public VideoMetaData? MetaData { get; set; }
 
         public string? ErrorMessage { get; private set; }
 
@@ -61,12 +61,6 @@ namespace FileService.Domain.MediaProcessing
             _steps = steps.ToList();
         }
 
-        private void CalculateTotalProgress()
-        {
-            int succeededSteps = _steps.Count(s => s.Status == VideoProcessStatus.SUCCEEDED);
-            TotalProgress = succeededSteps * 100 / _steps.Count;
-        }
-
         public static Result<VideoProcess> Create(
             Guid id,
             StorageKey rawKey,
@@ -86,6 +80,22 @@ namespace FileService.Domain.MediaProcessing
             }
 
             return new VideoProcess(id, rawKey, hlsKey, videoProcessSteps);
+        }
+
+        public static List<VideoProcessStep> CreateProcessingSteps()
+        {
+            var steps = new List<VideoProcessStep>();
+
+            string[] stepNames = Enum.GetNames<StepType>();
+            for (int i = 1; i <= stepNames.Length; i++)
+            {
+                var stepName = VideoProcessStepName.Create(stepNames[i - 1]);
+                var stepOrder = VideoProcessStepOrder.Create(i);
+                var step = new VideoProcessStep(stepName.Value, stepOrder.Value);
+                steps.Add(step);
+            }
+
+            return steps;
         }
 
         public Result PrepareForExecution()
@@ -186,12 +196,6 @@ namespace FileService.Domain.MediaProcessing
             return Result.Success();
         }
 
-        public void SetMetadata(MetaData metadata)
-        {
-            MetaData = metadata;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
         public Result FinishProcessing()
         {
             bool allStepsSucceeded = _steps.All(x => x.Status == VideoProcessStatus.SUCCEEDED);
@@ -243,6 +247,73 @@ namespace FileService.Domain.MediaProcessing
             UpdatedAt = DateTime.UtcNow;
 
             return Result.Success();
+        }
+
+        public void SetMetaData(VideoMetaData metadata)
+        {
+            MetaData = metadata;
+        }
+
+        public Result<VideoProcessStep?> ProcessingNextStep()
+        {
+            if (Status != VideoProcessStatus.RUNNING)
+                return VideoProcessStepErrors.InvalidStatus($"Cannot process step with status: {Status}");
+
+            VideoProcessStep? currentStep = CurrentStep;
+            if (currentStep is not null)
+                return currentStep;
+
+            VideoProcessStep? nextStep = _steps
+                .OrderBy(x => x.Order)
+                .FirstOrDefault(x => x.Status == VideoProcessStatus.RUNNING);
+
+            if (nextStep is null)
+            {
+                FinishProcessing();
+                return Result<VideoProcessStep?>.Success(null);
+            }
+
+            var startResult = nextStep.Start();
+            if (startResult.IsFailure)
+                return startResult.Errors;
+
+            return nextStep;
+        }
+
+        public Result CompleteCurrentStep()
+        {
+            if (Status != VideoProcessStatus.RUNNING)
+                return VideoProcessStepErrors.InvalidStatus($"Cannot complete step when status is {Status}");
+
+            VideoProcessStep? currentStep = CurrentStep;
+            if (currentStep is null)
+                return Error.Failure("processing.no.active.step", "No active step to complete");
+
+            var completeResult = CompleteStep(currentStep.Order.Value);
+
+            return completeResult;
+        }
+
+        public Result FailCurrentStep(string errorMessage)
+        {
+            if (Status != VideoProcessStatus.RUNNING)
+                return Error.Failure("processing.invalid.status", $"Cannot fail step when status is {Status}");
+
+            VideoProcessStep? currentStep = CurrentStep;
+            if (currentStep is null)
+                return Error.Failure("processing.no.active.step", "No active step to fail");
+
+            var failResult = currentStep.Fail(errorMessage);
+            if (failResult.IsFailure)
+                return failResult.Errors;
+
+            return Result.Success();
+        }
+
+        private void CalculateTotalProgress()
+        {
+            int succeededSteps = _steps.Count(s => s.Status == VideoProcessStatus.SUCCEEDED);
+            TotalProgress = (double)succeededSteps / _steps.Count * 100;
         }
     }
 }

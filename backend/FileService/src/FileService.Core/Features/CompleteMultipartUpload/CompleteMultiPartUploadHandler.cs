@@ -5,6 +5,7 @@ using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
 using FileService.Core.Features.CompleteMultipartUpload;
 using FileService.Core.FilesStorage;
 using FileService.Domain.Assets;
+using FileService.Domain.MediaProcessing;
 using FileService.Domain.Shared;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -15,20 +16,29 @@ namespace FileService.Core.Features.CompleteMultiPartUpload;
 public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetResponse, CompleteMultipartUploadCommand>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
+    private readonly IVideoProcessingRepository _videoProcessingRepository;
+    private readonly IVideoProcessingScheduler _videoProcessingScheduler;
     private readonly ILogger<CompleteMultiPartUploadHandler> _logger;
     private readonly IValidator<CompleteMultipartUploadCommand> _validator;
     private readonly IS3Provider _s3Provider;
+    private readonly ITransactionManager _transactionManager;
 
     public CompleteMultiPartUploadHandler(
         IMediaAssetRepository mediaAssetRepository,
+        IVideoProcessingRepository videoProcessingRepository,
+        IVideoProcessingScheduler videoProcessingScheduler,
         ILogger<CompleteMultiPartUploadHandler> logger,
         IValidator<CompleteMultipartUploadCommand> validator,
-        IS3Provider s3Provider)
+        IS3Provider s3Provider,
+        ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
+        _videoProcessingRepository = videoProcessingRepository;
+        _videoProcessingScheduler = videoProcessingScheduler;
         _logger = logger;
         _validator = validator;
         _s3Provider = s3Provider;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<MediaAssetResponse>> Handle(CompleteMultipartUploadCommand command, CancellationToken cancellationToken)
@@ -62,9 +72,47 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetR
             return completeMultiPartUploadResult.Errors;
 
         mediaAsset.MarkUploaded(DateTime.UtcNow);
-        await _mediaAssetRepository.SaveChanges(cancellationToken);
+        var markUploadedSaveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (markUploadedSaveResult.IsFailure)
+            return markUploadedSaveResult.Errors;
+
         _logger.LogInformation("Media Asset completed uploading: {MediaAssetId} with key: {StorageKey}", mediaAsset.Id, mediaAsset.RawKey);
 
+        if (mediaAsset is VideoAsset videoAsset)
+        {
+            var createProcessResult = await CreateVideoProcessAsync(videoAsset, cancellationToken);
+            if (createProcessResult.IsFailure)
+                return createProcessResult.Errors;
+
+            _logger.LogInformation("VideoProcess created for video asset {VideoAssetId}", videoAsset.Id);
+
+            var scheduleProcessResult = await _videoProcessingScheduler.ScheduleProcessingAsync(videoAsset.Id, cancellationToken);
+            if (scheduleProcessResult.IsFailure)
+                return scheduleProcessResult.Errors;
+
+            _logger.LogInformation("Video processing scheduled for video asset {VideoAssetId}", videoAsset.Id);
+        }
+
         return new MediaAssetResponse(mediaAsset.Id);
+    }
+
+    private async Task<Result> CreateVideoProcessAsync(VideoAsset videoAsset, CancellationToken cancellationToken)
+    {
+        var steps = VideoProcess.CreateProcessingSteps();
+        var videoProcessResult = VideoProcess.Create(
+            videoAsset.Id,
+            videoAsset.RawKey,
+            null,
+            steps);
+
+        if (videoProcessResult.IsFailure)
+            return videoProcessResult.Errors;
+
+        _videoProcessingRepository.Add(videoProcessResult.Value);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+            return saveResult.Errors;
+
+        return Result.Success();
     }
 }

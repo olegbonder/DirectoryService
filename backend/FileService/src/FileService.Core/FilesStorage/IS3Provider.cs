@@ -11,7 +11,7 @@ public interface IS3Provider
     Task<Result> UploadFileAsync(
         StorageKey storageKey,
         Stream stream,
-        MediaData mediaData,
+        string contentType,
         CancellationToken cancellationToken);
 
     Task<Result<string>> DownloadFileAsync(StorageKey storageKey, string tempPath,

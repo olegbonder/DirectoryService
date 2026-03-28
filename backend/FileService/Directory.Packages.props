@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
@@ -11,8 +11,11 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
+    <PackageVersion Include="Quartz" Version="3.13.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.13.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="manuilov.sharedkernel" Version="0.0.4" />
     <PackageVersion Include="manuilov.core" Version="0.0.4" />
