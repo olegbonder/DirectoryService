@@ -1,8 +1,8 @@
 ﻿using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
 
@@ -87,7 +87,7 @@ namespace FileService.IntegrationTests.Features
                 cancellationToken);
 
             var mediaAssetInfoResult = await mediaAssetInfoResponse
-                .HandleResponseAsync<GetMediaAssetResponse?>(cancellationToken);
+                .HandleNullableResponseAsync<GetMediaAssetResponse?>(cancellationToken);
 
             return mediaAssetInfoResult;
         }

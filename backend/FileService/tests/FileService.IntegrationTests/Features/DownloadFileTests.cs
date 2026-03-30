@@ -1,9 +1,9 @@
 ﻿using FileService.Contracts.Dtos.MediaAssets.DownloadFile;
 using FileService.Contracts.Dtos.MediaAssets.UploadFile;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
@@ -43,7 +43,7 @@ namespace FileService.IntegrationTests.Features
             var uploadMediaAssetId = uploadMediaAssetResult.Value;
 
             // act
-            var result = await DownloadFile(uploadMediaAssetId, cancellationToken);
+            var result = await DownloadFile(uploadMediaAssetId!.Value, cancellationToken);
             string downloadUrl = result.Value.DownloadUrl;
 
             // assert

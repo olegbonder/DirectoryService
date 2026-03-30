@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Json;
 using Amazon.S3;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Result;

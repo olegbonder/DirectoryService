@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Contracts.Dtos.MediaAssets.UploadFile;
-using FileService.Core.HttpCommunication;
+using Framework.HttpCommunication;
 using SharedKernel.Result;
 
 namespace FileService.IntegrationTests.Infrastructure
@@ -18,7 +18,7 @@ namespace FileService.IntegrationTests.Infrastructure
             _appHttpClient = appHttpClient;
         }
 
-        public async Task<Result<Guid>> UploadFile(
+        public async Task<Result<Guid?>> UploadFile(
             UploadFileRequest request,
             CancellationToken cancellationToken)
         {
@@ -38,7 +38,7 @@ namespace FileService.IntegrationTests.Infrastructure
                 cancellationToken);
 
             var uploadFileResult = await uploadFileResponse
-                .HandleResponseAsync<Guid>(cancellationToken);
+                .HandleNullableResponseAsync<Guid?>(cancellationToken);
 
             return uploadFileResult;
         }

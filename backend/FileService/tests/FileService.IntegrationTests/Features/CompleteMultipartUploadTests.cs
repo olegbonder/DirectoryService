@@ -2,11 +2,11 @@
 using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.Infrastructure.S3;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -60,9 +60,6 @@ namespace FileService.IntegrationTests.Features
             var result = await CompleteMultiPartUpload(request, cancellationToken);
 
             // assert
-            
-            _output.WriteLine($"Value: {result.Value}");
-            _output.WriteLine($"Errors: {string.Join(";", result.Errors?.Select(e => new {e.Message, e.Code}))}");
             Assert.True(result.IsSuccess);
             await ExecuteInDb(async db =>
             {

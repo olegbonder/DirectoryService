@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Json;
 using FileService.Contracts.Dtos.MediaAssets.GetMediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
 

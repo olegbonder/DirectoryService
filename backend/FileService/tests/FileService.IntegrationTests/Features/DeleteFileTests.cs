@@ -1,10 +1,10 @@
 ﻿using Amazon.S3.Model;
 using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.UploadFile;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
@@ -41,7 +41,7 @@ namespace FileService.IntegrationTests.Features
                 Guid.NewGuid());
 
             var uploadMediaAssetResult = await TestData.UploadFile(request, cancellationToken);
-            var uploadMediaAssetId = uploadMediaAssetResult.Value;
+            var uploadMediaAssetId = uploadMediaAssetResult.Value.Value;
 
             // act
             var result = await DeleteFile(uploadMediaAssetId, cancellationToken);

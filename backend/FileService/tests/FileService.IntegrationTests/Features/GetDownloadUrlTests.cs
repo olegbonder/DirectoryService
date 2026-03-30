@@ -1,10 +1,11 @@
 ﻿using System.Net.Http.Json;
 using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
 using FileService.Contracts.Dtos.MediaAssets.UploadFile;
-using FileService.Core.HttpCommunication;
+//using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
@@ -41,7 +42,7 @@ namespace FileService.IntegrationTests.Features
                 Guid.NewGuid());
 
             var uploadMediaAssetResult = await TestData.UploadFile(uploadFileRequest, cancellationToken);
-            var uploadMediaAssetId = uploadMediaAssetResult.Value;
+            var uploadMediaAssetId = uploadMediaAssetResult.Value!.Value;
             var request = new GetDownloadUrlRequest(uploadMediaAssetId);
 
             // act

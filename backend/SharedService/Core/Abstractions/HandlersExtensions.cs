@@ -11,10 +11,10 @@ public static class HandlersExtensions
         services.Scan(scan => scan.FromAssemblies(assemblies)
             .AddClasses(classes => classes
                 .AssignableToAny(
-                    typeof(ICommandHandler<,>), 
-                    typeof(ICommandHandler<>), 
-                    typeof(IResultCommandHandler<>), 
-                    typeof(IQueryHandler<,>), 
+                    typeof(ICommandHandler<,>),
+                    typeof(ICommandHandler<>),
+                    typeof(IResultCommandHandler<>),
+                    typeof(IQueryHandler<,>),
                     typeof(IQueryHandler<>)))
             .AsSelfWithInterfaces()
             .WithScopedLifetime());
