@@ -193,9 +193,109 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("MediaAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", (string)null);
 
                             b1.ToJson("final_key");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MediaAssetId");
+                        });
+
+                    b.OwnsOne("FileService.Domain.MediaData", "MediaData", b1 =>
+                        {
+                            b1.Property<Guid>("MediaAssetId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("ExpectedChunksCount")
+                                .HasColumnType("integer")
+                                .HasColumnName("expected_chunks_count");
+
+                            b1.Property<long>("Size")
+                                .HasColumnType("bigint")
+                                .HasColumnName("size");
+
+                            b1.HasKey("MediaAssetId");
+
+                            b1.ToTable("media_assets", (string)null);
+
+                            b1.ToJson("media_data");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MediaAssetId");
+
+                            b1.OwnsOne("FileService.Domain.ContentType", "ContentType", b2 =>
+                                {
+                                    b2.Property<Guid>("MediaDataMediaAssetId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<string>("Category")
+                                        .IsRequired()
+                                        .HasColumnType("text")
+                                        .HasColumnName("category");
+
+                                    b2.Property<string>("Value")
+                                        .IsRequired()
+                                        .ValueGeneratedOnUpdateSometimes()
+                                        .HasColumnType("text")
+                                        .HasColumnName("value");
+
+                                    b2.HasKey("MediaDataMediaAssetId");
+
+                                    b2.ToTable("media_assets", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MediaDataMediaAssetId");
+                                });
+
+                            b1.OwnsOne("FileService.Domain.FileName", "FileName", b2 =>
+                                {
+                                    b2.Property<Guid>("MediaDataMediaAssetId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<string>("Extension")
+                                        .IsRequired()
+                                        .HasColumnType("text")
+                                        .HasColumnName("extension");
+
+                                    b2.Property<string>("Name")
+                                        .IsRequired()
+                                        .HasColumnType("text")
+                                        .HasColumnName("name");
+
+                                    b2.HasKey("MediaDataMediaAssetId");
+
+                                    b2.ToTable("media_assets", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MediaDataMediaAssetId");
+                                });
+
+                            b1.Navigation("ContentType")
+                                .IsRequired();
+
+                            b1.Navigation("FileName")
+                                .IsRequired();
+                        });
+
+                    b.OwnsOne("FileService.Domain.MediaOwner", "Owner", b1 =>
+                        {
+                            b1.Property<Guid>("MediaAssetId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Context")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("context");
+
+                            b1.Property<Guid>("EntityId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("entity_id");
+
+                            b1.HasKey("MediaAssetId");
+
+                            b1.ToTable("media_assets", (string)null);
+
+                            b1.ToJson("owner");
 
                             b1.WithOwner()
                                 .HasForeignKey("MediaAssetId");
@@ -238,109 +338,9 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("MediaAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", (string)null);
 
                             b1.ToJson("raw_key");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MediaAssetId");
-                        });
-
-                    b.OwnsOne("FileService.Domain.MediaData", "MediaData", b1 =>
-                        {
-                            b1.Property<Guid>("MediaAssetId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("ExpectedChunksCount")
-                                .HasColumnType("integer")
-                                .HasColumnName("expected_chunks_count");
-
-                            b1.Property<long>("Size")
-                                .HasColumnType("bigint")
-                                .HasColumnName("size");
-
-                            b1.HasKey("MediaAssetId");
-
-                            b1.ToTable("media_assets");
-
-                            b1.ToJson("media_data");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MediaAssetId");
-
-                            b1.OwnsOne("FileService.Domain.ContentType", "ContentType", b2 =>
-                                {
-                                    b2.Property<Guid>("MediaDataMediaAssetId")
-                                        .HasColumnType("uuid");
-
-                                    b2.Property<string>("Category")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("category");
-
-                                    b2.Property<string>("Value")
-                                        .IsRequired()
-                                        .ValueGeneratedOnUpdateSometimes()
-                                        .HasColumnType("text")
-                                        .HasColumnName("value");
-
-                                    b2.HasKey("MediaDataMediaAssetId");
-
-                                    b2.ToTable("media_assets");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MediaDataMediaAssetId");
-                                });
-
-                            b1.OwnsOne("FileService.Domain.FileName", "FileName", b2 =>
-                                {
-                                    b2.Property<Guid>("MediaDataMediaAssetId")
-                                        .HasColumnType("uuid");
-
-                                    b2.Property<string>("Extension")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("extension");
-
-                                    b2.Property<string>("Name")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("name");
-
-                                    b2.HasKey("MediaDataMediaAssetId");
-
-                                    b2.ToTable("media_assets");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MediaDataMediaAssetId");
-                                });
-
-                            b1.Navigation("ContentType")
-                                .IsRequired();
-
-                            b1.Navigation("FileName")
-                                .IsRequired();
-                        });
-
-                    b.OwnsOne("FileService.Domain.MediaOwner", "Owner", b1 =>
-                        {
-                            b1.Property<Guid>("MediaAssetId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Context")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("context");
-
-                            b1.Property<Guid>("EntityId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("entity_id");
-
-                            b1.HasKey("MediaAssetId");
-
-                            b1.ToTable("media_assets");
-
-                            b1.ToJson("owner");
 
                             b1.WithOwner()
                                 .HasForeignKey("MediaAssetId");
@@ -359,21 +359,6 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("FileService.Domain.MediaProcessing.VideoProcess", b =>
                 {
-                    b.OwnsOne("FileService.Domain.MediaProcessing.MetaData", "MetaData", b1 =>
-                        {
-                            b1.Property<Guid>("VideoProcessId")
-                                .HasColumnType("uuid");
-
-                            b1.HasKey("VideoProcessId");
-
-                            b1.ToTable("video_processes");
-
-                            b1.ToJson("meta_data");
-
-                            b1.WithOwner()
-                                .HasForeignKey("VideoProcessId");
-                        });
-
                     b.OwnsOne("FileService.Domain.StorageKey", "HlsKey", b1 =>
                         {
                             b1.Property<Guid>("VideoProcessId")
@@ -411,9 +396,24 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessId");
 
-                            b1.ToTable("video_processes");
+                            b1.ToTable("video_processes", (string)null);
 
                             b1.ToJson("hls_key");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VideoProcessId");
+                        });
+
+                    b.OwnsOne("FileService.Domain.MediaProcessing.MetaData", "MetaData", b1 =>
+                        {
+                            b1.Property<Guid>("VideoProcessId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("VideoProcessId");
+
+                            b1.ToTable("video_processes", (string)null);
+
+                            b1.ToJson("meta_data");
 
                             b1.WithOwner()
                                 .HasForeignKey("VideoProcessId");
@@ -456,7 +456,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessId");
 
-                            b1.ToTable("video_processes");
+                            b1.ToTable("video_processes", (string)null);
 
                             b1.ToJson("raw_key");
 
@@ -481,23 +481,6 @@ namespace FileService.Infrastructure.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("FileService.Domain.MediaProcessing.VideoProcessProgress", "Progress", b1 =>
-                        {
-                            b1.Property<Guid>("VideoProcessStepId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<double>("Value")
-                                .HasColumnType("double precision")
-                                .HasColumnName("progress");
-
-                            b1.HasKey("VideoProcessStepId");
-
-                            b1.ToTable("video_process_steps");
-
-                            b1.WithOwner()
-                                .HasForeignKey("VideoProcessStepId");
-                        });
-
                     b.OwnsOne("FileService.Domain.MediaProcessing.VideoProcessStepName", "Name", b1 =>
                         {
                             b1.Property<Guid>("VideoProcessStepId")
@@ -510,7 +493,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessStepId");
 
-                            b1.ToTable("video_process_steps");
+                            b1.ToTable("video_process_steps", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("VideoProcessStepId");
@@ -527,7 +510,24 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessStepId");
 
-                            b1.ToTable("video_process_steps");
+                            b1.ToTable("video_process_steps", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("VideoProcessStepId");
+                        });
+
+                    b.OwnsOne("FileService.Domain.MediaProcessing.VideoProcessProgress", "Progress", b1 =>
+                        {
+                            b1.Property<Guid>("VideoProcessStepId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<double>("Value")
+                                .HasColumnType("double precision")
+                                .HasColumnName("progress");
+
+                            b1.HasKey("VideoProcessStepId");
+
+                            b1.ToTable("video_process_steps", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("VideoProcessStepId");
@@ -582,7 +582,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", (string)null);
 
                             b1.ToJson("hls_root_key");
 

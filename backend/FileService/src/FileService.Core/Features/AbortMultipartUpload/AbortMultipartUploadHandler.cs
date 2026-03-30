@@ -15,17 +15,20 @@ public sealed class AbortMultipartUploadHandler : IResultCommandHandler<AbortMul
     private readonly ILogger<AbortMultipartUploadHandler> _logger;
     private readonly IValidator<AbortMultipartUploadCommand> _validator;
     private readonly IS3Provider _s3Provider;
+    private readonly ITransactionManager _transactionManager;
 
     public AbortMultipartUploadHandler(
         IMediaAssetRepository mediaAssetRepository,
         ILogger<AbortMultipartUploadHandler> logger,
         IValidator<AbortMultipartUploadCommand> validator,
-        IS3Provider s3Provider)
+        IS3Provider s3Provider,
+        ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
         _logger = logger;
         _validator = validator;
         _s3Provider = s3Provider;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result> Handle(AbortMultipartUploadCommand command, CancellationToken cancellationToken)
@@ -51,7 +54,10 @@ public sealed class AbortMultipartUploadHandler : IResultCommandHandler<AbortMul
             return abortMultipartUploadResult.Errors;
 
         mediaAsset.MarkFailed(DateTime.UtcNow);
-        await _mediaAssetRepository.SaveChanges(cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+            return saveResult.Errors;
+
         _logger.LogInformation("Media Asset failed uploading: {MediaAssetId} with key: {StorageKey}", mediaAsset.Id, mediaAsset.RawKey);
 
         return Result.Success();

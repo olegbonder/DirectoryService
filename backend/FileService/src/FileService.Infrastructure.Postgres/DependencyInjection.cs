@@ -1,5 +1,6 @@
 ﻿using DirectoryService.Infrastructure.Postgres;
 using FileService.Core;
+using FileService.Infrastructure.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,9 @@ namespace FileService.Infrastructure.Postgres
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped<ITransactionManager, TransactionManager>();
             services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
+            services.AddScoped<IVideoProcessingRepository, VideoProcessingRepository>();
 
             services.AddDbContextPool<FileServiceDbContext>((sp, options) =>
             {

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
-namespace FileService.Infrastructure.Postgres;
+namespace FileService.Infrastructure.Postgres.Repositories;
 
 public class MediaAssetRepository : IMediaAssetRepository
 {
@@ -46,6 +46,17 @@ public class MediaAssetRepository : IMediaAssetRepository
         Expression<Func<MediaAsset, bool>> predicate, CancellationToken cancellationToken) =>
         await _context.MediaAssets.FirstOrDefaultAsync(predicate, cancellationToken);
 
+    public async Task<Result<VideoAsset>> GetVideoBy(
+        Expression<Func<VideoAsset, bool>> predicate, CancellationToken cancellationToken)
+    {
+        var videoAsset = await _context.MediaAssets
+            .OfType<VideoAsset>().FirstOrDefaultAsync(predicate, cancellationToken);
+        if (videoAsset == null)
+            return GeneralErrors.NotFound("video_asset", null);
+
+        return videoAsset!;
+    }
+
     public async Task<Result<MediaAsset>> GetById(Guid mediaAssetId, CancellationToken cancellationToken)
     {
         var mediaAsset = await GetBy(m => m.Id == mediaAssetId && m.Status != MediaStatus.DELETED, cancellationToken);
@@ -80,10 +91,5 @@ public class MediaAssetRepository : IMediaAssetRepository
             _logger.LogError(ex, "Ошибка удаления медиа-файла {fileInfo}", fileInfo);
             return MediaAssetErrors.DatabaseError();
         }
-    }
-
-    public async Task SaveChanges(CancellationToken cancellationToken)
-    {
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

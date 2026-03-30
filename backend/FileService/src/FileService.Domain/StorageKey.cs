@@ -49,13 +49,11 @@ public sealed record StorageKey
 
     public Result<StorageKey> AppendSegment(string segment)
     {
-        var normalizedKeyResult = NormalizeSegment(segment);
-        if (normalizedKeyResult.IsFailure)
-        {
-            return normalizedKeyResult.Errors;
-        }
+        if (string.IsNullOrWhiteSpace(segment))
+            return GeneralErrors.ValueIsRequired(nameof(segment));
 
-        return new StorageKey(Bucket, normalizedKeyResult.Value, Value);
+        string newPrefix = Value;
+        return Create(Bucket, newPrefix, segment);
     }
 
     public static StorageKey None = new(string.Empty, string.Empty, string.Empty);

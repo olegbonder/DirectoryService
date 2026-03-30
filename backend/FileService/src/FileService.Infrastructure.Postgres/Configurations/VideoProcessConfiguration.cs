@@ -32,9 +32,12 @@ namespace FileService.Infrastructure.Postgres.Configurations
                 rkb.Property(r => r.FullPath).HasColumnName("full_path").IsRequired();
             });
 
-            builder.OwnsOne(v => v.MetaData, mb =>
+            builder.OwnsOne(v => v.MetaData, mdb =>
             {
-                mb.ToJson("meta_data");
+                mdb.ToJson("meta_data");
+                mdb.Property(md => md.Duration).HasColumnName("duration").IsRequired();
+                mdb.Property(md => md.Width).HasColumnName("width").IsRequired();
+                mdb.Property(md => md.Height).HasColumnName("height").IsRequired();
             });
 
             builder.Property(v => v.Status).HasConversion<string>().HasColumnName("status");

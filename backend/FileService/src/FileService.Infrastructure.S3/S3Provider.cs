@@ -30,7 +30,7 @@ public class S3Provider : IS3Provider
     public async Task<Result> UploadFileAsync(
         StorageKey storageKey,
         Stream stream,
-        MediaData mediaData,
+        string contentType,
         CancellationToken cancellationToken)
     {
         try
@@ -40,7 +40,7 @@ public class S3Provider : IS3Provider
                 BucketName = storageKey.Bucket,
                 Key = storageKey.Value,
                 InputStream = stream,
-                ContentType = mediaData.ContentType.Value,
+                ContentType = contentType ?? "application/octet-stream"
             };
             await _s3Client.PutObjectAsync(request, cancellationToken);
 

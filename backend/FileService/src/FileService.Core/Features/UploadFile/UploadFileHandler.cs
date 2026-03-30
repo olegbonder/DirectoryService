@@ -15,17 +15,20 @@ public class UploadFileHandler : ICommandHandler<Guid, UploadFileCommand>
     private readonly IS3Provider _s3Provider;
     private readonly IValidator<UploadFileCommand> _validator;
     private readonly ILogger<UploadFileHandler> _logger;
+    private readonly ITransactionManager _transactionManager;
 
     public UploadFileHandler(
         IMediaAssetRepository mediaAssetRepository,
         IS3Provider s3Provider,
         IValidator<UploadFileCommand> validator,
-        ILogger<UploadFileHandler> logger)
+        ILogger<UploadFileHandler> logger,
+        ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
         _s3Provider = s3Provider;
         _validator = validator;
         _logger = logger;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<Guid>> Handle(UploadFileCommand command, CancellationToken cancellationToken)
@@ -64,17 +67,22 @@ public class UploadFileHandler : ICommandHandler<Guid, UploadFileCommand>
         var uploadResult = await _s3Provider.UploadFileAsync(
             mediaAsset.RawKey,
             file.OpenReadStream(),
-            mediaData,
+            mediaData.ContentType.Value,
             cancellationToken);
         if (uploadResult.IsFailure)
         {
             mediaAsset.MarkFailed(DateTime.UtcNow);
-            await _mediaAssetRepository.SaveChanges(cancellationToken);
+            var uploadSaveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (uploadSaveResult.IsFailure)
+                return uploadSaveResult.Errors;
+
             return uploadResult.Errors;
         }
 
         mediaAsset.MarkUploaded(DateTime.UtcNow);
-        await _mediaAssetRepository.SaveChanges(cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+            return saveResult.Errors;
 
         _logger.LogInformation($"Uploaded file {file.Name}");
 
