@@ -9,9 +9,9 @@ namespace FileService.Domain.MediaProcessing
 
         public Guid Id { get; private set; }
 
-        public StorageKey RawKey { get; private set; }
+        public StorageKey? RawKey { get; private set; }
 
-        public StorageKey HlsKey { get; private set; }
+        public StorageKey? HlsKey { get; private set; }
 
         public VideoProcessStatus Status { get; private set; }
 

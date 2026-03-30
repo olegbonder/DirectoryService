@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Contracts.Dtos.MediaAssets.UploadFile;
 using Framework.HttpCommunication;
+using Microsoft.AspNetCore.Http;
 using SharedKernel.Result;
 
 namespace FileService.IntegrationTests.Infrastructure
@@ -56,6 +57,53 @@ namespace FileService.IntegrationTests.Infrastructure
                 .HandleResponseAsync<StartMultiPartUploadResponse>(cancellationToken);
 
             return startMultipartResult;
+        }
+
+        public FileInfo GetFileInfo(bool isImage = false)
+        {
+            FileInfo fileInfo = new(Path.Combine(
+                AppContext.BaseDirectory,
+                Constants.TEST_FILE_DIRECTORY,
+                isImage ? Constants.TEST_IMAGE_FILE_NAME : Constants.TEST_VIDEO_FILE_NAME));
+
+            return fileInfo;
+        }
+
+        public FormFile GetFormFile(bool isImage = false)
+        {
+            var fileInfo = GetFileInfo(isImage);
+            var stream = fileInfo.OpenRead();
+            var formFile = new FormFile(stream, 0, stream.Length, "file", fileInfo.Name)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = isImage ? "image/jpeg" : "video/mp4"
+            };
+
+            return formFile;
+        }
+
+        public StartMultiPartUploadRequest SetStartMultiPartUploadRequest(FileInfo fileInfo, bool isImage = false)
+        {
+            var startMultiPartUploadRequest = new StartMultiPartUploadRequest(
+                fileInfo.Name,
+                isImage ? "preview" : "video",
+                isImage ? "image/jpeg" : "video/mp4",
+                fileInfo.Length,
+                "department",
+                Guid.NewGuid());
+
+            return startMultiPartUploadRequest;
+        }
+
+        public UploadFileRequest SetUploadFileRequest(FormFile formFile, bool isImage = false)
+        {
+            var request = new UploadFileRequest(
+                formFile,
+                isImage ? "preview" : "video",
+                "department",
+                Guid.NewGuid());
+
+            return request;
         }
     }
 }

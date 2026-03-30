@@ -21,6 +21,8 @@ public class VideoAsset: MediaAsset
     {
     }
 
+    public override bool RequiredProcessing() => true;
+
     public const string MASTER_PLAYLIST_NAME = "master.m3u8";
     public const string STREAM_PLAYLIST_PATTERN = "%v_stream.m3u8";
     public const string SEGMENT_FILE_PATTERN = "%v_%06d.ts";

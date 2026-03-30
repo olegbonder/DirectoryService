@@ -64,7 +64,7 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetR
             return MediaAssetErrors.ExpectedChunksCount();
 
         Result completeMultiPartUploadResult = await _s3Provider.CompleteMultiPartUploadAsync(
-            mediaAsset.RawKey,
+            mediaAsset.UploadKey,
             uploadId,
             partETags,
             cancellationToken);

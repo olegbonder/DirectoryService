@@ -3,7 +3,8 @@
 public static class Constants
 {
     public const string TEST_FILE_DIRECTORY = "Resources";
-    public const string TEST_FILE_NAME = "test-file.mp4";
+    public const string TEST_VIDEO_FILE_NAME = "test-file.mp4";
+    public const string TEST_IMAGE_FILE_NAME = "test-image.jpg";
 
     public const string BASE_URL = "/api";
     public const string START_MULTIPART_UPLOAD_URL = $"{BASE_URL}/files/multipart/start";

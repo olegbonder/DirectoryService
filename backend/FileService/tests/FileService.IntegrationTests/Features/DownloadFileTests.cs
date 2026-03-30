@@ -22,22 +22,9 @@ namespace FileService.IntegrationTests.Features
         {
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            await using var stream = fileInfo.OpenRead();
-            var formFile = new FormFile(stream, 0, stream.Length, "file", fileInfo.Name)
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "video/mp4"
-            };
+            var formFile = TestData.GetFormFile();
 
-            var request = new UploadFileRequest(
-                formFile,
-                "video",
-                "department",
-                Guid.NewGuid());
+            var request = TestData.SetUploadFileRequest(formFile);
 
             var uploadMediaAssetResult = await TestData.UploadFile(request, cancellationToken);
             var uploadMediaAssetId = uploadMediaAssetResult.Value;
@@ -60,7 +47,7 @@ namespace FileService.IntegrationTests.Features
 
                 var objectS3Response = await GetObjectInS3(mediaAsset.RawKey, cancellationToken);
 
-                Assert.Equal(fileInfo.Length, objectS3Response.ContentLength);
+                Assert.Equal(formFile.Length, objectS3Response.ContentLength);
                 Assert.Equal(mediaAsset.RawKey.Value, objectS3Response.Key);
             });
         }

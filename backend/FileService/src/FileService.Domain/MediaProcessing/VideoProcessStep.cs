@@ -36,7 +36,7 @@ namespace FileService.Domain.MediaProcessing
             Order = order;
             Progress = VideoProcessProgress.Create(VideoProcessProgress.MIN_LENGTH);
             Status = VideoProcessStatus.PENDING;
-            CreatedAt = DateTime.Now;
+            CreatedAt = DateTime.UtcNow;
             UpdatedAt = CreatedAt;
         }
 

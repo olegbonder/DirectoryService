@@ -2,7 +2,6 @@
 using Amazon.S3.Model;
 using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.GetChunkUploadUrl;
-using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
@@ -26,17 +25,8 @@ namespace FileService.IntegrationTests.Features
             var cancellationToken = new CancellationTokenSource().Token;
             int partNumber = 1;
 
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var startMultipartRequest = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var startMultipartRequest = TestData.SetStartMultiPartUploadRequest(fileInfo);
             var startMultipartResult = await TestData.StartMultiPartUpload(startMultipartRequest, cancellationToken);
             var startMultipartResponse = startMultipartResult.Value;
             var mediaAssetId = startMultipartResponse.MediaAssetId;
@@ -107,17 +97,8 @@ namespace FileService.IntegrationTests.Features
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
 
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var startMultipartRequest = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var startMultipartRequest = TestData.SetStartMultiPartUploadRequest(fileInfo);
             var startMultipartResult = await TestData.StartMultiPartUpload(startMultipartRequest, cancellationToken);
             var startMultipartResponse = startMultipartResult.Value;
             var mediaAssetId = startMultipartResponse.MediaAssetId;
@@ -133,11 +114,6 @@ namespace FileService.IntegrationTests.Features
             var getChunkUploadUrl = result.Value;
             Assert.True(result.IsSuccess);
             Assert.Equal(partNumber, getChunkUploadUrl.PartNumber);
-            /*Assert.NotEmpty(result.Errors);
-            Assert.Equal(3, result.Errors.Count());
-
-            var errorCodes = result.Errors.Select(e => e.Code).ToList();
-            Assert.Contains(errorCodes, e => e.Contains("partNumber"));*/
         }
 
         private async Task<Result<ChunkUploadUrl>> GetChunkUploadUrl(

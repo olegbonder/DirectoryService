@@ -65,13 +65,13 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
         await _mediaAssetRepository.Add(mediaAssetResult.Value, cancellationToken);
 
         var mediaAsset = mediaAssetResult.Value;
-        var startUploadResult = await _s3Provider.StartMultiPartUploadAsync(mediaAsset.RawKey, mediaData, cancellationToken);
+        var startUploadResult = await _s3Provider.StartMultiPartUploadAsync(mediaAsset.UploadKey, mediaData, cancellationToken);
         if (startUploadResult.IsFailure)
             return startUploadResult.Errors;
 
         string uploadId = startUploadResult.Value;
         var chunksUploadUrlsResult = await _s3Provider.GenerateAllChunksUploadUrlsAsync(
-            mediaAsset.RawKey,
+            mediaAsset.UploadKey,
             uploadId,
             totalChunks,
             cancellationToken);
