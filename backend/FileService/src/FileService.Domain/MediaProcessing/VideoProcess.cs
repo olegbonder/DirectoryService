@@ -264,8 +264,8 @@ namespace FileService.Domain.MediaProcessing
                 return currentStep;
 
             VideoProcessStep? nextStep = _steps
-                .OrderBy(x => x.Order)
-                .FirstOrDefault(x => x.Status == VideoProcessStatus.RUNNING);
+                .OrderBy(x => x.Order.Value)
+                .FirstOrDefault(x => x.Status == VideoProcessStatus.PENDING);
 
             if (nextStep is null)
             {
@@ -273,7 +273,7 @@ namespace FileService.Domain.MediaProcessing
                 return Result<VideoProcessStep?>.Success(null);
             }
 
-            var startResult = nextStep.Start();
+            var startResult = StartStep(nextStep.Order.Value, nextStep.Name.Value);
             if (startResult.IsFailure)
                 return startResult.Errors;
 

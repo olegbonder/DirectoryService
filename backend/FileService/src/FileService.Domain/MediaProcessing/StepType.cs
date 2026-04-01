@@ -6,6 +6,6 @@ public enum StepType
     EXTRACT_METADATA,
     GENERATE_HLS,
     UPLOAD_HLS,
-    GENERATE_PREVIEW,
+    //GENERATE_PREVIEW,
     CLEANUP
 }

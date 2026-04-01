@@ -3,8 +3,6 @@ using Amazon.S3;
 using FileService.Core;
 using FileService.Infrastructure.Postgres;
 using FileService.Infrastructure.S3;
-using FileService.IntegrationTests.Mocks;
-using FileService.VideoProcessing.FfmpegProcess;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -20,11 +18,8 @@ using Testcontainers.PostgreSql;
 
 namespace FileService.IntegrationTests.Infrastructure;
 
-/// <summary>
-/// Фабрика для интеграционных тестов с FakeHlsGenerator (быстрые тесты).
-/// </summary>
-[CollectionDefinition("FileTestsCollection")]
-public class IntegrationTestsWebFactory : WebApplicationFactory<Program>, IAsyncLifetime
+[CollectionDefinition("RealFfmpegTestsCollection")]
+public class RealFfmpegIntegrationTestsWebFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres")
@@ -87,9 +82,6 @@ public class IntegrationTestsWebFactory : WebApplicationFactory<Program>, IAsync
             });
 
             services.RemoveAll<S3BucketInitializationService>();
-
-            services.RemoveAll<IFfmpegProcessRunner>();
-            services.AddSingleton<IFfmpegProcessRunner, FakeHlsGenerator>();
         });
     }
 
@@ -116,7 +108,7 @@ public class IntegrationTestsWebFactory : WebApplicationFactory<Program>, IAsync
             {
                 await s3Client.PutBucketAsync(bucket);
             }
-            catch (AmazonS3Exception ex) // when(ex.ErrorCode == "BucketAlreadyOwnedByYouException")
+            catch (AmazonS3Exception ex)
             {
             }
         }

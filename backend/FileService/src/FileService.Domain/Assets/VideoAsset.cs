@@ -29,7 +29,7 @@ public class VideoAsset: MediaAsset
     public const string HLS_PREFIX = "hls";
 
     private const long MAX_SIZE = 5_368_709_120; // 5 GB
-    private const string BUCKET = "videos";
+    public const string BUCKET = "videos";
     private const string RAW_PREFIX = "raw";
     private const string ALLOWED_CONTENT_TYPE = "video";
     private static readonly string[] _allowedExtensions = ["mp4", "mkv", "avi", "mov"];
@@ -89,10 +89,10 @@ public class VideoAsset: MediaAsset
         if (Status != MediaStatus.UPLOADED)
             return Error.Validation("video.invalid.status", "Can only set hls master playlist key from UPLOADED status");
 
-        if (HlsRootKey is not null)
+        if (FinalKey is not null)
             return Error.Validation("video.hls.key.exists", "HLS master playlist key already exists");
 
-        HlsRootKey = value;
+        FinalKey = value;
         UpdatedAt = DateTime.UtcNow;
 
         return Result.Success();

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using FileService.Domain;
 using FileService.Domain.MediaProcessing;
@@ -65,7 +66,7 @@ namespace FileService.VideoProcessing.FfmpegProcess
             if (reader.TokenType == JsonTokenType.String)
             {
                 string? str = reader.GetString();
-                if (double.TryParse(str, out double value))
+                if (double.TryParse(str, CultureInfo.InvariantCulture, out double value))
                     return value;
 
                 return null;

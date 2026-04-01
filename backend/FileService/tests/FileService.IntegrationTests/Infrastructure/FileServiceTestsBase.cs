@@ -6,14 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FileService.IntegrationTests.Infrastructure;
 
-public class FileServiceTestsBase : IClassFixture<IntegrationTestsWebFactory>
+public class FileServiceTestsBase : IAsyncLifetime, IClassFixture<IntegrationTestsWebFactory>
 {
+    private readonly IntegrationTestsWebFactory _factory;
+
     protected FileServiceTestsBase(IntegrationTestsWebFactory factory)
     {
-        AppHttpClient = factory.CreateClient();
+        _factory = factory;
+        AppHttpClient = _factory.CreateClient();
         HttpClient = new HttpClient();
-        Services = factory.Services;
-        TestData = new TestData(Services, AppHttpClient);
+        Services = _factory.Services;
+        TestData = new TestData(AppHttpClient, HttpClient);
     }
 
     protected HttpClient HttpClient { get; init; }
@@ -24,6 +27,13 @@ public class FileServiceTestsBase : IClassFixture<IntegrationTestsWebFactory>
 
     protected TestData TestData { get; init; }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
+    }
+
     protected async Task ExecuteInDb(Func<FileServiceDbContext, Task> action)
     {
         await using var scope = Services.CreateAsyncScope();
@@ -31,6 +41,15 @@ public class FileServiceTestsBase : IClassFixture<IntegrationTestsWebFactory>
         FileServiceDbContext dbContext = scope.ServiceProvider.GetRequiredService<FileServiceDbContext>();
 
         await action(dbContext);
+    }
+
+    protected async Task ExecuteInS3(Func<IAmazonS3, Task> action)
+    {
+        await using var scope = Services.CreateAsyncScope();
+
+        IAmazonS3 s3Client = scope.ServiceProvider.GetRequiredService<IAmazonS3>();
+
+        await action(s3Client);
     }
 
     protected async Task<GetObjectResponse> GetObjectInS3(StorageKey key, CancellationToken cancellationToken = default)
