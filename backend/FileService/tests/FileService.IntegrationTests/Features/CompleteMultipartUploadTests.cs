@@ -1,82 +1,135 @@
-﻿using System.Net.Http.Json;
-using FileService.Contracts.Dtos.MediaAssets;
+﻿using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
-using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
+using FileService.Domain.MediaProcessing;
 using FileService.Infrastructure.S3;
 using FileService.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using SharedKernel.Result;
-using Xunit.Abstractions;
 
 namespace FileService.IntegrationTests.Features
 {
     public class CompleteMultipartUploadTests : FileServiceTestsBase
     {
-        private readonly ITestOutputHelper _output;
-
-        public CompleteMultipartUploadTests(IntegrationTestsWebFactory factory, ITestOutputHelper output)
+        public CompleteMultipartUploadTests(IntegrationTestsWebFactory factory)
             : base(factory)
         {
-            _output = output;
         }
 
         [Fact]
-        public async Task CompleteMultipartUpload_FullCycle_PersistsMediaFile()
+        public async Task CompleteMultipartUpload_FullCycle_PersistsVideoFile()
         {
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
 
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var startMultiPartUploadRequest = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
-            var startMultipartResult = await TestData.StartMultiPartUpload(startMultiPartUploadRequest, cancellationToken);
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var startMultiPartUploadRequest = TestData.SetStartMultiPartUploadRequest(fileInfo);
+            var startMultipartResult = await TestData.StartMultiPartUpload(
+                startMultiPartUploadRequest,
+                cancellationToken);
 
             var startMultiPartUploadResponse = startMultipartResult.Value;
-            var partEtags = await UploadChunks(
+            var mediaAssetId = startMultiPartUploadResponse.MediaAssetId;
+            var partEtags = await TestData.UploadChunks(
                 fileInfo,
                 startMultiPartUploadResponse.ChunkSize,
                 startMultiPartUploadResponse.ChunkUploadUrls,
                 cancellationToken);
 
             var request = new CompleteMultiPartUploadRequest(
-                startMultiPartUploadResponse.MediaAssetId,
+                mediaAssetId,
                 startMultiPartUploadResponse.UploadId,
                 partEtags);
 
             // act
-            var result = await CompleteMultiPartUpload(request, cancellationToken);
+            var result = await TestData.CompleteMultiPartUpload(request, cancellationToken);
 
             // assert
-            
-            _output.WriteLine($"Value: {result.Value}");
-            _output.WriteLine($"Errors: {string.Join(";", result.Errors?.Select(e => new {e.Message, e.Code}))}");
             Assert.True(result.IsSuccess);
             await ExecuteInDb(async db =>
             {
                 MediaAsset? mediaAsset = await db.MediaAssets
-                    .FirstOrDefaultAsync(m => m.Id == startMultiPartUploadResponse.MediaAssetId, cancellationToken);
+                    .FirstOrDefaultAsync(
+                        m => m.Id == mediaAssetId,
+                        cancellationToken);
+
+                VideoProcess? videoProcess = await db.VideoProcesses
+                    .Include(videoProcess => videoProcess.Steps)
+                    .FirstOrDefaultAsync(
+                        vp => vp.Id == mediaAssetId,
+                        cancellationToken);
 
                 Assert.NotNull(mediaAsset);
                 Assert.Equal(mediaAsset.Id, result.Value.MediaAssetId);
                 Assert.Equal(MediaStatus.UPLOADED, mediaAsset.Status);
 
-                var objectS3Response = await GetObjectInS3(mediaAsset.RawKey, cancellationToken);
+                Assert.True(mediaAsset is VideoAsset);
+                Assert.NotNull(videoProcess);
+                Assert.Equal(Enum.GetNames<StepType>().Length, videoProcess.Steps.Count);
+
+                var objectS3Response = await GetObjectInS3(mediaAsset.UploadKey, cancellationToken);
 
                 Assert.Equal(fileInfo.Length, objectS3Response.ContentLength);
-                Assert.Equal(mediaAsset.RawKey.Value, objectS3Response.Key);
+                Assert.Equal(mediaAsset.UploadKey.Value, objectS3Response.Key);
+            });
+        }
+
+        [Fact]
+        public async Task CompleteMultipartUpload_FullCycle_PersistsImageFile()
+        {
+            // arrange
+            var cancellationToken = new CancellationTokenSource().Token;
+
+            bool isImage = true;
+            FileInfo fileInfo = TestData.GetFileInfo(isImage);
+            var startMultiPartUploadRequest = TestData.SetStartMultiPartUploadRequest(fileInfo, isImage);
+            var startMultipartResult = await TestData.StartMultiPartUpload(
+                startMultiPartUploadRequest,
+                cancellationToken);
+
+            var startMultiPartUploadResponse = startMultipartResult.Value;
+            var mediaAssetId = startMultiPartUploadResponse.MediaAssetId;
+            var partEtags = await TestData.UploadChunks(
+                fileInfo,
+                startMultiPartUploadResponse.ChunkSize,
+                startMultiPartUploadResponse.ChunkUploadUrls,
+                cancellationToken);
+
+            var request = new CompleteMultiPartUploadRequest(
+                mediaAssetId,
+                startMultiPartUploadResponse.UploadId,
+                partEtags);
+
+            // act
+            var result = await TestData.CompleteMultiPartUpload(request, cancellationToken);
+
+            // assert
+            Assert.True(result.IsSuccess);
+            await ExecuteInDb(async db =>
+            {
+                MediaAsset? mediaAsset = await db.MediaAssets
+                    .FirstOrDefaultAsync(
+                        m => m.Id == mediaAssetId,
+                        cancellationToken);
+
+                VideoProcess? videoProcess = await db.VideoProcesses.Include(videoProcess => videoProcess.Steps)
+                    .FirstOrDefaultAsync(
+                        vp => vp.Id == mediaAssetId,
+                        cancellationToken);
+
+                Assert.NotNull(mediaAsset);
+                Assert.Equal(mediaAsset.Id, result.Value.MediaAssetId);
+                Assert.Equal(MediaStatus.UPLOADED, mediaAsset.Status);
+
+                Assert.True(mediaAsset is PreviewAsset);
+                Assert.Null(videoProcess);
+
+                var objectS3Response = await GetObjectInS3(mediaAsset.UploadKey, cancellationToken);
+
+                Assert.Equal(fileInfo.Length, objectS3Response.ContentLength);
+                Assert.Equal(mediaAsset.UploadKey.Value, objectS3Response.Key);
             });
         }
 
@@ -88,7 +141,7 @@ namespace FileService.IntegrationTests.Features
             var request = new CompleteMultiPartUploadRequest(Guid.Empty, string.Empty, []);
 
             // act
-            var result = await CompleteMultiPartUpload(request, cancellationToken);
+            var result = await TestData.CompleteMultiPartUpload(request, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -113,24 +166,15 @@ namespace FileService.IntegrationTests.Features
             // а рекомендуемый размер чанка по-умолчанию 10 МБ
             optionsS3.Value.RecommendedChunkSizeBytes = 1024 * 1024;
 
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var startMultiPartUploadRequest = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var startMultiPartUploadRequest = TestData.SetStartMultiPartUploadRequest(fileInfo);
             var startMultipartResult = await TestData.StartMultiPartUpload(startMultiPartUploadRequest, cancellationToken);
 
             var startMultiPartUploadResponse = startMultipartResult.Value;
             List<ChunkUploadUrl> chunkUploadUrls = [..startMultiPartUploadResponse.ChunkUploadUrls];
             chunkUploadUrls.RemoveAt(startMultiPartUploadResponse.ChunkUploadUrls.Count - 1);
 
-            var partEtags = await UploadChunks(
+            var partEtags = await TestData.UploadChunks(
                 fileInfo,
                 startMultiPartUploadResponse.ChunkSize,
                 chunkUploadUrls,
@@ -142,7 +186,7 @@ namespace FileService.IntegrationTests.Features
                 partEtags);
 
             // act
-            var result = await CompleteMultiPartUpload(request, cancellationToken);
+            var result = await TestData.CompleteMultiPartUpload(request, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -162,47 +206,6 @@ namespace FileService.IntegrationTests.Features
                 Assert.NotNull(mediaAsset);
                 Assert.NotEqual(MediaStatus.UPLOADED, mediaAsset.Status);
             });
-        }
-
-        private async Task<IReadOnlyList<PartEtagDto>> UploadChunks(
-            FileInfo fileInfo,
-            int chunkSize,
-            IReadOnlyList<ChunkUploadUrl> chunkUploadUrls,
-            CancellationToken cancellationToken)
-        {
-            await using var stream = fileInfo.OpenRead();
-
-            var parts = new List<PartEtagDto>();
-
-            foreach (ChunkUploadUrl chunkUploadUrl in chunkUploadUrls.OrderBy(c => c.PartNumber))
-            {
-                byte[] chunk = new byte[chunkSize];
-                int bytesRead = await stream.ReadAsync(chunk.AsMemory(0, chunkSize), cancellationToken);
-                if (bytesRead == 0)
-                    break;
-
-                var content = new ByteArrayContent(chunk);
-                var response = await HttpClient.PutAsync(chunkUploadUrl.UploadUrl, content, cancellationToken);
-
-                string? etag = response.Headers.ETag?.Tag.Trim('"');
-
-                parts.Add(new PartEtagDto(chunkUploadUrl.PartNumber, etag!));
-            }
-
-            return parts;
-        }
-
-        private async Task<Result<MediaAssetResponse>> CompleteMultiPartUpload(
-            CompleteMultiPartUploadRequest request,
-            CancellationToken cancellationToken)
-        {
-            var completeResponse = await AppHttpClient.PostAsJsonAsync(
-                Constants.COMPLETE_MULTIPART_UPLOAD_URL,
-                request,
-                cancellationToken);
-            var completeResult = await completeResponse.HandleResponseAsync<MediaAssetResponse>(cancellationToken);
-
-            return completeResult;
         }
     }
 }

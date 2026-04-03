@@ -20,7 +20,8 @@ namespace FileService.Web.Configuration
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
                 .AddCors()
                 .AddS3(configuration)
-                .AddVideoProcessing();
+                .AddVideoProcessing(configuration)
+                .AddQuartzService();
 
             return services;
         }

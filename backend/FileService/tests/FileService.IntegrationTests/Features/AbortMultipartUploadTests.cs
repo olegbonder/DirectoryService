@@ -1,10 +1,9 @@
 ﻿using System.Net.Http.Json;
 using Amazon.S3;
-using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Result;
@@ -26,18 +25,9 @@ namespace FileService.IntegrationTests.Features
             var cancellationToken = new CancellationTokenSource().Token;
             int partNumber = 1;
 
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var startMultipartRequest = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
-            var startMultipartResult = await TestData.StartMultiPartUpload(startMultipartRequest, cancellationToken);
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var startMultiPartUploadRequest = TestData.SetStartMultiPartUploadRequest(fileInfo);
+            var startMultipartResult = await TestData.StartMultiPartUpload(startMultiPartUploadRequest, cancellationToken);
             var startMultipartResponse = startMultipartResult.Value;
             var mediaAssetId = startMultipartResponse.MediaAssetId;
             string uploadId = startMultipartResponse.UploadId;

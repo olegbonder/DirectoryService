@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using System.Text.Json.Serialization;
 
 namespace SharedKernel.Result
 {
+    [JsonConverter(typeof(ErrorsJsonConverter))]
     public class Errors : IEnumerable<Error>
     {
         private readonly List<Error> _errors;

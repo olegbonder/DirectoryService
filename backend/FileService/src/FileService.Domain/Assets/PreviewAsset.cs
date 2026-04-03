@@ -19,7 +19,7 @@ public class PreviewAsset: MediaAsset
     }
 
     private const long MAX_SIZE = 10_485_760; // 10 MB
-    private const string BUCKET = "preview";
+    private const string BUCKET = "previews";
     private const string RAW_PREFIX = "raw";
     private const string ALLOWED_CONTENT_TYPE = "image";
 

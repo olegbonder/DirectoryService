@@ -1,11 +1,9 @@
 ﻿using System.Net.Http.Json;
 using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
-using FileService.Contracts.Dtos.MediaAssets.UploadFile;
-using FileService.Core.HttpCommunication;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.IntegrationTests.Infrastructure;
-using Microsoft.AspNetCore.Http;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
 
@@ -23,25 +21,12 @@ namespace FileService.IntegrationTests.Features
         {
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            await using var stream = fileInfo.OpenRead();
-            var formFile = new FormFile(stream, 0, stream.Length, "file", fileInfo.Name)
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "video/mp4"
-            };
+            var formFile = TestData.GetFormFile();
 
-            var uploadFileRequest = new UploadFileRequest(
-                formFile,
-                "video",
-                "department",
-                Guid.NewGuid());
+            var uploadFileRequest = TestData.SetUploadFileRequest(formFile);
 
             var uploadMediaAssetResult = await TestData.UploadFile(uploadFileRequest, cancellationToken);
-            var uploadMediaAssetId = uploadMediaAssetResult.Value;
+            var uploadMediaAssetId = uploadMediaAssetResult.Value!.Value;
             var request = new GetDownloadUrlRequest(uploadMediaAssetId);
 
             // act
@@ -62,7 +47,7 @@ namespace FileService.IntegrationTests.Features
 
                 var objectS3Response = await GetObjectInS3(mediaAsset.RawKey, cancellationToken);
 
-                Assert.Equal(fileInfo.Length, objectS3Response.ContentLength);
+                Assert.Equal(formFile.Length, objectS3Response.ContentLength);
                 Assert.Equal(mediaAsset.RawKey.Value, objectS3Response.Key);
             });
         }

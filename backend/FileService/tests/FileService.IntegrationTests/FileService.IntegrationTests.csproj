@@ -4,6 +4,7 @@
         <PackageReference Include="coverlet.collector"/>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="Respawn" />
         <PackageReference Include="Testcontainers.Minio" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="xunit"/>
@@ -20,7 +21,13 @@
 
     <ItemGroup>
       <None Update="Resources\test-file.mp4">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Resources\test-image.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.IntegrationTests.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 

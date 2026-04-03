@@ -159,11 +159,11 @@ namespace FileService.VideoProcessing.Pipeline
                     return Error.Failure("pipeline.step.handler.not.found", error);
                 }
 
-                var startStepResult = context.VideoProcess.StartStep(
+                /*var startStepResult = context.VideoProcess.StartStep(
                     currentStep.Order.Value,
                     currentStep.Name.Value);
                 if (startStepResult.IsFailure)
-                    return startStepResult.Errors;
+                    return startStepResult.Errors;*/
 
                 var executionResult = await ExecuteStepSafetyAsync(
                     stepHandler,

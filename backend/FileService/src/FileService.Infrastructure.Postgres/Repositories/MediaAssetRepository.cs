@@ -22,7 +22,7 @@ public class MediaAssetRepository : IMediaAssetRepository
 
     public async Task<Result<Guid>> Add(MediaAsset mediaAsset, CancellationToken cancellationToken)
     {
-        var fileInfo = $"Файл: {mediaAsset.MediaData.FileName} Тип: {mediaAsset.AssetType} Путь к S3:{mediaAsset.RawKey.FullPath}";
+        var fileInfo = $"Файл: {mediaAsset.MediaData.FileName} Тип: {mediaAsset.AssetType} Путь к S3:{mediaAsset.UploadKey.FullPath}";
         try
         {
             await _context.MediaAssets.AddAsync(mediaAsset, cancellationToken);

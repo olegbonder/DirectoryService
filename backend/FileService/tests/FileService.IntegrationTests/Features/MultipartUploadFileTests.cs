@@ -14,22 +14,13 @@ namespace FileService.IntegrationTests.Features
         }
 
         [Fact]
-        public async Task MultipartUpload_with_valid_request_should_success()
+        public async Task MultipartUpload_with_valid_video_request_should_success()
         {
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
 
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var request = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var request = TestData.SetStartMultiPartUploadRequest(fileInfo);
 
             // act
             var startMultipartResult = await TestData.StartMultiPartUpload(request, cancellationToken);
@@ -46,6 +37,38 @@ namespace FileService.IntegrationTests.Features
 
                 Assert.NotNull(mediaAsset);
                 Assert.Equal(MediaStatus.UPLOADING, mediaAsset.Status);
+
+                Assert.True(mediaAsset is VideoAsset);
+            });
+        }
+
+        [Fact]
+        public async Task MultipartUpload_with_valid_image_request_should_success()
+        {
+            // arrange
+            var cancellationToken = new CancellationTokenSource().Token;
+
+            bool isImage = true;
+            FileInfo fileInfo = TestData.GetFileInfo(isImage);
+            var request = TestData.SetStartMultiPartUploadRequest(fileInfo, isImage);
+
+            // act
+            var startMultipartResult = await TestData.StartMultiPartUpload(request, cancellationToken);
+
+            Assert.True(startMultipartResult.IsSuccess);
+            Assert.NotNull(startMultipartResult.Value.UploadId);
+            Assert.True(startMultipartResult.Value.ChunkSize > 0);
+            Assert.True(startMultipartResult.Value.ChunkUploadUrls.Count > 0);
+
+            await ExecuteInDb(async db =>
+            {
+                MediaAsset? mediaAsset = await db.MediaAssets
+                    .FirstOrDefaultAsync(m => m.Id == startMultipartResult.Value.MediaAssetId, cancellationToken);
+
+                Assert.NotNull(mediaAsset);
+                Assert.Equal(MediaStatus.UPLOADING, mediaAsset.Status);
+
+                Assert.True(mediaAsset is PreviewAsset);
             });
         }
 

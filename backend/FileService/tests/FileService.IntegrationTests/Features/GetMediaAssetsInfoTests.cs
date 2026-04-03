@@ -1,8 +1,7 @@
 ﻿using System.Net.Http.Json;
 using FileService.Contracts.Dtos.MediaAssets.GetMediaAssets;
-using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
-using FileService.Core.HttpCommunication;
 using FileService.IntegrationTests.Infrastructure;
+using Framework.HttpCommunication;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
 
@@ -20,17 +19,8 @@ namespace FileService.IntegrationTests.Features
         {
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
-            FileInfo fileInfo = new(Path.Combine(
-                AppContext.BaseDirectory,
-                Constants.TEST_FILE_DIRECTORY,
-                Constants.TEST_FILE_NAME));
-            var startMultipartRequest = new StartMultiPartUploadRequest(
-                fileInfo.Name,
-                "video",
-                "video/mp4",
-                fileInfo.Length,
-                "department",
-                Guid.NewGuid());
+            FileInfo fileInfo = TestData.GetFileInfo();
+            var startMultipartRequest = TestData.SetStartMultiPartUploadRequest(fileInfo);
 
             var firstStartMultipartResult = await TestData.StartMultiPartUpload(startMultipartRequest, cancellationToken);
             var secondStartMultipartResult = await TestData.StartMultiPartUpload(startMultipartRequest, cancellationToken);

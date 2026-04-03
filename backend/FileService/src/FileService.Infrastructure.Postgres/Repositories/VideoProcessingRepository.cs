@@ -27,7 +27,9 @@ namespace FileService.Infrastructure.Postgres.Repositories
             Expression<Func<VideoProcess, bool>> predicate,
             CancellationToken cancellationToken)
         {
-            var videoProcess = await _context.VideoProcesses.FirstOrDefaultAsync(predicate, cancellationToken);
+            var videoProcess = await _context.VideoProcesses
+                .Include(v => v.Steps)
+                .FirstOrDefaultAsync(predicate, cancellationToken);
             if (videoProcess == null)
                 return GeneralErrors.NotFound("video_process", null);
 
