@@ -1,6 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Core.Database;
 using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FluentValidation;

@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
@@ -40,13 +40,11 @@ namespace DirectoryService.Application.Features.Locations.Commands.UpdateLocatio
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var locId = command.LocationId;
             var locationId = LocationId.Current(locId);
@@ -54,12 +52,12 @@ namespace DirectoryService.Application.Features.Locations.Commands.UpdateLocatio
             var existingLocation = await _locationsRepository.GetActiveLocationById(locationId, cancellationToken);
             if (existingLocation == null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return LocationErrors.NotFound(locId);
             }
 
             var request = command.Request;
-            var name = request.Name;
+            string name = request.Name;
             var locName = LocationName.Create(name).Value;
 
             var locAdr = request.Address;
@@ -72,11 +70,11 @@ namespace DirectoryService.Application.Features.Locations.Commands.UpdateLocatio
             var updateResult = await _locationsRepository.Update(existingLocation, cancellationToken);
             if (updateResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updateResult.Errors;
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

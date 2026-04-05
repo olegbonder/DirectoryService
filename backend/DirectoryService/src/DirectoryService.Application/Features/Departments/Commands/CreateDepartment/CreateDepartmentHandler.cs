@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Domain;
 using DirectoryService.Domain.Departments;
@@ -54,13 +54,11 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
 
             var deptIdentifier = DepartmentIdentifier.Create(request.Identifier).Value;
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken: cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var parentId = request.ParentId;
             Department? parentDepartment = null;
@@ -72,7 +70,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
                 parentDepartment = await _departmentsRepository.GetBy(d => d.Id == parentDepartmentId, cancellationToken);
                 if (parentDepartment == null)
                 {
-                    transactionScope.RollBack();
+                    await _transactionManager.RollbackAsync(cancellationToken);
                     return DepartmentErrors.NotFound(parentId.Value);
                 }
 
@@ -85,7 +83,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
             var getLocationsRes = await _locationsRepository.GetLocationsByIds(locationIds, cancellationToken);
             if (getLocationsRes.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return getLocationsRes.Errors;
             }
 
@@ -95,7 +93,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
             var departmentRes = Department.Create(newDeptId, parentDepartmentId, deptName, deptIdentifier, deptPath, depth, locationDepartments);
             if (departmentRes.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return departmentRes.Errors;
             }
 
@@ -105,7 +103,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.CreateDepar
                 return addDepartmentRes.Errors;
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

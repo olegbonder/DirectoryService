@@ -1,3 +1,4 @@
+using FileService.Core.Messaging;
 using FileService.Infrastructure.Postgres;
 using FileService.Infrastructure.Postgres.Migrations;
 using FileService.Infrastructure.S3;
@@ -23,6 +24,7 @@ try
 
     builder.Services.AddInfrastructure(builder.Configuration);
 
+    builder.AddWolverine();
     var app = builder.Build();
 
     app.ConfigureApp();

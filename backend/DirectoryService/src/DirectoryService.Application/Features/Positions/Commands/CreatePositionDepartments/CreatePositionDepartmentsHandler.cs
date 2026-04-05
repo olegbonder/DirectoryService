@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
@@ -45,32 +45,30 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var posId = command.PositionId;
             var positionId = PositionId.Current(posId);
 
-            var position = await _positionsRepository.GetByWithDepartments(p => p.IsActive && p.Id == positionId, cancellationToken);
+            var position = await _positionsRepository.
+                GetByWithDepartments(p => p.IsActive && p.Id == positionId, cancellationToken);
             if (position == null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return PositionErrors.NotFound(posId);
             }
 
-            var positionDepartmentIds = position.DepartmentPositions.Select(dp => dp.DepartmentId).ToList();
-
             var request = command.Request;
             var departmentIds = request.DepartmentIds.Select(DepartmentId.Current).ToList();
-            var getDepartments = await _departmentsRepository.GetActiveDepartmentsByIds(departmentIds, cancellationToken);
+            var getDepartments = await _departmentsRepository
+                .GetActiveDepartmentsByIds(departmentIds, cancellationToken);
             if (!getDepartments.Any())
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return DepartmentErrors.NotFounds();
             }
 
@@ -79,22 +77,19 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             var addDepartmentsResult = await _positionsRepository.AddDepartmentsToPosition(position, dbDepartmentIds, cancellationToken);
             if (addDepartmentsResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return addDepartmentsResult.Errors;
             }
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка удаления подразделений у позиции с {id}", posId);
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Ошибка удаления подразделений у позиции с {id}", posId);
                 return DepartmentErrors.DatabaseUpdateLocationsError(posId);
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

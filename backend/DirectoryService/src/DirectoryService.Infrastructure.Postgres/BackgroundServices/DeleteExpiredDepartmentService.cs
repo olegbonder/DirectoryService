@@ -1,7 +1,9 @@
 ﻿using Core.Caching;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using DirectoryService.Infrastructure.Postgres.Database;
+using IntegrationEvents.Directory.Events;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
@@ -14,34 +16,36 @@ public class DeleteExpiredDepartmentService
     private readonly TransactionManager _transactionManager;
     private readonly ApplicationDbContext _dbContext;
     private readonly ICacheService _cache;
+    private readonly IOutboxService _outboxService;
 
     public DeleteExpiredDepartmentService(
         ILogger<DeleteExpiredDepartmentService> logger,
         TransactionManager transactionManager,
         ApplicationDbContext dbContext,
-        ICacheService cache)
+        ICacheService cache,
+        IOutboxService outboxService)
     {
         _logger = logger;
         _transactionManager = transactionManager;
         _dbContext = dbContext;
         _cache = cache;
+        _outboxService = outboxService;
     }
 
     public async Task Process(CancellationToken cancellationToken)
     {
         string prefixDepartmentKey = "departments_";
-        var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken: cancellationToken);
         if (transactionScopeResult.IsFailure)
         {
             return;
         }
 
-        using var transactionScope = transactionScopeResult.Value;
-
         var departments = await GetExpiredDepartments(cancellationToken);
         if (departments.Any())
         {
             var updateChildResults = new List<Result>();
+            string context = nameof(Department);
             foreach (var department in departments)
             {
                 var departmentId = department.Id.Value;
@@ -50,12 +54,26 @@ public class DeleteExpiredDepartmentService
                 updateChildResults.Add(result);
 
                 await UpdateChildrenDepartments(department.Id, cancellationToken);
+
+                var videoId = department.VideoId;
+                if (videoId.HasValue)
+                {
+                    var departmentDeletedEvent = new DepartmentDeleted(videoId.Value, context, departmentId);
+                    await _outboxService.PublishAsync(departmentDeletedEvent);
+                }
+
+                var previewId = department.PreviewId;
+                if (previewId.HasValue)
+                {
+                    var departmentDeletedEvent = new DepartmentDeleted(previewId.Value, context, departmentId);
+                    await _outboxService.PublishAsync(departmentDeletedEvent);
+                }
             }
 
             var failedResults = updateChildResults.Where(r => r.IsFailure).ToList();
             if (failedResults.Any())
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
             }
 
             var departmentIds = departments.Select(d => d.Id).ToList();
@@ -65,18 +83,15 @@ public class DeleteExpiredDepartmentService
 
             _dbContext.Departments.RemoveRange(departments);
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Отмена операции удаления подразделений/позиций/локаций");
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Отмена операции удаления подразделений/позиций/локаций");
             }
         }
 
-        var commitResult = transactionScope.Commit();
+        var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
         if (commitResult.IsSuccess)
         {
             await _cache.RemoveByPrefixAsync(prefixDepartmentKey, cancellationToken);

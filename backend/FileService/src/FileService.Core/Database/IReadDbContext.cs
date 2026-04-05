@@ -1,6 +1,6 @@
 ﻿using FileService.Domain.Assets;
 
-namespace FileService.Core
+namespace FileService.Core.Database
 {
     public interface IReadDbContext
     {

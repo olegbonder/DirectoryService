@@ -6,7 +6,7 @@ namespace DirectoryService.Domain.Departments
 {
     public sealed class Department : Entity<DepartmentId>
     {
-        private List<Department> _children = [];
+        private readonly List<Department> _children = [];
         private List<DepartmentLocation> _locations = [];
 
         // EF Core
@@ -53,6 +53,8 @@ namespace DirectoryService.Domain.Departments
         public bool IsActive { get; private set; }
 
         public Guid? VideoId { get; private set; }
+
+        public Guid? PreviewId { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
 
@@ -124,6 +126,12 @@ namespace DirectoryService.Domain.Departments
         public void UpdateVideo(Guid? videoId)
         {
             VideoId = videoId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdatePreview(Guid? previewId)
+        {
+            PreviewId = previewId;
             UpdatedAt = DateTime.UtcNow;
         }
     }

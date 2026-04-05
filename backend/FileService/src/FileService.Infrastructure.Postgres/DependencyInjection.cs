@@ -1,11 +1,13 @@
-﻿using DirectoryService.Infrastructure.Postgres;
-using FileService.Core;
+﻿using FileService.Core;
+using FileService.Core.Database;
+using FileService.Core.Messaging;
 using FileService.Infrastructure.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Wolverine.EntityFrameworkCore;
 
 namespace FileService.Infrastructure.Postgres
 {
@@ -14,12 +16,15 @@ namespace FileService.Infrastructure.Postgres
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<ITransactionManager, TransactionManager>();
+            services.AddScoped<IAssetCreatedEventPublisher, AssetCreatedEventPublisher>();
+            services.AddScoped<IOutboxService, OutboxService>();
+            services.AddScoped<IDbContextOutbox<FileServiceDbContext>, DbContextOutbox<FileServiceDbContext>>();
             services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
             services.AddScoped<IVideoProcessingRepository, VideoProcessingRepository>();
 
             services.AddDbContextPool<FileServiceDbContext>((sp, options) =>
             {
-                string? connectionString = configuration.GetConnectionString(Constants.DATABASE_CONNECTIONSTRING);
+                string? connectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE);
                 var hostEnvironment = sp.GetRequiredService<IHostEnvironment>();
                 var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
 
@@ -36,7 +41,7 @@ namespace FileService.Infrastructure.Postgres
 
             services.AddDbContextPool<IReadDbContext, FileServiceDbContext>((sp, options) =>
             {
-                string? connectionString = configuration.GetConnectionString(Constants.DATABASE_CONNECTIONSTRING);
+                string? connectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE);
                 var hostEnvironment = sp.GetRequiredService<IHostEnvironment>();
                 var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
 
@@ -50,8 +55,6 @@ namespace FileService.Infrastructure.Postgres
 
                 options.UseLoggerFactory(loggerFactory);
             });
-
-            services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
 
             return services;
         }

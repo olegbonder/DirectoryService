@@ -46,8 +46,8 @@ namespace FileService.Domain.MediaProcessing
 
         private VideoProcess(
             Guid id,
-            StorageKey rawKey,
-            StorageKey hlsKey,
+            StorageKey? rawKey,
+            StorageKey? hlsKey,
             IEnumerable<VideoProcessStep> steps)
         {
             Id = id;
@@ -63,8 +63,8 @@ namespace FileService.Domain.MediaProcessing
 
         public static Result<VideoProcess> Create(
             Guid id,
-            StorageKey rawKey,
-            StorageKey hlsKey,
+            StorageKey? rawKey,
+            StorageKey? hlsKey,
             IEnumerable<VideoProcessStep> steps)
         {
             var videoProcessSteps = steps.ToList();

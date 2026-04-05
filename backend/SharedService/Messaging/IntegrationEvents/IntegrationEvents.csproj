@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <PackageId>Manuilov.IntegrationEvents</PackageId>
+    <Version>0.0.3</Version>
+    <Authors>Manuilov Oleg</Authors>
+    <PackageDescription>Shared integration events for messaging DicrectoryService and FileService</PackageDescription>
+    <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="WolverineFx" />
+  </ItemGroup>
+
+</Project>

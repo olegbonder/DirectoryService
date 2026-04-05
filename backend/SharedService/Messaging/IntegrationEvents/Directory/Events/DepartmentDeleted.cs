@@ -1,4 +1,4 @@
 ﻿namespace IntegrationEvents.Directory.Events
 {
-    public record DepartmentDeleted(Guid DepartmentId);
+    public record DepartmentDeleted(Guid MediaAssetId, string Context, Guid EntityId);
 }

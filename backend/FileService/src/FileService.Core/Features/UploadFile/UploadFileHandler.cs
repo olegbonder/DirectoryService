@@ -1,5 +1,6 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
+using FileService.Core.Database;
 using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FileService.Domain.Assets;
@@ -65,7 +66,7 @@ public class UploadFileHandler : ICommandHandler<Guid, UploadFileCommand>
             return addResult.Errors;
 
         var uploadResult = await _s3Provider.UploadFileAsync(
-            mediaAsset.RawKey,
+            mediaAsset.UploadKey!,
             file.OpenReadStream(),
             mediaData.ContentType.Value,
             cancellationToken);

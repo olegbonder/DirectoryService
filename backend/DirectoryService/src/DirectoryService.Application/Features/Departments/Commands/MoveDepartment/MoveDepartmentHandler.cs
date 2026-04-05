@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
@@ -52,13 +52,11 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
                 return DepartmentErrors.ParentIdConflict();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken: cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             if (newParentId.HasValue)
             {
@@ -68,7 +66,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
                 bool hasChildDepartments = await _departmentsRepository.IsExistsChildForParent(departmentId, newParentDeptId, cancellationToken);
                 if (hasChildDepartments)
                 {
-                    transactionScope.RollBack();
+                    await _transactionManager.RollbackAsync(cancellationToken);
                     return DepartmentErrors.ParentIdAsChildConflict(newParentId.Value);
                 }
 
@@ -76,7 +74,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
                 newParentDepartment = await _departmentsRepository.GetActiveDepartmentById(newParentDeptId, cancellationToken);
                 if (newParentDepartment == null)
                 {
-                    transactionScope.RollBack();
+                    await _transactionManager.RollbackAsync(cancellationToken);
                     return DepartmentErrors.NotFound(newParentId.Value);
                 }
             }
@@ -85,7 +83,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
             var departmentResult = await _departmentsRepository.GetByIdWithLock(departmentId, cancellationToken);
             if (departmentResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return departmentResult.Errors;
             }
 
@@ -102,22 +100,19 @@ namespace DirectoryService.Application.Features.Departments.Commands.MoveDepartm
             var updateChildrenResult = await _departmentsRepository.UpdateChildrensForMove(oldDepartmentPath, department, cancellationToken);
             if (updateChildrenResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updateChildrenResult.Errors;
             }
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка перемещения подразделения с {id}", deptId);
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Ошибка перемещения подразделения с {id}", deptId);
                 return DepartmentErrors.DatabaseUpdateLocationsError(deptId);
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

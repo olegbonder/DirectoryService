@@ -1,4 +1,5 @@
 ﻿using FileService.Contracts.Dtos.MediaAssets.CheckMediaAssetExists;
+using FileService.Core.Database;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Result;
 

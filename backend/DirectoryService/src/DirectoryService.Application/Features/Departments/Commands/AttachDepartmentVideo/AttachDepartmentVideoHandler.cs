@@ -1,6 +1,6 @@
 ﻿using Core.Abstractions;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using FileService.Contracts;
@@ -63,7 +63,9 @@ namespace DirectoryService.Application.Features.Departments.Commands.AttachDepar
 
             department.UpdateVideo(videoId);
 
-            await _transactionManager.SaveChanges(cancellationToken);
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
+                return saveResult.Errors;
 
             _logger.LogInformation("Updated video for lesson {Id}", departmentIdValue);
 

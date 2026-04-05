@@ -1,7 +1,7 @@
 using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
@@ -40,13 +40,11 @@ namespace DirectoryService.Application.Features.Positions.Commands.SoftDeletePos
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var positionIdValue = command.PositionId;
             var positionId = PositionId.Current(positionIdValue);
@@ -54,29 +52,26 @@ namespace DirectoryService.Application.Features.Positions.Commands.SoftDeletePos
             var existingPosition = await _positionsRepository.GetActivePositionById(positionId, cancellationToken);
             if (existingPosition == null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return PositionErrors.NotFound(positionIdValue);
             }
 
             var positionResult = await _positionsRepository.DeactivatePosition(positionId, cancellationToken);
             if (positionResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return positionResult.Errors;
             }
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка обновления позиции с {id}", positionIdValue);
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Ошибка обновления позиции с {id}", positionIdValue);
                 return LocationErrors.DatabaseUpdateError(positionIdValue);
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

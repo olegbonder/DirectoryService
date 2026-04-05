@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
@@ -40,13 +40,11 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var departmentIdValue = command.Id;
             var departmentId = DepartmentId.Current(departmentIdValue);
@@ -54,7 +52,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
             var existingDepartmentRes = await _departmentsRepository.GetByIdWithLock(departmentId, cancellationToken);
             if (existingDepartmentRes.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return DepartmentErrors.NotFound(departmentIdValue);
             }
 
@@ -86,23 +84,20 @@ namespace DirectoryService.Application.Features.Departments.Commands.UpdateDepar
                 cancellationToken);
             if (updateChildrenResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updateChildrenResult.Errors;
             }
 
             existingDepartment.Update(deptName, deptIdentifier);
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка обновления подразделения с {id}", departmentIdValue);
+                _logger.LogError("Ошибка обновления подразделения с {id}", departmentIdValue);
                 return DepartmentErrors.DatabaseUpdateError(departmentIdValue);
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

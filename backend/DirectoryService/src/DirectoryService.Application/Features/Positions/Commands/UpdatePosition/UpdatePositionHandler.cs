@@ -1,8 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
-using DirectoryService.Application.Features.Departments;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
@@ -14,7 +13,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
     public sealed class UpdatePositionHandler : ICommandHandler<Guid, UpdatePositionCommand>
     {
         private readonly ITransactionManager _transactionManager;
-        private readonly IDepartmentsRepository _departmentsRepository;
         private readonly IPositionsRepository _positionsRepository;
         private readonly IValidator<UpdatePositionCommand> _validator;
         private readonly ICacheService _cache;
@@ -22,7 +20,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
 
         public UpdatePositionHandler(
             ITransactionManager transactionManager,
-            IDepartmentsRepository departmentsRepository,
             IPositionsRepository positionsRepository,
             IValidator<UpdatePositionCommand> validator,
             ICacheService cache,
@@ -30,7 +27,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
         {
             _transactionManager = transactionManager;
             _positionsRepository = positionsRepository;
-            _departmentsRepository = departmentsRepository;
             _validator = validator;
             _cache = cache;
             _logger = logger;
@@ -44,13 +40,11 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var positionIdValue = command.PositionId;
             var positionId = PositionId.Current(positionIdValue);
@@ -58,7 +52,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
             var existingPosition = await _positionsRepository.GetActivePositionById(positionId, cancellationToken);
             if (existingPosition == null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return PositionErrors.NotFound(positionIdValue);
             }
 
@@ -71,22 +65,22 @@ namespace DirectoryService.Application.Features.Positions.Commands.UpdatePositio
 
             if (activeWithTheSameNamePosition != null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return PositionErrors.ActivePositionHaveSameName(positionName.Value);
             }
 
-            var positionDesription = PositionDesription.Create(request.Description).Value;
+            var positionDescription = PositionDesription.Create(request.Description).Value;
 
-            existingPosition.Update(positionName, positionDesription);
+            existingPosition.Update(positionName, positionDescription);
 
             var updPositionResult = await _positionsRepository.Update(existingPosition, cancellationToken);
             if (updPositionResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updPositionResult.Errors;
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

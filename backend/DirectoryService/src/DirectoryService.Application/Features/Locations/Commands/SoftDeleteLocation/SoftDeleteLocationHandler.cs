@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using FluentValidation;
@@ -40,50 +40,46 @@ namespace DirectoryService.Application.Features.Locations.Commands.SoftDeleteLoc
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var locId = command.LocationId;
             var locationId = LocationId.Current(locId);
 
-            var existingLocationResult = await _locationsRepository.GetActiveLocationsByIds(new List<LocationId> { locationId }, cancellationToken);
+            var existingLocationResult = await _locationsRepository
+                .GetActiveLocationsByIds([locationId], cancellationToken);
             if (existingLocationResult.IsFailure)
             {
-                transactionScope.RollBack();
-                return existingLocationResult.Errors!;
+                await _transactionManager.RollbackAsync(cancellationToken);
+                return existingLocationResult.Errors;
             }
 
             var existingLocation = existingLocationResult.Value.FirstOrDefault();
             if (existingLocation == null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return LocationErrors.NotFound(locId);
             }
 
             var locationResult = await _locationsRepository.DeactivateLocation(locationId, cancellationToken);
             if (locationResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return locationResult.Errors;
             }
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка обновления локации с {id}", locId);
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Ошибка обновления локации с {id}", locId);
                 return LocationErrors.DatabaseUpdateError(locId);
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

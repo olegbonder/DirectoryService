@@ -17,8 +17,10 @@ namespace FileService.Infrastructure.Postgres.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("public")
                 .HasAnnotation("ProductVersion", "9.0.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("WolverineEnabled", "true");
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -51,7 +53,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                     b.HasIndex("Status", "CreatedAt");
 
-                    b.ToTable("media_assets", (string)null);
+                    b.ToTable("media_assets", "public");
 
                     b.HasDiscriminator<string>("AssetType");
 
@@ -94,7 +96,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
                     b.HasIndex("Status", "CreatedAt")
                         .HasDatabaseName("ix_video_processes_status_created_at");
 
-                    b.ToTable("video_processes", (string)null);
+                    b.ToTable("video_processes", "public");
                 });
 
             modelBuilder.Entity("FileService.Domain.MediaProcessing.VideoProcessStep", b =>
@@ -137,7 +139,99 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                     b.HasIndex("ProcessId");
 
-                    b.ToTable("video_process_steps", (string)null);
+                    b.ToTable("video_process_steps", "public");
+                });
+
+            modelBuilder.Entity("Wolverine.EntityFrameworkCore.Internals.IncomingMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<byte[]>("Body")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("body");
+
+                    b.Property<DateTimeOffset?>("ExecutionTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("execution_time");
+
+                    b.Property<DateTimeOffset?>("KeepUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("keep_until");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message_type");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("ReceivedAt")
+                        .HasColumnType("text")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("wolverine_incoming_envelopes", "public", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Wolverine.EntityFrameworkCore.Internals.OutgoingMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<byte[]>("Body")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("body");
+
+                    b.Property<DateTimeOffset?>("DeliverBy")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deliver_by");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("destination");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message_type");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("owner_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("wolverine_outgoing_envelopes", "public", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("FileService.Domain.Assets.PreviewAsset", b =>
@@ -193,7 +287,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("MediaAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", "public");
 
                             b1.ToJson("final_key");
 
@@ -238,7 +332,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("MediaAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", "public");
 
                             b1.ToJson("raw_key");
 
@@ -261,7 +355,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("MediaAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", "public");
 
                             b1.ToJson("media_data");
 
@@ -286,7 +380,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                                     b2.HasKey("MediaDataMediaAssetId");
 
-                                    b2.ToTable("media_assets");
+                                    b2.ToTable("media_assets", "public");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MediaDataMediaAssetId");
@@ -309,7 +403,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                                     b2.HasKey("MediaDataMediaAssetId");
 
-                                    b2.ToTable("media_assets");
+                                    b2.ToTable("media_assets", "public");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MediaDataMediaAssetId");
@@ -338,7 +432,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("MediaAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", "public");
 
                             b1.ToJson("owner");
 
@@ -378,7 +472,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessId");
 
-                            b1.ToTable("video_processes");
+                            b1.ToTable("video_processes", "public");
 
                             b1.ToJson("meta_data");
 
@@ -423,7 +517,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessId");
 
-                            b1.ToTable("video_processes");
+                            b1.ToTable("video_processes", "public");
 
                             b1.ToJson("hls_key");
 
@@ -468,7 +562,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessId");
 
-                            b1.ToTable("video_processes");
+                            b1.ToTable("video_processes", "public");
 
                             b1.ToJson("raw_key");
 
@@ -502,7 +596,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessStepId");
 
-                            b1.ToTable("video_process_steps");
+                            b1.ToTable("video_process_steps", "public");
 
                             b1.WithOwner()
                                 .HasForeignKey("VideoProcessStepId");
@@ -520,7 +614,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessStepId");
 
-                            b1.ToTable("video_process_steps");
+                            b1.ToTable("video_process_steps", "public");
 
                             b1.WithOwner()
                                 .HasForeignKey("VideoProcessStepId");
@@ -537,7 +631,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoProcessStepId");
 
-                            b1.ToTable("video_process_steps");
+                            b1.ToTable("video_process_steps", "public");
 
                             b1.WithOwner()
                                 .HasForeignKey("VideoProcessStepId");
@@ -592,7 +686,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("VideoAssetId");
 
-                            b1.ToTable("media_assets");
+                            b1.ToTable("media_assets", "public");
 
                             b1.ToJson("hls_root_key");
 
