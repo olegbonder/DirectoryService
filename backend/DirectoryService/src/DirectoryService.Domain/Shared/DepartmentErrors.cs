@@ -14,6 +14,11 @@ namespace DirectoryService.Domain.Shared
             return Error.Failure("department.database.error", $"Ошибка обновления подразделения {id}");
         }
 
+        public static Error DatabaseDeleteError()
+        {
+            return Error.Failure("department.database.error", $"Ошибка удаления подразделений");
+        }
+
         public static Error DatabaseUpdateLocationsError(Guid id)
         {
             return Error.Failure("department.locations.database.error", $"Ошибка обновления локаций у подразделения {id}");
@@ -27,6 +32,11 @@ namespace DirectoryService.Domain.Shared
         public static Error DatabaseUpdateChildrenError(Guid id)
         {
             return Error.Failure("department.children.database.error", $"Ошибка обновления детей у подразделения {id}");
+        }
+
+        public static Error DatabaseUpdateChildrenError()
+        {
+            return Error.Failure("department.children.database.error", $"Ошибка обновления детей у подразделений");
         }
 
         public static Error ParentIdConflict()
