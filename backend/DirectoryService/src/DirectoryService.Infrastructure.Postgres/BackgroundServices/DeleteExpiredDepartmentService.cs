@@ -35,8 +35,8 @@ public class DeleteExpiredDepartmentService
     public async Task Process(CancellationToken cancellationToken)
     {
         string prefixDepartmentKey = "departments_";
-        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken: cancellationToken);
-        if (transactionScopeResult.IsFailure)
+        var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken: cancellationToken);
+        if (transactionResult.IsFailure)
         {
             return;
         }
@@ -44,45 +44,52 @@ public class DeleteExpiredDepartmentService
         var departments = await GetExpiredDepartments(cancellationToken);
         if (departments.Any())
         {
-            var updateChildResults = new List<Result>();
             string context = nameof(Department);
-            foreach (var department in departments)
+            string[] departmentPaths = departments.Select(d => d.Path.Value).ToArray();
+            var lockDepartments = await GetDepartmentsWithLock(departmentPaths, cancellationToken);
+            if (lockDepartments.Count < departments.Count)
             {
-                var departmentId = department.Id.Value;
-                string departmentPath = department.Path.Value;
-                var result = await UpdateChildrenDepartmentPaths(departmentPath, departmentId, cancellationToken);
-                updateChildResults.Add(result);
-
-                await UpdateChildrenDepartments(department.Id, cancellationToken);
-
-                var videoId = department.VideoId;
-                if (videoId.HasValue)
-                {
-                    var departmentDeletedEvent = new DepartmentDeleted(videoId.Value, context, departmentId);
-                    await _outboxService.PublishAsync(departmentDeletedEvent);
-                }
-
-                var previewId = department.PreviewId;
-                if (previewId.HasValue)
-                {
-                    var departmentDeletedEvent = new DepartmentDeleted(previewId.Value, context, departmentId);
-                    await _outboxService.PublishAsync(departmentDeletedEvent);
-                }
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Отмена операции удаления подразделений из-за несовпадения количества заблокированных записей");
+                return;
             }
 
             var updChildrenResult = await UpdateChildrenDepartments(departmentPaths, cancellationToken);
             if (updChildrenResult.IsFailure)
             {
                 await _transactionManager.RollbackAsync(cancellationToken);
+                var errors = updChildrenResult.Errors.Select(e => e.Message);
+                _logger.LogError(string.Join(", ", errors));
+                return;
             }
 
             var deleteResult = await DeleteDepartments(departmentPaths, cancellationToken);
             if (deleteResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 var errors = deleteResult.Errors.Select(e => e.Message);
                 _logger.LogError(string.Join(", ", errors));
                 return;
+            }
+
+            var departmentsWithVideos = departments
+                .Where(d => d.VideoId.HasValue).ToList();
+
+            if (departmentsWithVideos.Any())
+            {
+                var departmentvideoIds = departmentsWithVideos
+                    .Select(d => new DepartmentDeleted(d.VideoId.Value, context, d.Id.Value)).ToList();
+                await _outboxService.PublishAsync(departmentvideoIds);
+            }
+
+            var departmentsWithPreviews = departments
+                .Where(d => d.PreviewId.HasValue).ToList();
+
+            if (departmentsWithPreviews.Any())
+            {
+                var departmentpreviewIds = departmentsWithPreviews
+                    .Select(d => new DepartmentDeleted(d.PreviewId.Value, context, d.Id.Value)).ToList();
+                await _outboxService.PublishAsync(departmentpreviewIds);
             }
 
             var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
@@ -123,6 +130,8 @@ public class DeleteExpiredDepartmentService
                  path,
                  depth,
                  is_active,
+                 video_id,
+                 preview_id,
                  created_at,
                  updated_at,
                  deleted_at

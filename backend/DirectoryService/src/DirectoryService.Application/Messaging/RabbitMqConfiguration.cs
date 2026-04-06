@@ -33,12 +33,10 @@ public static class RabbitMqConfiguration
 
     private static void ConfigureDirectoryEventsPublishing(this WolverineOptions opts)
     {
-        /*opts.PublishMessagesToRabbitMqExchange<DepartmentDeleted>(
-            DirectoryEventsRouting.EXCHANGE,
-            n => DirectoryEventsRouting.RoutingKeys.DepartmentDeleted(n.Context)).UseDurableOutbox();*/
         string exchange = DirectoryEventsRouting.EXCHANGE;
 
-        opts.PublishMessage<DepartmentDeleted>().ToRabbitQueue(exchange).UseDurableOutbox();
+        opts.PublishMessage<DepartmentDeleted>().ToRabbitExchange(exchange).UseDurableOutbox();
+        opts.PublishMessage<List<DepartmentDeleted>>().ToRabbitExchange(exchange).UseDurableOutbox();
     }
 
     private static void ConfigureDirectoryEventsListeners(this WolverineOptions opts)

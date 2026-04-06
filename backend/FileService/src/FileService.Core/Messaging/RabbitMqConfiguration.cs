@@ -9,6 +9,7 @@ namespace FileService.Core.Messaging;
 public static class RabbitMqConfiguration
 {
     private const string FILE_HARD_DELETES_QUEUE = "file.hard-delete";
+    private const string FILES_HARD_DELETES_QUEUE = "files.hard-delete";
 
     public static void ConfigureRabbitMq(this WolverineOptions options, string connectionString)
     {
@@ -16,6 +17,11 @@ public static class RabbitMqConfiguration
             .AutoProvision()
             .EnableWolverineControlQueues()
             .UseQuorumQueues()
+            .DeclareExchange(DirectoryEventsRouting.EXCHANGE, exchange =>
+            {
+                exchange.ExchangeType = ExchangeType.Fanout;
+                exchange.IsDurable = true;
+            })
             .DeclareExchange(FileEventsRouting.EXCHANGE, exchange =>
             {
                 exchange.ExchangeType = ExchangeType.Topic;
@@ -29,6 +35,10 @@ public static class RabbitMqConfiguration
     private static void ConfigureEducationEventsListeners(this WolverineOptions opts)
     {
         opts.ListenToRabbitQueue(FILE_HARD_DELETES_QUEUE, queue =>
+        {
+            queue.BindExchange(DirectoryEventsRouting.EXCHANGE);
+        });
+        opts.ListenToRabbitQueue(FILES_HARD_DELETES_QUEUE, queue =>
         {
             queue.BindExchange(DirectoryEventsRouting.EXCHANGE);
         });

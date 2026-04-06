@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DirectoryService.Infrastructure.Postgres.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260405161139_AddPreviewIdToDepartment")]
+    [Migration("20260406180002_AddPreviewIdToDepartment")]
     partial class AddPreviewIdToDepartment
     {
         /// <inheritdoc />
@@ -90,7 +90,8 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
                         .HasColumnName("parent_id");
 
                     b.Property<Guid?>("PreviewId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("preview_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

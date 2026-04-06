@@ -16,8 +16,4 @@
     <ProjectReference Include="..\FileService.Domain\FileService.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Messaging\" />
-  </ItemGroup>
-
 </Project>

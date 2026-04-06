@@ -12,7 +12,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "PreviewId",
+                name: "preview_id",
                 table: "departments",
                 type: "uuid",
                 nullable: true);
@@ -22,7 +22,7 @@ namespace DirectoryService.Infrastructure.Postgres.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "PreviewId",
+                name: "preview_id",
                 table: "departments");
         }
     }

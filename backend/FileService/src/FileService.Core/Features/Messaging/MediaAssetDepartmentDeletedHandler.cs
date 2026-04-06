@@ -1,14 +1,11 @@
 ﻿using FileService.Core.Features.DeleteFile;
 using IntegrationEvents.Directory.Events;
 using Microsoft.Extensions.Logging;
-using Wolverine.Attributes;
 
 namespace FileService.Core.Features.Messaging
 {
-    [WolverineHandler]
     public class MediaAssetDepartmentDeletedHandler
     {
-        
         public static async Task Handle(
             DepartmentDeleted message,
             DeleteFileHandler handler,
