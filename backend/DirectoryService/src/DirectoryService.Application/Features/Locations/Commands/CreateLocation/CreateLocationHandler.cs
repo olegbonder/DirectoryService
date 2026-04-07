@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Locations;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -39,13 +39,11 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var locName = LocationName.Create(command.Request.Name).Value;
 
@@ -58,22 +56,22 @@ namespace DirectoryService.Application.Features.Locations.Commands.CreateLocatio
             var locationResult = Location.Create(locName, locAddress, locTimeZone);
             if (locationResult.IsFailure)
             {
-                transactionScope.RollBack();
-                return locationResult.Errors!;
+                await _transactionManager.RollbackAsync(cancellationToken);
+                return locationResult.Errors;
             }
 
             // Бизнес валидация
             var addLocationResult = await _locationsRepository.Add(locationResult.Value, cancellationToken);
             if (addLocationResult.IsFailure)
             {
-                transactionScope.RollBack();
-                return addLocationResult.Errors!;
+                await _transactionManager.RollbackAsync(cancellationToken);
+                return addLocationResult.Errors;
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
-                return commitResult.Errors!;
+                return commitResult.Errors;
             }
 
             await _cache.RemoveByPrefixAsync(Constants.PREFIX_LOCATION_KEY, cancellationToken);

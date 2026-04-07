@@ -24,7 +24,7 @@ namespace FileService.Infrastructure.Postgres.Migrations
                     hls_root_key = table.Column<string>(type: "jsonb", nullable: true),
                     media_data = table.Column<string>(type: "jsonb", nullable: false),
                     owner = table.Column<string>(type: "jsonb", nullable: false),
-                    raw_key = table.Column<string>(type: "jsonb", nullable: false)
+                    raw_key = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {

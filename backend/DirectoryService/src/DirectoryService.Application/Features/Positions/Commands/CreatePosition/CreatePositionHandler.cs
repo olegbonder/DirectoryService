@@ -1,6 +1,5 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Domain;
@@ -15,7 +14,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
 {
     public sealed class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand>
     {
-        private readonly ITransactionManager _transactionManager;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly IPositionsRepository _positionsRepository;
         private readonly ICacheService _cache;
@@ -23,14 +21,12 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
         private readonly ILogger<CreatePositionHandler> _logger;
 
         public CreatePositionHandler(
-            ITransactionManager transactionManager,
             IDepartmentsRepository departmentsRepository,
             IPositionsRepository positionsRepository,
             ICacheService cache,
             IValidator<CreatePositionCommand> validator,
             ILogger<CreatePositionHandler> logger)
         {
-            _transactionManager = transactionManager;
             _departmentsRepository = departmentsRepository;
             _positionsRepository = positionsRepository;
             _cache = cache;
@@ -60,7 +56,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
                 return PositionErrors.ActivePositionHaveSameName(positionName.Value);
             }
 
-            var positionDesription = PositionDesription.Create(request.Description).Value;
+            var positionDescription = PositionDesription.Create(request.Description).Value;
 
             var departmentIds = request.DepartmentIds.Select(DepartmentId.Current).ToList();
             var getDepartmentsRes = await _departmentsRepository.GetDepartmentByIds(departmentIds, cancellationToken);
@@ -72,7 +68,7 @@ namespace DirectoryService.Application.Features.Positions.Commands.CreatePositio
             var departments = getDepartmentsRes.Value;
             var departmentPositions = departments.Select(d => new DepartmentPosition(d.Id, newPositionId)).ToList();
 
-            var positionRes = Position.Create(newPositionId, positionName, positionDesription, departmentPositions);
+            var positionRes = Position.Create(newPositionId, positionName, positionDescription, departmentPositions);
             if (positionRes.IsFailure)
             {
                 return positionRes.Errors!;

@@ -79,6 +79,26 @@
     networks:
       - dev-network
 
+  rabbitmq-dev:
+    image: rabbitmq:4.2-management
+    container_name: rabbitmq-dev
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_dev_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    networks:
+      - dev-network
+
 networks:
   dev-network:
     driver: bridge
@@ -91,3 +111,5 @@ volumes:
     name: seq-dev-data
   redis-dev-data:
     name: redis-dev-data
+  rabbitmq_dev_data:
+    name: rabbitmq-dev-data

@@ -26,7 +26,6 @@ public class MediaAssetRepository : IMediaAssetRepository
         try
         {
             await _context.MediaAssets.AddAsync(mediaAsset, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
 
             return mediaAsset.Id;
         }

@@ -120,7 +120,7 @@ namespace DirectoryService.Presenters.Controllers
             [FromServices] GetDepartmentDictionaryHandler handler,
             CancellationToken cancellationToken)
         {
-            return await handler.Handle(request,cancellationToken);
+            return await handler.Handle(request, cancellationToken);
         }
 
         [HttpGet("{parentId:guid}/children")]

@@ -1,7 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Locations;
 using DirectoryService.Application.Features.Positions;
 using DirectoryService.Domain.Departments;
@@ -48,13 +48,11 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
                 return validResult.ToList();
             }
 
-            var transactionScopeResult = await _transactionManager.BeginTransaction(cancellationToken: cancellationToken);
-            if (transactionScopeResult.IsFailure)
+            var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (transactionResult.IsFailure)
             {
-                return transactionScopeResult.Errors;
+                return transactionResult.Errors;
             }
-
-            using var transactionScope = transactionScopeResult.Value;
 
             var deptId = command.DepartmentId;
             var departmentId = DepartmentId.Current(deptId);
@@ -63,14 +61,14 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
             var departmentResult = await _departmentsRepository.GetByIdWithLock(departmentId, cancellationToken);
             if (departmentResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return departmentResult.Errors;
             }
 
             var department = departmentResult.Value;
             if (department == null)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return DepartmentErrors.NotFound(deptId);
             }
 
@@ -79,7 +77,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
                 await _locationsRepository.DeactivateLocationsByDepartment(departmentId, cancellationToken);
             if (updateLocationsResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updateLocationsResult.Errors;
             }
 
@@ -87,7 +85,7 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
                 await _positionsRepository.DeactivatePositionsByDepartment(departmentId, cancellationToken);
             if (updatePositionsResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updateLocationsResult.Errors;
             }
 
@@ -105,22 +103,19 @@ namespace DirectoryService.Application.Features.Departments.Commands.SoftDeleteD
                 .UpdateChildrenPaths(oldDepartmentPath, newDepartmentPath, departmentId.Value, cancellationToken);
             if (updateChildrenResult.IsFailure)
             {
-                transactionScope.RollBack();
+                await _transactionManager.RollbackAsync(cancellationToken);
                 return updateChildrenResult.Errors;
             }
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                transactionScope.RollBack();
-                _logger.LogError(ex, "Ошибка обновления подразделения с {id}", deptId);
+                await _transactionManager.RollbackAsync(cancellationToken);
+                _logger.LogError("Ошибка обновления подразделения с {id}", deptId);
                 return DepartmentErrors.DatabaseUpdateError(deptId);
             }
 
-            var commitResult = transactionScope.Commit();
+            var commitResult = await _transactionManager.CommitTransactionAsync(cancellationToken);
             if (commitResult.IsFailure)
             {
                 return commitResult.Errors;

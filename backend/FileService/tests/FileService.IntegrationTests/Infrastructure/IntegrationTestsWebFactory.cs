@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Amazon.S3;
 using FileService.Core;
+using FileService.Core.Database;
 using FileService.Infrastructure.Postgres;
 using FileService.Infrastructure.S3;
 using FileService.IntegrationTests.Mocks;

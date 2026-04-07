@@ -1,7 +1,9 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
+using FileService.Core.Database;
 using FileService.Core.FilesStorage;
+using FileService.Core.Messaging;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FluentValidation;
@@ -17,19 +19,25 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
     private readonly IS3Provider _s3Provider;
     private readonly IValidator<StartMultiPartUploadCommand> _validator;
     private readonly IChunkSizeCalculator _chunkSizeCalculator;
+    private readonly IAssetCreatedEventPublisher _assetCreatedEventPublisher;
+    private readonly ITransactionManager _transactionManager;
 
     public StartMultiPartUploadHandler(
         IMediaAssetRepository mediaAssetRepository,
         ILogger<StartMultiPartUploadHandler> logger,
         IS3Provider s3Provider,
         IValidator<StartMultiPartUploadCommand> validator,
-        IChunkSizeCalculator chunkSizeCalculator)
+        IChunkSizeCalculator chunkSizeCalculator,
+        IAssetCreatedEventPublisher assetCreatedEventPublisher,
+        ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
         _logger = logger;
         _s3Provider = s3Provider;
         _validator = validator;
         _chunkSizeCalculator = chunkSizeCalculator;
+        _assetCreatedEventPublisher = assetCreatedEventPublisher;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<StartMultiPartUploadResponse>> Handle(StartMultiPartUploadCommand command, CancellationToken cancellationToken)
@@ -62,21 +70,29 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
         if (mediaAssetResult.IsFailure)
             return mediaAssetResult.Errors;
 
-        await _mediaAssetRepository.Add(mediaAssetResult.Value, cancellationToken);
-
         var mediaAsset = mediaAssetResult.Value;
-        var startUploadResult = await _s3Provider.StartMultiPartUploadAsync(mediaAsset.UploadKey, mediaData, cancellationToken);
+        await _mediaAssetRepository.Add(mediaAsset, cancellationToken);
+
+        var startUploadResult = await _s3Provider.StartMultiPartUploadAsync(mediaAsset.UploadKey!, mediaData, cancellationToken);
         if (startUploadResult.IsFailure)
             return startUploadResult.Errors;
 
         string uploadId = startUploadResult.Value;
         var chunksUploadUrlsResult = await _s3Provider.GenerateAllChunksUploadUrlsAsync(
-            mediaAsset.UploadKey,
+            mediaAsset.UploadKey!,
             uploadId,
             totalChunks,
             cancellationToken);
         if (chunksUploadUrlsResult.IsFailure)
             return chunksUploadUrlsResult.Errors;
+
+        var publishResult = await _assetCreatedEventPublisher.PublishAsync(mediaAsset);
+        if (publishResult.IsFailure)
+            return publishResult.Errors;
+
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+            return saveResult.Errors;
 
         _logger.LogInformation("Media Asset started uploading: {MediaAssetId} with key: {StorageKey}", mediaAsset.Id, mediaAsset.RawKey);
 

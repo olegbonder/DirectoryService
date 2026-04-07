@@ -2,6 +2,7 @@
 using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
+using FileService.Core.Database;
 using FileService.Core.Features.CompleteMultipartUpload;
 using FileService.Core.FilesStorage;
 using FileService.Domain.Assets;

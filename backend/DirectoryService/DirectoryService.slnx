@@ -1,4 +1,4 @@
-<Solution>
+﻿<Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
@@ -17,10 +17,9 @@
     <Project Path="src/DirectoryService.Infrastructure.Postgres/DirectoryService.Infrastructure.Postgres.csproj" />
     <Project Path="src/DirectoryService.Infrastructure/DirectoryService.Infrastructure.csproj" />
     <Project Path="src/DirectoryService.Presenters/DirectoryService.Presenters.csproj" />
+    <Project Path="src/DirectoryService.Web/DirectoryService.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DirectoryService.IntegrationTests/DirectoryService.IntegrationTests.csproj" />
   </Folder>
-  <Project Path="SharedService/SharedService.csproj" />
-  <Project Path="src/DirectoryService.Web/DirectoryService.Web.csproj" />
 </Solution>

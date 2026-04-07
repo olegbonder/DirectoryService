@@ -1,8 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
-using Core.Database;
 using Core.Validation;
-using DirectoryService.Application.Features.Departments;
+using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Domain.Shared;
@@ -16,7 +15,6 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IPositionsRepository _positionsRepository;
-        private readonly IDepartmentsRepository _departmentsRepository;
         private readonly IValidator<DeletePositionDepartmentCommand> _validator;
         private readonly ICacheService _cache;
         private readonly ILogger<DeletePositionDepartmentHandler> _logger;
@@ -24,14 +22,12 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
         public DeletePositionDepartmentHandler(
             ITransactionManager transactionManager,
             IPositionsRepository positionsRepository,
-            IDepartmentsRepository departmentsRepository,
             IValidator<DeletePositionDepartmentCommand> validator,
             ICacheService cache,
             ILogger<DeletePositionDepartmentHandler> logger)
         {
             _transactionManager = transactionManager;
             _positionsRepository = positionsRepository;
-            _departmentsRepository = departmentsRepository;
             _validator = validator;
             _cache = cache;
             _logger = logger;
@@ -64,13 +60,10 @@ namespace DirectoryService.Application.Features.Positions.Commands.DeletePositio
 
             position.DepartmentPositions.Remove(departmentPosition);
 
-            try
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                await _transactionManager.SaveChanges(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка удаления подразделений у позиции с {id}", posId);
+                _logger.LogError("Ошибка удаления подразделений у позиции с {id}", posId);
                 return DepartmentErrors.DatabaseUpdateLocationsError(posId);
             }
 

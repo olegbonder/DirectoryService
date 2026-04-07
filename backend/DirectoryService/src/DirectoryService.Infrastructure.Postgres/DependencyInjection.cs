@@ -1,4 +1,5 @@
 ﻿using Core.Database;
+using DirectoryService.Application;
 using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Application.Features.Departments;
 using DirectoryService.Application.Features.Locations;
@@ -11,6 +12,8 @@ using DirectoryService.Infrastructure.Postgres.Positions;
 using DirectoryService.Infrastructure.Postgres.Seeding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Wolverine.EntityFrameworkCore;
+using ITransactionManager = DirectoryService.Application.Abstractions.Database.ITransactionManager;
 
 namespace DirectoryService.Infrastructure.Postgres
 {
@@ -18,16 +21,20 @@ namespace DirectoryService.Infrastructure.Postgres
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString(Constants.DATABASE_CONNECTIONSTRING);
+            var connectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE);
             services.AddScoped(s => new ApplicationDbContext(connectionString!));
             services.AddScoped<IReadDbContext, ApplicationDbContext>(s => new ApplicationDbContext(connectionString!));
             services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>(s => new NpgsqlConnectionFactory(connectionString!));
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
-            services.AddScoped<ITransactionManager, TransactionManager>();
-            services.AddScoped<TransactionManager>();
+
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();
             services.AddScoped<IPositionsRepository, PositionsRepository>();
+
+            services.AddScoped<ITransactionManager, TransactionManager>();
+            services.AddScoped<TransactionManager>();
+            services.AddScoped<IOutboxService, OutboxService>();
+            services.AddScoped<IDbContextOutbox<ApplicationDbContext>, DbContextOutbox<ApplicationDbContext>>();
 
             services.AddScoped<ISeeder, Seeder>();
 

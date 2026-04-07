@@ -1,6 +1,7 @@
 ﻿using Core.Abstractions;
 using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets;
+using FileService.Core.Database;
 using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FluentValidation;
@@ -46,7 +47,12 @@ public class DeleteFileHandler : ICommandHandler<MediaAssetResponse, DeleteFileC
 
         var mediaAsset = mediaAssetResult.Value;
 
-        var deleteKeys = new List<StorageKey> { mediaAsset.RawKey };
+        var deleteKeys = new List<StorageKey>();
+        if (mediaAsset.RawKey != null)
+        {
+            deleteKeys.Add(mediaAsset.RawKey);
+        }
+
         if (mediaAsset.FinalKey != null)
         {
             deleteKeys.Add(mediaAsset.FinalKey);
