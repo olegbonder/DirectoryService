@@ -21,7 +21,7 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetR
     private readonly IVideoProcessingScheduler _videoProcessingScheduler;
     private readonly ILogger<CompleteMultiPartUploadHandler> _logger;
     private readonly IValidator<CompleteMultipartUploadCommand> _validator;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly ITransactionManager _transactionManager;
 
     public CompleteMultiPartUploadHandler(
@@ -30,7 +30,7 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetR
         IVideoProcessingScheduler videoProcessingScheduler,
         ILogger<CompleteMultiPartUploadHandler> logger,
         IValidator<CompleteMultipartUploadCommand> validator,
-        IS3Provider s3Provider,
+        IFileStorageProvider fileStorageProvider,
         ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
@@ -38,7 +38,7 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetR
         _videoProcessingScheduler = videoProcessingScheduler;
         _logger = logger;
         _validator = validator;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
         _transactionManager = transactionManager;
     }
 
@@ -64,7 +64,7 @@ public sealed class CompleteMultiPartUploadHandler : ICommandHandler<MediaAssetR
         if (mediaAsset.MediaData.ExpectedChunksCount != partETags.Count)
             return MediaAssetErrors.ExpectedChunksCount();
 
-        Result completeMultiPartUploadResult = await _s3Provider.CompleteMultiPartUploadAsync(
+        Result completeMultiPartUploadResult = await _fileStorageProvider.CompleteMultiPartUploadAsync(
             mediaAsset.UploadKey,
             uploadId,
             partETags,

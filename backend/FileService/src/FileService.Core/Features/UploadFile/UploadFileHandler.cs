@@ -13,20 +13,20 @@ namespace FileService.Core.Features.UploadFile;
 public class UploadFileHandler : ICommandHandler<Guid, UploadFileCommand>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IValidator<UploadFileCommand> _validator;
     private readonly ILogger<UploadFileHandler> _logger;
     private readonly ITransactionManager _transactionManager;
 
     public UploadFileHandler(
         IMediaAssetRepository mediaAssetRepository,
-        IS3Provider s3Provider,
+        IFileStorageProvider fileStorageProvider,
         IValidator<UploadFileCommand> validator,
         ILogger<UploadFileHandler> logger,
         ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
         _validator = validator;
         _logger = logger;
         _transactionManager = transactionManager;
@@ -65,7 +65,7 @@ public class UploadFileHandler : ICommandHandler<Guid, UploadFileCommand>
         if (addResult.IsFailure)
             return addResult.Errors;
 
-        var uploadResult = await _s3Provider.UploadFileAsync(
+        var uploadResult = await _fileStorageProvider.UploadFileAsync(
             mediaAsset.UploadKey!,
             file.OpenReadStream(),
             mediaData.ContentType.Value,

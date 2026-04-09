@@ -14,18 +14,18 @@ public sealed class GetChunkUploadUrlHandler : ICommandHandler<ChunkUploadUrl, G
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly ILogger<GetChunkUploadUrlHandler> _logger;
     private readonly IValidator<GetChunkUploadUrlCommand> _validator;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
 
     public GetChunkUploadUrlHandler(
         IMediaAssetRepository mediaAssetRepository,
         ILogger<GetChunkUploadUrlHandler> logger,
         IValidator<GetChunkUploadUrlCommand> validator,
-        IS3Provider s3Provider)
+        IFileStorageProvider fileStorageProvider)
     {
         _mediaAssetRepository = mediaAssetRepository;
         _logger = logger;
         _validator = validator;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
     }
 
     public async Task<Result<ChunkUploadUrl>> Handle(GetChunkUploadUrlCommand command, CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ public sealed class GetChunkUploadUrlHandler : ICommandHandler<ChunkUploadUrl, G
 
         MediaAsset mediaAsset = mediaAssetResult.Value;
 
-        Result<string> chunkUploadUrlResult = await _s3Provider.GenerateChunkUploadUrlAsync(mediaAsset.RawKey, uploadId, partNumber, cancellationToken);
+        Result<string> chunkUploadUrlResult = await _fileStorageProvider.GenerateChunkUploadUrlAsync(mediaAsset.RawKey, uploadId, partNumber, cancellationToken);
         if (chunkUploadUrlResult.IsFailure)
             return chunkUploadUrlResult.Errors;
 

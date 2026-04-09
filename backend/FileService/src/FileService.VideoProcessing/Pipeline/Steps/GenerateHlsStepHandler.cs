@@ -10,18 +10,18 @@ namespace FileService.VideoProcessing.Pipeline.Steps
     public sealed class GenerateHlsStepHandler : IProcessingStepHandler
     {
         private readonly IFfmpegProcessRunner _ffmpegProcessRunner;
-        private readonly IS3Provider _s3Provider;
+        private readonly IFileStorageProvider _fileStorageProvider;
         private readonly ILogger<GenerateHlsStepHandler> _logger;
 
         public StepType StepType => StepType.GENERATE_HLS;
 
         public GenerateHlsStepHandler(
             IFfmpegProcessRunner ffmpegProcessRunner,
-            IS3Provider s3Provider,
+            IFileStorageProvider fileStorageProvider,
             ILogger<GenerateHlsStepHandler> logger)
         {
             _ffmpegProcessRunner = ffmpegProcessRunner;
-            _s3Provider = s3Provider;
+            _fileStorageProvider = fileStorageProvider;
             _logger = logger;
         }
 
@@ -43,7 +43,7 @@ namespace FileService.VideoProcessing.Pipeline.Steps
                     "InputFileUrl not found, generating new presigned url for video asset {VideoAssetId}.",
                     context.VideoProcess.Id);
 
-                var urlResult = await _s3Provider.GenerateDownloadUrlAsync(context.VideoAsset.UploadKey!);
+                var urlResult = await _fileStorageProvider.GenerateDownloadUrlAsync(context.VideoAsset.UploadKey!);
                 if (urlResult.IsFailure)
                     return urlResult.Errors;
 

@@ -11,20 +11,20 @@ using SharedKernel.Result;
 
 namespace FileService.Infrastructure.S3;
 
-public class S3Provider : IS3Provider
+public class FileStorageProvider : IFileStorageProvider
 {
     private readonly IAmazonS3 _s3Client;
-    private readonly ILogger<S3Provider> _logger;
-    private readonly S3Options _s3Options;
+    private readonly ILogger<FileStorageProvider> _logger;
+    private readonly FileStorageOptions _s3StorageOptions;
 
     private readonly SemaphoreSlim _requestsSemaphore;
 
-    public S3Provider(IAmazonS3 s3Client, IOptions<S3Options> s3Options, ILogger<S3Provider> logger)
+    public FileStorageProvider(IAmazonS3 s3Client, IOptions<FileStorageOptions> s3Options, ILogger<FileStorageProvider> logger)
     {
         _s3Client = s3Client;
         _logger = logger;
-        _s3Options = s3Options.Value;
-        _requestsSemaphore = new SemaphoreSlim(1, _s3Options.MaxConcurrentRequests);
+        _s3StorageOptions = s3Options.Value;
+        _requestsSemaphore = new SemaphoreSlim(1, _s3StorageOptions.MaxConcurrentRequests);
     }
 
     public async Task<Result> UploadFileAsync(
@@ -98,8 +98,8 @@ public class S3Provider : IS3Provider
             Key = storageKey.Value,
             Verb = HttpVerb.PUT,
             ContentType = mediaData.ContentType.Value,
-            Expires = DateTime.Now.AddMinutes(_s3Options.UploadUrlExpirationMinutes),
-            Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
+            Expires = DateTime.Now.AddMinutes(_s3StorageOptions.UploadUrlExpirationMinutes),
+            Protocol = _s3StorageOptions.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
         };
         try
         {
@@ -120,8 +120,8 @@ public class S3Provider : IS3Provider
             BucketName = storageKey.Bucket,
             Key = storageKey.Value,
             Verb = HttpVerb.GET,
-            Expires = DateTime.Now.AddHours(_s3Options.DownloadExpirationHours),
-            Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
+            Expires = DateTime.Now.AddHours(_s3StorageOptions.DownloadExpirationHours),
+            Protocol = _s3StorageOptions.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
         };
         try
         {
@@ -151,8 +151,8 @@ public class S3Provider : IS3Provider
                         BucketName = storageKey.Bucket,
                         Key = storageKey.Value,
                         Verb = HttpVerb.GET,
-                        Expires = DateTime.Now.AddHours(_s3Options.DownloadExpirationHours),
-                        Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
+                        Expires = DateTime.Now.AddHours(_s3StorageOptions.DownloadExpirationHours),
+                        Protocol = _s3StorageOptions.WithSsl ? Protocol.HTTPS : Protocol.HTTP,
                     };
                     string? result = await _s3Client.GetPreSignedURLAsync(request);
                     return new MediaUrl(storageKey, result);
@@ -212,8 +212,8 @@ public class S3Provider : IS3Provider
                 Verb = HttpVerb.PUT,
                 UploadId = uploadId,
                 PartNumber = partNumber,
-                Expires = DateTime.UtcNow.AddMinutes(_s3Options.UploadUrlExpirationMinutes),
-                Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP
+                Expires = DateTime.UtcNow.AddMinutes(_s3StorageOptions.UploadUrlExpirationMinutes),
+                Protocol = _s3StorageOptions.WithSsl ? Protocol.HTTPS : Protocol.HTTP
             };
             string? url = await _s3Client.GetPreSignedURLAsync(request);
             return url;
@@ -246,8 +246,8 @@ public class S3Provider : IS3Provider
                             Verb = HttpVerb.PUT,
                             UploadId = uploadId,
                             PartNumber = partNumber,
-                            Expires = DateTime.UtcNow.AddMinutes(_s3Options.UploadUrlExpirationMinutes),
-                            Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP
+                            Expires = DateTime.UtcNow.AddMinutes(_s3StorageOptions.UploadUrlExpirationMinutes),
+                            Protocol = _s3StorageOptions.WithSsl ? Protocol.HTTPS : Protocol.HTTP
                         };
                         string? url = await _s3Client.GetPreSignedURLAsync(request);
 
@@ -278,8 +278,8 @@ public class S3Provider : IS3Provider
                 BucketName = storageKey.Bucket,
                 Key = storageKey.Value,
                 Verb = HttpVerb.PUT,
-                Expires = DateTime.UtcNow.AddHours(_s3Options.DownloadExpirationHours),
-                Protocol = _s3Options.WithSsl ? Protocol.HTTPS : Protocol.HTTP
+                Expires = DateTime.UtcNow.AddHours(_s3StorageOptions.DownloadExpirationHours),
+                Protocol = _s3StorageOptions.WithSsl ? Protocol.HTTPS : Protocol.HTTP
             };
             string? response = await _s3Client.GetPreSignedURLAsync(request);
 

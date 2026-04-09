@@ -6,9 +6,9 @@ namespace FileService.Infrastructure.S3
 {
     public class ChunkSizeCalculator : IChunkSizeCalculator
     {
-        private readonly S3Options _options;
+        private readonly FileStorageOptions _options;
 
-        public ChunkSizeCalculator(IOptions<S3Options> options)
+        public ChunkSizeCalculator(IOptions<FileStorageOptions> options)
         {
             _options = options.Value;
         }

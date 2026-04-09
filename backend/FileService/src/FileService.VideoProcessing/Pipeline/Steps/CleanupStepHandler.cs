@@ -7,16 +7,16 @@ namespace FileService.VideoProcessing.Pipeline.Steps
 {
     public sealed class CleanupStepHandler : IProcessingStepHandler
     {
-        private readonly IS3Provider _s3Provider;
+        private readonly IFileStorageProvider _fileStorageProvider;
         private readonly ILogger<CleanupStepHandler> _logger;
 
         public StepType StepType => StepType.CLEANUP;
 
         public CleanupStepHandler(
-            IS3Provider s3Provider,
+            IFileStorageProvider fileStorageProvider,
             ILogger<CleanupStepHandler> logger)
         {
-            _s3Provider = s3Provider;
+            _fileStorageProvider = fileStorageProvider;
             _logger = logger;
         }
 
@@ -32,7 +32,7 @@ namespace FileService.VideoProcessing.Pipeline.Steps
                 return await Task.FromResult(context);
             }
 
-            var deleteResult = await _s3Provider.DeleteFileAsync(context.VideoAsset.RawKey, cancellationToken);
+            var deleteResult = await _fileStorageProvider.DeleteFileAsync(context.VideoAsset.RawKey, cancellationToken);
             if (deleteResult.IsFailure)
             {
                 _logger.LogWarning(

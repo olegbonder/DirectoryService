@@ -13,20 +13,20 @@ namespace FileService.Core.Features.DeleteFile;
 public class DeleteFileHandler : ICommandHandler<MediaAssetResponse, DeleteFileCommand>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IValidator<DeleteFileCommand> _validator;
     private readonly ILogger<DeleteFileHandler> _logger;
     private readonly ITransactionManager _transactionManager;
 
     public DeleteFileHandler(
         IMediaAssetRepository mediaAssetRepository,
-        IS3Provider s3Provider,
+        IFileStorageProvider fileStorageProvider,
         IValidator<DeleteFileCommand> validator,
         ILogger<DeleteFileHandler> logger,
         ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
         _validator = validator;
         _logger = logger;
         _transactionManager = transactionManager;
@@ -58,7 +58,7 @@ public class DeleteFileHandler : ICommandHandler<MediaAssetResponse, DeleteFileC
             deleteKeys.Add(mediaAsset.FinalKey);
         }
 
-        var tasks = deleteKeys.Select(key => _s3Provider.DeleteFileAsync(key, cancellationToken));
+        var tasks = deleteKeys.Select(key => _fileStorageProvider.DeleteFileAsync(key, cancellationToken));
         var deleteResults = await Task.WhenAll(tasks);
         var failedResults = deleteResults.Where(deleteResult => deleteResult.IsFailure).ToList();
         if (failedResults.Any())

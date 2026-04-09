@@ -11,7 +11,7 @@ namespace FileService.VideoProcessing.Pipeline.Steps
     public sealed class UploadeHlsStepHandler : IProcessingStepHandler
     {
         private readonly IFfmpegProcessRunner _ffmpegProcessRunner;
-        private readonly IS3Provider _s3Provider;
+        private readonly IFileStorageProvider _fileStorageProvider;
         private readonly ILogger<GenerateHlsStepHandler> _logger;
         private readonly VideoProcessingOptions _options;
 
@@ -19,12 +19,12 @@ namespace FileService.VideoProcessing.Pipeline.Steps
 
         public UploadeHlsStepHandler(
             IFfmpegProcessRunner ffmpegProcessRunner,
-            IS3Provider s3Provider,
+            IFileStorageProvider fileStorageProvider,
             ILogger<GenerateHlsStepHandler> logger,
             IOptions<VideoProcessingOptions> options)
         {
             _ffmpegProcessRunner = ffmpegProcessRunner;
-            _s3Provider = s3Provider;
+            _fileStorageProvider = fileStorageProvider;
             _logger = logger;
             _options = options.Value;
         }
@@ -100,7 +100,7 @@ namespace FileService.VideoProcessing.Pipeline.Steps
 
             await using FileStream fileStream = File.OpenRead(localFilePath);
 
-            return await _s3Provider.UploadFileAsync(
+            return await _fileStorageProvider.UploadFileAsync(
                 storageKeyResult.Value,
                 fileStream,
                 contentType,

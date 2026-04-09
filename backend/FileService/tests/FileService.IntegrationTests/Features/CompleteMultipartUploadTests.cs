@@ -1,9 +1,9 @@
 ﻿using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
+using FileService.Core.FilesStorage;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FileService.Domain.MediaProcessing;
-using FileService.Infrastructure.S3;
 using FileService.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -159,7 +159,7 @@ namespace FileService.IntegrationTests.Features
         {
             // arrange
             var cancellationToken = new CancellationTokenSource().Token;
-            var optionsS3 = Services.GetRequiredService<IOptions<S3Options>>();
+            var optionsS3 = Services.GetRequiredService<IOptions<FileStorageOptions>>();
 
             // Меняем рекомендуемый размер чанка на 1МБ,
             // т.к. размер тестируемого файла 5 МБ,

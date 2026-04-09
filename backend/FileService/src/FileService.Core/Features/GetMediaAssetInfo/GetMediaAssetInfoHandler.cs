@@ -14,16 +14,16 @@ namespace FileService.Core.Features.GetMediaAssetInfo
     {
         private readonly IReadDbContext _readDbContext;
         private readonly IValidator<GetMediaAssetInfoRequest> _validator;
-        private readonly IS3Provider _s3Provider;
+        private readonly IFileStorageProvider _fileStorageProvider;
 
         public GetMediaAssetInfoHandler(
             IReadDbContext readDbContext,
             IValidator<GetMediaAssetInfoRequest> validator,
-            IS3Provider s3Provider)
+            IFileStorageProvider fileStorageProvider)
         {
             _readDbContext = readDbContext;
             _validator = validator;
-            _s3Provider = s3Provider;
+            _fileStorageProvider = fileStorageProvider;
         }
 
         public async Task<Result<GetMediaAssetResponse?>> Handle(GetMediaAssetInfoRequest request, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ namespace FileService.Core.Features.GetMediaAssetInfo
 
             if (mediaAsset.Status == MediaStatus.READY)
             {
-                var urlsResult = await _s3Provider.GenerateDownloadUrlAsync(mediaAsset.RawKey);
+                var urlsResult = await _fileStorageProvider.GenerateDownloadUrlAsync(mediaAsset.RawKey);
                 if (urlsResult.IsFailure)
                     return urlsResult.Errors;
 

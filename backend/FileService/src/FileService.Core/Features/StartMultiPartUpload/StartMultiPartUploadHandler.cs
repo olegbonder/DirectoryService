@@ -16,7 +16,7 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly ILogger<StartMultiPartUploadHandler> _logger;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IValidator<StartMultiPartUploadCommand> _validator;
     private readonly IChunkSizeCalculator _chunkSizeCalculator;
     private readonly IAssetCreatedEventPublisher _assetCreatedEventPublisher;
@@ -25,7 +25,7 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
     public StartMultiPartUploadHandler(
         IMediaAssetRepository mediaAssetRepository,
         ILogger<StartMultiPartUploadHandler> logger,
-        IS3Provider s3Provider,
+        IFileStorageProvider fileStorageProvider,
         IValidator<StartMultiPartUploadCommand> validator,
         IChunkSizeCalculator chunkSizeCalculator,
         IAssetCreatedEventPublisher assetCreatedEventPublisher,
@@ -33,7 +33,7 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
     {
         _mediaAssetRepository = mediaAssetRepository;
         _logger = logger;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
         _validator = validator;
         _chunkSizeCalculator = chunkSizeCalculator;
         _assetCreatedEventPublisher = assetCreatedEventPublisher;
@@ -73,12 +73,12 @@ public sealed class StartMultiPartUploadHandler : ICommandHandler<StartMultiPart
         var mediaAsset = mediaAssetResult.Value;
         await _mediaAssetRepository.Add(mediaAsset, cancellationToken);
 
-        var startUploadResult = await _s3Provider.StartMultiPartUploadAsync(mediaAsset.UploadKey!, mediaData, cancellationToken);
+        var startUploadResult = await _fileStorageProvider.StartMultiPartUploadAsync(mediaAsset.UploadKey!, mediaData, cancellationToken);
         if (startUploadResult.IsFailure)
             return startUploadResult.Errors;
 
         string uploadId = startUploadResult.Value;
-        var chunksUploadUrlsResult = await _s3Provider.GenerateAllChunksUploadUrlsAsync(
+        var chunksUploadUrlsResult = await _fileStorageProvider.GenerateAllChunksUploadUrlsAsync(
             mediaAsset.UploadKey!,
             uploadId,
             totalChunks,
