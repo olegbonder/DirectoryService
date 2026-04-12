@@ -7,5 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FileService.Core\FileService.Core.csproj" />
+    <ProjectReference Include="..\FileService.Contracts\FileService.Contracts.csproj" />
   </ItemGroup>
 </Project>

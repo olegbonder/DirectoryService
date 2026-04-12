@@ -20,7 +20,9 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IFfmpegProcessRunner, FfmpegProcessRunner>();
 
         services.AddScoped<IVideoProcessingService, VideoProcessingService>();
+        services.AddScoped<IVideoProgressReporter, VideoProgressReporter>();
         services.AddScoped<IProcessingPipeline, ProcessingPipeline>();
+        services.AddSingleton<IProgressEventQueue, InMemoryProgressQueue>();
 
         services.AddScoped<IProcessingStepHandler, InitializeStepHandler>();
         services.AddScoped<IProcessingStepHandler, ExtractMetadataStepHandler>();

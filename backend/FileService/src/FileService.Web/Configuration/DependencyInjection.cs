@@ -2,6 +2,7 @@
 using FileService.Core;
 using FileService.Infrastructure.S3;
 using FileService.VideoProcessing;
+using FileService.Web.SignalR;
 using Framework.Endpoints;
 using Framework.Logging;
 using Framework.Swagger;
@@ -21,7 +22,10 @@ namespace FileService.Web.Configuration
                 .AddCors()
                 .AddS3(configuration)
                 .AddVideoProcessing(configuration)
-                .AddQuartzService();
+                .AddQuartzService()
+                .AddSignalR();
+
+            services.AddHostedService<ProgressConsumer>();
 
             return services;
         }
