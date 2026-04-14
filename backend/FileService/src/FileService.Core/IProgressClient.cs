@@ -1,6 +1,6 @@
 ﻿using FileService.Contracts.Dtos.VideoProcessing;
 
-namespace FileService.Web.SignalR;
+namespace FileService.Core;
 
 public interface IProgressClient
 {

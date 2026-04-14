@@ -1,6 +1,7 @@
 ﻿using Core.Abstractions;
 using FileService.Contracts.Dtos.MediaAssets.DownloadFile;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 

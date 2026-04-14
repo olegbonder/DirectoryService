@@ -4,6 +4,7 @@ using FileService.Contracts.Dtos.MediaAssets.StartMultiPartUpload;
 using FileService.Core.Database;
 using FileService.Core.FilesStorage;
 using FileService.Core.Messaging;
+using FileService.Core.Repositories;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FluentValidation;

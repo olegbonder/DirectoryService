@@ -3,6 +3,7 @@ using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets;
 using FileService.Core.Database;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using FileService.Domain;
 using FluentValidation;
 using Microsoft.Extensions.Logging;

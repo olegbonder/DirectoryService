@@ -1,8 +1,10 @@
 ﻿using FileService.Core;
+using FileService.VideoProcessing.BackgroundServices;
 using FileService.VideoProcessing.FfmpegProcess;
 using FileService.VideoProcessing.Pipeline;
 using FileService.VideoProcessing.Pipeline.Steps;
 using FileService.VideoProcessing.ProcessRunner;
+using FileService.VideoProcessing.Progress;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -29,6 +31,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IProcessingStepHandler, GenerateHlsStepHandler>();
         services.AddScoped<IProcessingStepHandler, UploadeHlsStepHandler>();
         services.AddScoped<IProcessingStepHandler, CleanupStepHandler>();
+
+        services.AddHostedService<ProgressConsumer>();
 
         return services;
     }

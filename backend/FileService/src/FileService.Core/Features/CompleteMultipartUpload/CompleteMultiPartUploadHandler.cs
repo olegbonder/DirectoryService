@@ -5,6 +5,7 @@ using FileService.Contracts.Dtos.MediaAssets.CompleteMultiPartUpload;
 using FileService.Core.Database;
 using FileService.Core.Features.CompleteMultipartUpload;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using FileService.Domain.Assets;
 using FileService.Domain.MediaProcessing;
 using FileService.Domain.Shared;

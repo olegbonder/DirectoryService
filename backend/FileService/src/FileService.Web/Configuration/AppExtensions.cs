@@ -1,4 +1,5 @@
-﻿using FileService.Web.SignalR;
+﻿using FileService.Presenters.SignalRExtensions;
+using FileService.VideoProcessing.Progress;
 using Framework.Cors;
 using Framework.Endpoints;
 using Framework.Middlewares;
@@ -22,7 +23,8 @@ namespace FileService.Web.Configuration
             var apiGroup = app.MapGroup("/api").WithOpenApi();
 
             app.MapEndpoints(apiGroup);
-            app.MapHub<ProgressHub>("/progressHub");
+
+            app.UseSignalR();
 
             app.ConfigureCors("http://localhost:3000");
 

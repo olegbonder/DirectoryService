@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using FileService.Core;
+using Microsoft.AspNetCore.SignalR;
 
-namespace FileService.Web.SignalR;
+namespace FileService.Presenters.Hubs;
 
 public sealed class ProgressHub : Hub<IProgressClient>
 {

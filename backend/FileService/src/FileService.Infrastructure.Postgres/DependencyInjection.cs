@@ -1,6 +1,7 @@
 ﻿using FileService.Core;
 using FileService.Core.Database;
 using FileService.Core.Messaging;
+using FileService.Core.Repositories;
 using FileService.Infrastructure.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

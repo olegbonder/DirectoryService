@@ -4,7 +4,7 @@ using FileService.Contracts.Dtos.VideoProcessing;
 using FileService.Core;
 using SharedKernel.Result;
 
-namespace FileService.VideoProcessing;
+namespace FileService.VideoProcessing.Progress;
 
 public sealed class InMemoryProgressQueue : IProgressEventQueue
 {

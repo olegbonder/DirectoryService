@@ -2,6 +2,7 @@
 using Core.Validation;
 using FileService.Core.Database;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using FileService.Domain;
 using FileService.Domain.Assets;
 using FluentValidation;

@@ -3,6 +3,7 @@ using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
 using FileService.Core.Features.GetChunkUploadUrl;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using FileService.Domain.Assets;
 using FluentValidation;
 using Microsoft.Extensions.Logging;

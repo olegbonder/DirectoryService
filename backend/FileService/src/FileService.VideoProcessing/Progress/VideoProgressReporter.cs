@@ -3,7 +3,7 @@ using FileService.Core;
 using FileService.Domain.MediaProcessing;
 using Microsoft.Extensions.Logging;
 
-namespace FileService.VideoProcessing;
+namespace FileService.VideoProcessing.Progress;
 
 public sealed class VideoProgressReporter : IVideoProgressReporter
 {
@@ -18,21 +18,7 @@ public sealed class VideoProgressReporter : IVideoProgressReporter
         _logger = logger;
     }
 
-    public void PrepareForExecution(VideoProcess videoProcess) => Publish(videoProcess);
-
-    public void StartStep(VideoProcess videoProcess) => Publish(videoProcess);
-
-    public void ReportStepProgress(VideoProcess videoProcess) => Publish(videoProcess);
-
-    public void CompleteStep(VideoProcess videoProcess) => Publish(videoProcess);
-
-    public void Fail(VideoProcess videoProcess) => Publish(videoProcess);
-
-    public void Cancel(VideoProcess videoProcess) => Publish(videoProcess);
-
-    public void FinishProcessing(VideoProcess videoProcess) => Publish(videoProcess);
-
-    private void Publish(VideoProcess videoProcess)
+    public void Publish(VideoProcess videoProcess)
     {
         var progressEvent = ProgressEventDto.FromVideoProcess(videoProcess);
         var enqueueResult = _progressEventQueue.TryWriteQueue(progressEvent);

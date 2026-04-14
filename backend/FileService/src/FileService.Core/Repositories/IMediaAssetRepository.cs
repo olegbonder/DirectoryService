@@ -2,7 +2,7 @@
 using FileService.Domain.Assets;
 using SharedKernel.Result;
 
-namespace FileService.Core;
+namespace FileService.Core.Repositories;
 
 public interface IMediaAssetRepository
 {

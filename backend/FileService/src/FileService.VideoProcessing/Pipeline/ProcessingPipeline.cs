@@ -1,7 +1,8 @@
 ﻿using FileService.Core;
-using FileService.Contracts.Dtos.VideoProcessing;
 using FileService.Core.Database;
+using FileService.Core.Repositories;
 using FileService.Domain.MediaProcessing;
+using FileService.VideoProcessing.Progress;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
@@ -87,7 +88,7 @@ namespace FileService.VideoProcessing.Pipeline
                 return saveResult.Errors;
             }
 
-            _progressReporter.Cancel(context.VideoProcess);
+            _progressReporter.Publish(context.VideoProcess);
             return Result.Failure(error);
         }
 
@@ -114,7 +115,7 @@ namespace FileService.VideoProcessing.Pipeline
                 return saveResult.Errors;
             }
 
-            _progressReporter.FinishProcessing(context.VideoProcess);
+            _progressReporter.Publish(context.VideoProcess);
             return Result.Success();
         }
 
@@ -142,7 +143,7 @@ namespace FileService.VideoProcessing.Pipeline
                 return saveResult.Errors;
             }
 
-            _progressReporter.Fail(context.VideoProcess);
+            _progressReporter.Publish(context.VideoProcess);
             return Result.Failure(error);
         }
 
@@ -180,7 +181,7 @@ namespace FileService.VideoProcessing.Pipeline
                     currentStep.Order,
                     videoAssetId);
 
-                _progressReporter.StartStep(context.VideoProcess);
+                _progressReporter.Publish(context.VideoProcess);
 
                 var stepHandler = _stepHandlers
                     .FirstOrDefault(x => x.StepType.ToString() == currentStep.Name.Value);
@@ -232,7 +233,7 @@ namespace FileService.VideoProcessing.Pipeline
                             videoAssetId);
                     }
 
-                    _progressReporter.Fail(context.VideoProcess);
+                    _progressReporter.Publish(context.VideoProcess);
 
                     return executionResult.Errors;
                 }
@@ -240,7 +241,7 @@ namespace FileService.VideoProcessing.Pipeline
                 var progressReportResult = context.VideoProcess.ReportStepProgress(context.VideoProcess.CurrentStepProgress ?? 0);
                 if (progressReportResult.IsSuccess)
                 {
-                    _progressReporter.ReportStepProgress(context.VideoProcess);
+                    _progressReporter.Publish(context.VideoProcess);
                 }
 
                 var completeStepResult = context.VideoProcess.CompleteCurrentStep();
@@ -263,7 +264,7 @@ namespace FileService.VideoProcessing.Pipeline
                         videoAssetId);
                 }
 
-                _progressReporter.CompleteStep(context.VideoProcess);
+                _progressReporter.Publish(context.VideoProcess);
             }
         }
 
@@ -344,7 +345,7 @@ namespace FileService.VideoProcessing.Pipeline
             if (executeProcessResult.IsFailure)
                 return executeProcessResult.Errors;
 
-            _progressReporter.PrepareForExecution(videoProcess);
+            _progressReporter.Publish(videoProcess);
 
             var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if (saveResult.IsFailure)

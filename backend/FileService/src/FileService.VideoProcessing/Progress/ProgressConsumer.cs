@@ -1,21 +1,22 @@
 ﻿using FileService.Core;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace FileService.Web.SignalR;
+namespace FileService.VideoProcessing.Progress;
 
 public sealed class ProgressConsumer : BackgroundService
 {
     private readonly IProgressEventQueue _progressEventQueue;
-    private readonly IHubContext<ProgressHub, IProgressClient> _hubContext;
+    private readonly IProgressNotifier _progressNotifier;
     private readonly ILogger<ProgressConsumer> _logger;
 
     public ProgressConsumer(
         IProgressEventQueue progressEventQueue,
-        IHubContext<ProgressHub, IProgressClient> hubContext,
+        IProgressNotifier progressNotifier,
         ILogger<ProgressConsumer> logger)
     {
         _progressEventQueue = progressEventQueue;
-        _hubContext = hubContext;
+        _progressNotifier = progressNotifier;
         _logger = logger;
     }
 
@@ -25,9 +26,7 @@ public sealed class ProgressConsumer : BackgroundService
         {
             try
             {
-                await _hubContext.Clients
-                    .Group(progressEvent.MediaAssetId.ToString())
-                    .ReceiveProgress(progressEvent);
+                await _progressNotifier.NotifyProgressAsync(progressEvent, stoppingToken);
             }
             catch (Exception exception)
             {

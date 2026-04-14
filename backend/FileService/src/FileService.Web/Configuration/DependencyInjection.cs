@@ -1,8 +1,8 @@
 ﻿using Core.Caching;
 using FileService.Core;
 using FileService.Infrastructure.S3;
+using FileService.Presenters;
 using FileService.VideoProcessing;
-using FileService.Web.SignalR;
 using Framework.Endpoints;
 using Framework.Logging;
 using Framework.Swagger;
@@ -23,9 +23,8 @@ namespace FileService.Web.Configuration
                 .AddS3(configuration)
                 .AddVideoProcessing(configuration)
                 .AddQuartzService()
+                .AddProgressNotifier()
                 .AddSignalR();
-
-            services.AddHostedService<ProgressConsumer>();
 
             return services;
         }
