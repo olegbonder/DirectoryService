@@ -17,7 +17,7 @@ namespace FileService.Web.Configuration
                 .AddSerilogLogging(configuration, "FileService")
                 .AddDistributedCache(configuration)
                 .AddOpenApiSpec()
-                .AddApplication()
+                .AddApplication(configuration)
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
                 .AddCors()
                 .AddS3(configuration)

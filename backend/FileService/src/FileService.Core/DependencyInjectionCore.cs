@@ -1,20 +1,21 @@
 ﻿using Core.Abstractions;
+using Core.Caching;
 using FluentValidation;
-using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileService.Core
 {
     public static class DependencyInjectionCore
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
+        public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
         {
             var assembly = typeof(DependencyInjectionCore).Assembly;
             services.AddValidatorsFromAssembly(assembly);
 
             services.AddHandlers(assembly);
 
-            services.AddStackExchangeRedisCache(setup =>
+            services.AddDistributedAndLocalCache(configuration);/*.AddStackExchangeRedisCache(setup =>
             {
                 setup.Configuration = "localhost:6379";
             });
@@ -25,7 +26,7 @@ namespace FileService.Core
                     Expiration = TimeSpan.FromMinutes(30),
                     LocalCacheExpiration = TimeSpan.FromMinutes(5),
                 };
-            });
+            });*/
 
             return services;
         }
