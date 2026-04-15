@@ -6,7 +6,7 @@ using SharedKernel.Result;
 
 namespace FileService.Core.FilesStorage;
 
-public interface IS3Provider
+public interface IFileStorageProvider
 {
     Task<Result> UploadFileAsync(
         StorageKey storageKey,

@@ -1,6 +1,7 @@
 ﻿using Core.Abstractions;
 using FileService.Contracts.Dtos.MediaAssets.DownloadFile;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
@@ -9,16 +10,16 @@ namespace FileService.Core.Features.DownloadFile;
 public class DownloadFileHandler : IQueryHandler<DownloadFileResponse, DownloadFileRequest>
 {
     private readonly IMediaAssetRepository _mediaAssetRepository;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly ILogger<DownloadFileHandler> _logger;
 
     public DownloadFileHandler(
         IMediaAssetRepository mediaAssetRepository,
-        IS3Provider s3Provider,
+        IFileStorageProvider fileStorageProvider,
         ILogger<DownloadFileHandler> logger)
     {
         _mediaAssetRepository = mediaAssetRepository;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
         _logger = logger;
     }
 
@@ -35,7 +36,7 @@ public class DownloadFileHandler : IQueryHandler<DownloadFileResponse, DownloadF
 
         var mediaAsset = mediaAssetResult.Value;
 
-        var downloadResult = await _s3Provider.DownloadFileAsync(
+        var downloadResult = await _fileStorageProvider.DownloadFileAsync(
             mediaAsset.RawKey,
             "",
             cancellationToken);

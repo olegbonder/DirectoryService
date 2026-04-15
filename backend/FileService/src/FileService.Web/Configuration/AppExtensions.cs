@@ -1,4 +1,6 @@
-﻿using Framework.Cors;
+﻿using FileService.Presenters.SignalRExtensions;
+using FileService.VideoProcessing.Progress;
+using Framework.Cors;
 using Framework.Endpoints;
 using Framework.Middlewares;
 using Framework.Swagger;
@@ -21,6 +23,8 @@ namespace FileService.Web.Configuration
             var apiGroup = app.MapGroup("/api").WithOpenApi();
 
             app.MapEndpoints(apiGroup);
+
+            app.UseSignalR();
 
             app.ConfigureCors("http://localhost:3000");
 

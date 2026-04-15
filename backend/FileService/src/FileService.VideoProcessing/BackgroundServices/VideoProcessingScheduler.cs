@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Quartz;
 using SharedKernel.Result;
 
-namespace FileService.VideoProcessing;
+namespace FileService.VideoProcessing.BackgroundServices;
 
 public class VideoProcessingScheduler : IVideoProcessingScheduler
 {

@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Amazon.S3;
 using FileService.Core.Database;
+using FileService.Core.FilesStorage;
 using FileService.Infrastructure.Postgres;
 using FileService.Infrastructure.S3;
 using Microsoft.AspNetCore.Hosting;
@@ -69,7 +70,7 @@ public class RealFfmpegIntegrationTestsWebFactory : WebApplicationFactory<Progra
 
             services.AddSingleton<IAmazonS3>(sp =>
             {
-                S3Options s3Options = sp.GetRequiredService<IOptions<S3Options>>().Value;
+                FileStorageOptions s3Options = sp.GetRequiredService<IOptions<FileStorageOptions>>().Value;
                 ushort minioPort = _minioContainer.GetMappedPublicPort(9000);
                 var config = new AmazonS3Config
                 {

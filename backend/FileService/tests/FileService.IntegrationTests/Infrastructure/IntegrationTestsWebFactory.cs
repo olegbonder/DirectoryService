@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using Amazon.S3;
-using FileService.Core;
 using FileService.Core.Database;
+using FileService.Core.FilesStorage;
 using FileService.Infrastructure.Postgres;
 using FileService.Infrastructure.S3;
 using FileService.IntegrationTests.Mocks;
@@ -75,7 +75,7 @@ public class IntegrationTestsWebFactory : WebApplicationFactory<Program>, IAsync
 
             services.AddSingleton<IAmazonS3>(sp =>
             {
-                S3Options s3Options = sp.GetRequiredService<IOptions<S3Options>>().Value;
+                FileStorageOptions s3Options = sp.GetRequiredService<IOptions<FileStorageOptions>>().Value;
                 ushort minioPort = _minioContainer.GetMappedPublicPort(9000);
                 var config = new AmazonS3Config
                 {

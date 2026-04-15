@@ -19,4 +19,8 @@
   <ItemGroup>
     <Folder Include="Dtos\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FileService.Domain\FileService.Domain.csproj" />
+  </ItemGroup>
 </Project>

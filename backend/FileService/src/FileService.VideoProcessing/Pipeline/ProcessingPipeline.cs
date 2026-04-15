@@ -1,6 +1,8 @@
 ﻿using FileService.Core;
 using FileService.Core.Database;
+using FileService.Core.Repositories;
 using FileService.Domain.MediaProcessing;
+using FileService.VideoProcessing.Progress;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
@@ -13,19 +15,22 @@ namespace FileService.VideoProcessing.Pipeline
         private readonly IMediaAssetRepository _mediaAssetRepository;
         private readonly IVideoProcessingRepository _videoProcessingRepository;
         private readonly ITransactionManager _transactionManager;
+        private readonly IVideoProgressReporter _progressReporter;
 
         public ProcessingPipeline(
             IEnumerable<IProcessingStepHandler> stepHandlers,
             ILogger<ProcessingPipeline> logger,
             IMediaAssetRepository mediaAssetRepository,
             IVideoProcessingRepository videoProcessingRepository,
-            ITransactionManager transactionManager)
+            ITransactionManager transactionManager,
+            IVideoProgressReporter progressReporter)
         {
             _stepHandlers = stepHandlers;
             _logger = logger;
             _mediaAssetRepository = mediaAssetRepository;
             _videoProcessingRepository = videoProcessingRepository;
             _transactionManager = transactionManager;
+            _progressReporter = progressReporter;
         }
 
         public async Task<Result> ProcessAllStepsAsync(
@@ -42,10 +47,49 @@ namespace FileService.VideoProcessing.Pipeline
 
             if (executionResult.IsFailure)
             {
+                var error = executionResult.Errors.First();
+                if (error.Code == "pipeline.canceled" || error.Code == "operation.canceled" || error.Code == "process.canceled")
+                {
+                    return await FinalizeWithCancellationAsync(context, error, cancellationToken);
+                }
+
                 return await FinalizeWithFailureAsync(context, executionResult.Errors.First(), cancellationToken);
             }
 
             return await FinalizeAsync(context, cancellationToken);
+        }
+
+        private async Task<Result> FinalizeWithCancellationAsync(
+            ProcessingContext context,
+            Error error,
+            CancellationToken cancellationToken)
+        {
+            var videoAssetId = context.VideoProcess.Id;
+            var cancelResult = context.VideoProcess.Cancel(error.Message);
+            if (cancelResult.IsFailure)
+            {
+                _logger.LogError(
+                    "Failed to cancel video process {VideoAssetId} after cancellation signal.",
+                    videoAssetId);
+                return cancelResult.Errors;
+            }
+
+            _logger.LogInformation(
+                "Processing canceled for video asset {VideoAssetId}.",
+                videoAssetId);
+
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
+            {
+                _logger.LogError(
+                    "Failed to save canceled state for video asset {VideoAssetId}.",
+                    videoAssetId);
+
+                return saveResult.Errors;
+            }
+
+            _progressReporter.Publish(context.VideoProcess);
+            return Result.Failure(error);
         }
 
         private async Task<Result> FinalizeAsync(
@@ -71,6 +115,7 @@ namespace FileService.VideoProcessing.Pipeline
                 return saveResult.Errors;
             }
 
+            _progressReporter.Publish(context.VideoProcess);
             return Result.Success();
         }
 
@@ -98,6 +143,7 @@ namespace FileService.VideoProcessing.Pipeline
                 return saveResult.Errors;
             }
 
+            _progressReporter.Publish(context.VideoProcess);
             return Result.Failure(error);
         }
 
@@ -135,6 +181,8 @@ namespace FileService.VideoProcessing.Pipeline
                     currentStep.Order,
                     videoAssetId);
 
+                _progressReporter.Publish(context.VideoProcess);
+
                 var stepHandler = _stepHandlers
                     .FirstOrDefault(x => x.StepType.ToString() == currentStep.Name.Value);
 
@@ -159,12 +207,6 @@ namespace FileService.VideoProcessing.Pipeline
 
                     return Error.Failure("pipeline.step.handler.not.found", error);
                 }
-
-                /*var startStepResult = context.VideoProcess.StartStep(
-                    currentStep.Order.Value,
-                    currentStep.Name.Value);
-                if (startStepResult.IsFailure)
-                    return startStepResult.Errors;*/
 
                 var executionResult = await ExecuteStepSafetyAsync(
                     stepHandler,
@@ -191,7 +233,15 @@ namespace FileService.VideoProcessing.Pipeline
                             videoAssetId);
                     }
 
+                    _progressReporter.Publish(context.VideoProcess);
+
                     return executionResult.Errors;
+                }
+
+                var progressReportResult = context.VideoProcess.ReportStepProgress(context.VideoProcess.CurrentStepProgress ?? 0);
+                if (progressReportResult.IsSuccess)
+                {
+                    _progressReporter.Publish(context.VideoProcess);
                 }
 
                 var completeStepResult = context.VideoProcess.CompleteCurrentStep();
@@ -213,6 +263,8 @@ namespace FileService.VideoProcessing.Pipeline
                         currentStep.Name,
                         videoAssetId);
                 }
+
+                _progressReporter.Publish(context.VideoProcess);
             }
         }
 
@@ -224,6 +276,10 @@ namespace FileService.VideoProcessing.Pipeline
             try
             {
                 return await step.ExecuteAsync(context, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return Error.Failure("pipeline.canceled", "Video processing was canceled.");
             }
             catch (Exception ex)
             {
@@ -288,6 +344,8 @@ namespace FileService.VideoProcessing.Pipeline
             var executeProcessResult = videoProcess.PrepareForExecution();
             if (executeProcessResult.IsFailure)
                 return executeProcessResult.Errors;
+
+            _progressReporter.Publish(videoProcess);
 
             var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if (saveResult.IsFailure)

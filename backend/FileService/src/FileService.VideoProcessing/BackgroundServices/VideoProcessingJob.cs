@@ -1,10 +1,9 @@
 using System.Text.Json;
-using Quartz;
 using FileService.VideoProcessing.Pipeline;
 using Microsoft.Extensions.Logging;
-using SharedKernel.Result;
+using Quartz;
 
-namespace FileService.VideoProcessing;
+namespace FileService.VideoProcessing.BackgroundServices;
 
 public class VideoProcessingJob : IJob
 {

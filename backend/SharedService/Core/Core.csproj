@@ -7,13 +7,15 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis"/>
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Scrutor" />
   </ItemGroup>
 
   <PropertyGroup>
     <PackageId>Manuilov.Core</PackageId>
-    <Version>0.0.5</Version>
+    <Version>0.0.7</Version>
     <Authors>Manuilov Oleg</Authors>
     <PackageDescription>General Core Project</PackageDescription>
     <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>

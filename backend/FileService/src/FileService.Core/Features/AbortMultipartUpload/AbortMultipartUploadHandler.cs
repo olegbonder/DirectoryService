@@ -3,6 +3,7 @@ using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets.AbortMultipartUpload;
 using FileService.Core.Database;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using FileService.Domain.Assets;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -15,20 +16,20 @@ public sealed class AbortMultipartUploadHandler : IResultCommandHandler<AbortMul
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly ILogger<AbortMultipartUploadHandler> _logger;
     private readonly IValidator<AbortMultipartUploadCommand> _validator;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly ITransactionManager _transactionManager;
 
     public AbortMultipartUploadHandler(
         IMediaAssetRepository mediaAssetRepository,
         ILogger<AbortMultipartUploadHandler> logger,
         IValidator<AbortMultipartUploadCommand> validator,
-        IS3Provider s3Provider,
+        IFileStorageProvider fileStorageProvider,
         ITransactionManager transactionManager)
     {
         _mediaAssetRepository = mediaAssetRepository;
         _logger = logger;
         _validator = validator;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
         _transactionManager = transactionManager;
     }
 
@@ -50,7 +51,7 @@ public sealed class AbortMultipartUploadHandler : IResultCommandHandler<AbortMul
 
         MediaAsset mediaAsset = mediaAssetResult.Value;
 
-        Result abortMultipartUploadResult = await _s3Provider.AbortMultipartUploadAsync(mediaAsset.RawKey, uploadId, cancellationToken);
+        Result abortMultipartUploadResult = await _fileStorageProvider.AbortMultipartUploadAsync(mediaAsset.RawKey, uploadId, cancellationToken);
         if (abortMultipartUploadResult.IsFailure)
             return abortMultipartUploadResult.Errors;
 

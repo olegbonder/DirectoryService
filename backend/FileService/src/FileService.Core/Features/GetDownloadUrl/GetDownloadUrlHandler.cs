@@ -3,6 +3,7 @@ using Core.Validation;
 using FileService.Contracts.Dtos.MediaAssets.GetDownloadUrl;
 using FileService.Core.Features.GetChunkUploadUrl;
 using FileService.Core.FilesStorage;
+using FileService.Core.Repositories;
 using FileService.Domain.Assets;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -15,18 +16,18 @@ public sealed class GetDownloadUrlHandler : ICommandHandler<GetDownloadUrlRespon
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly ILogger<GetChunkUploadUrlHandler> _logger;
     private readonly IValidator<GetDownloadUrlCommand> _validator;
-    private readonly IS3Provider _s3Provider;
+    private readonly IFileStorageProvider _fileStorageProvider;
 
     public GetDownloadUrlHandler(
         IMediaAssetRepository mediaAssetRepository,
         ILogger<GetChunkUploadUrlHandler> logger,
         IValidator<GetDownloadUrlCommand> validator,
-        IS3Provider s3Provider)
+        IFileStorageProvider fileStorageProvider)
     {
         _mediaAssetRepository = mediaAssetRepository;
         _logger = logger;
         _validator = validator;
-        _s3Provider = s3Provider;
+        _fileStorageProvider = fileStorageProvider;
     }
 
     public async Task<Result<GetDownloadUrlResponse>> Handle(GetDownloadUrlCommand command, CancellationToken cancellationToken)
@@ -46,7 +47,7 @@ public sealed class GetDownloadUrlHandler : ICommandHandler<GetDownloadUrlRespon
 
         MediaAsset mediaAsset = mediaAssetResult.Value;
 
-        Result<string> getDownloadUrlResult = await _s3Provider.GenerateDownloadUrlAsync(mediaAsset.RawKey);
+        Result<string> getDownloadUrlResult = await _fileStorageProvider.GenerateDownloadUrlAsync(mediaAsset.RawKey);
         if (getDownloadUrlResult.IsFailure)
             return getDownloadUrlResult.Errors;
 

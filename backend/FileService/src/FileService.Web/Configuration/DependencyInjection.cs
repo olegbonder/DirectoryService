@@ -1,6 +1,7 @@
 ﻿using Core.Caching;
 using FileService.Core;
 using FileService.Infrastructure.S3;
+using FileService.Presenters;
 using FileService.VideoProcessing;
 using Framework.Endpoints;
 using Framework.Logging;
@@ -16,12 +17,14 @@ namespace FileService.Web.Configuration
                 .AddSerilogLogging(configuration, "FileService")
                 .AddDistributedCache(configuration)
                 .AddOpenApiSpec()
-                .AddApplication()
+                .AddApplication(configuration)
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
                 .AddCors()
                 .AddS3(configuration)
                 .AddVideoProcessing(configuration)
-                .AddQuartzService();
+                .AddQuartzService()
+                .AddProgressNotifier()
+                .AddSignalR();
 
             return services;
         }

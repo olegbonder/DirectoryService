@@ -9,7 +9,12 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run dev",
-      "cwd": "${workspaceFolder}/frontend"
+      "cwd": "${workspaceFolder}/frontend",
+      "serverReadyAction": {
+        "pattern": "Ready in",
+        "uriFormat": "http://localhost:3000",
+        "action": "openExternally"
+      }
     },
     {
       "name": "Launch Chrome against localhost",
@@ -18,6 +23,121 @@
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/frontend",
       "sourceMaps": true
+    },
+    {
+      "name": "Launch DirectoryService.Web",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build DirectoryService.Web",
+      "program": "${workspaceFolder}/backend/DirectoryService/src/DirectoryService.Web/bin/Debug/net9.0/DirectoryService.Web.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/backend/DirectoryService/src/DirectoryService.Web",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/backend/DirectoryService/src/DirectoryService.Web/Views"
+      }
+    },
+    {
+      "name": "Launch FileService.Web",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build FileService.Web",
+      "program": "${workspaceFolder}/backend/FileService/src/FileService.Web/bin/Debug/net9.0/FileService.Web.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/backend/FileService/src/FileService.Web",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/backend/FileService/src/FileService.Web/Views"
+      }
+    },
+    {
+      "name": "Run DirectoryService Integration Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "dotnet",
+      "args": [
+        "test",
+        "tests/DirectoryService.IntegrationTests",
+        "--logger",
+        "console;verbosity=detailed",
+        "--no-build"
+      ],
+      "cwd": "${workspaceFolder}/backend/DirectoryService",
+      "console": "integratedTerminal",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "name": "Run FileService Unit Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "dotnet",
+      "args": [
+        "test",
+        "tests/FileService.UnitTests",
+        "--logger",
+        "console;verbosity=detailed",
+        "--no-build"
+      ],
+      "cwd": "${workspaceFolder}/backend/FileService",
+      "console": "integratedTerminal",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "name": "Run FileService Integration Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "dotnet",
+      "args": [
+        "test",
+        "tests/FileService.IntegrationTests",
+        "--logger",
+        "console;verbosity=detailed",
+        "--no-build"
+      ],
+      "cwd": "${workspaceFolder}/backend/FileService",
+      "console": "integratedTerminal",
+      "problemMatcher": "$msCompile"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Both Backend Services",
+      "configurations": [
+        "Launch DirectoryService.Web",
+        "Launch FileService.Web"
+      ]
+    },
+    {
+      "name": "Launch All Web Projects",
+      "configurations": [
+        "Launch DirectoryService.Web",
+        "Launch FileService.Web",
+        "Next.js: debug server-side"
+      ]
+    },
+    {
+      "name": "Run All Tests",
+      "configurations": [
+        "Run DirectoryService Integration Tests",
+        "Run FileService Unit Tests",
+        "Run FileService Integration Tests"
+      ]
     }
   ]
 }
