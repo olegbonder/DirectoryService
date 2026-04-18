@@ -1,5 +1,6 @@
 using FileService.Core.Messaging;
 using FileService.Infrastructure.Postgres;
+using FileService.Infrastructure.Postgres.Initializers;
 using FileService.Infrastructure.Postgres.Migrations;
 using FileService.Infrastructure.S3;
 using FileService.Web.Configuration;
@@ -26,6 +27,8 @@ try
 
     builder.AddWolverine();
     var app = builder.Build();
+
+    await app.Services.RunQuartzDbInitializer();
 
     app.ConfigureApp();
 

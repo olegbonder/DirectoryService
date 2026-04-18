@@ -3,6 +3,7 @@ using Core.Caching;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Quartz;
 
 namespace FileService.Core
 {
@@ -15,18 +16,32 @@ namespace FileService.Core
 
             services.AddHandlers(assembly);
 
-            services.AddDistributedAndLocalCache(configuration);/*.AddStackExchangeRedisCache(setup =>
+            services.AddDistributedAndLocalCache(configuration);
+
+            services.AddQuartzServices(configuration);
+
+            return services;
+        }
+
+        private static IServiceCollection AddQuartzServices(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            services.AddQuartz(options => 
             {
-                setup.Configuration = "localhost:6379";
-            });
-            services.AddHybridCache(options =>
-            {
-                options.DefaultEntryOptions = new HybridCacheEntryOptions
+                options.UsePersistentStore(persistenceOptions =>
                 {
-                    Expiration = TimeSpan.FromMinutes(30),
-                    LocalCacheExpiration = TimeSpan.FromMinutes(5),
-                };
-            });*/
+                    persistenceOptions.UsePostgres(cfg =>
+                    {
+                        cfg.ConnectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE)!;
+                    });
+
+                    persistenceOptions.UseNewtonsoftJsonSerializer();
+                    persistenceOptions.UseProperties = true;
+                });
+            });
+
+            services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
             return services;
         }

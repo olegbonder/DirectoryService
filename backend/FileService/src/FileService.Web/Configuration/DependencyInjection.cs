@@ -22,7 +22,6 @@ namespace FileService.Web.Configuration
                 .AddCors()
                 .AddS3(configuration)
                 .AddVideoProcessing(configuration)
-                .AddQuartzService()
                 .AddProgressNotifier()
                 .AddSignalR();
 
