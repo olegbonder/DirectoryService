@@ -2,6 +2,7 @@
 using FileService.Core.Database;
 using FileService.Core.Messaging;
 using FileService.Core.Repositories;
+using FileService.Infrastructure.Postgres.Initializers;
 using FileService.Infrastructure.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ namespace FileService.Infrastructure.Postgres
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddTransient<QuartzDbInitializer>();
             services.AddScoped<ITransactionManager, TransactionManager>();
             services.AddScoped<IAssetCreatedEventPublisher, AssetCreatedEventPublisher>();
             services.AddScoped<IOutboxService, OutboxService>();

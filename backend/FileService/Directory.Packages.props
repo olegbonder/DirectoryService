@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.23" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.19.1" />
+    <PackageVersion Include="CrystalQuartz.AspNetCore" Version="7.3.0" />
     <PackageVersion Include="Manuilov.Framework" Version="0.0.5" />
     <PackageVersion Include="Manuilov.IntegrationEvents" Version="0.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
@@ -15,8 +16,9 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
-    <PackageVersion Include="Quartz" Version="3.13.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.13.0" />
+    <PackageVersion Include="Quartz" Version="3.18.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.0" />
+    <PackageVersion Include="Quartz.Serialization.Json" Version="3.18.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="manuilov.sharedkernel" Version="0.0.7" />
     <PackageVersion Include="manuilov.core" Version="0.0.7" />

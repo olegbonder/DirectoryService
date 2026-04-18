@@ -1,9 +1,11 @@
-﻿using FileService.Presenters.SignalRExtensions;
+﻿using CrystalQuartz.AspNetCore;
+using FileService.Presenters.SignalRExtensions;
 using FileService.VideoProcessing.Progress;
 using Framework.Cors;
 using Framework.Endpoints;
 using Framework.Middlewares;
 using Framework.Swagger;
+using Quartz;
 using Serilog;
 
 namespace FileService.Web.Configuration
@@ -25,6 +27,13 @@ namespace FileService.Web.Configuration
             app.MapEndpoints(apiGroup);
 
             app.UseSignalR();
+
+            app.UseRouting();
+            app.UseCrystalQuartz(() =>
+            {
+                var factory = app.Services.GetRequiredService<ISchedulerFactory>();
+                return factory.GetScheduler().GetAwaiter().GetResult();
+            });
 
             app.ConfigureCors("http://localhost:3000");
 

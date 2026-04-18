@@ -1,5 +1,4 @@
 ﻿using FileService.Core;
-using FileService.VideoProcessing.BackgroundServices;
 using FileService.VideoProcessing.FfmpegProcess;
 using FileService.VideoProcessing.Pipeline;
 using FileService.VideoProcessing.Pipeline.Steps;
@@ -7,7 +6,6 @@ using FileService.VideoProcessing.ProcessRunner;
 using FileService.VideoProcessing.Progress;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Quartz;
 
 namespace FileService.VideoProcessing;
 
@@ -33,30 +31,6 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IProcessingStepHandler, CleanupStepHandler>();
 
         services.AddHostedService<ProgressConsumer>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddQuartzService(this IServiceCollection services)
-    {
-        services.AddQuartz(configure =>
-        {
-            configure.UseSimpleTypeLoader();
-            configure.UseInMemoryStore();
-
-            configure.AddJob<VideoProcessingJob>(options =>
-            {
-                options.WithIdentity(new JobKey(nameof(VideoProcessingJob)));
-                options.StoreDurably();
-            });
-        });
-
-        services.AddQuartzHostedService(options =>
-        {
-            options.WaitForJobsToComplete = true;
-        });
-
-        services.AddScoped<IVideoProcessingScheduler, VideoProcessingScheduler>();
 
         return services;
     }
