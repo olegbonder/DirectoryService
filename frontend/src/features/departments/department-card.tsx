@@ -6,7 +6,7 @@ import {
   CardContent,
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Building, Pencil, Trash2 } from "lucide-react";
+import { Building, Pencil, Trash2, Upload } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Department } from "@/entities/departments/types";
 import DepartmentPath from "./department-path";
@@ -16,18 +16,28 @@ type DepartmentCardProps = {
   department: Department;
   onEdit?: (department: Department) => void;
   onDelete?: () => void;
+  onOpenVideoUpload?: (department: Department) => void;
 };
 
 export default function DepartmentCard({
   department,
   onEdit,
   onDelete,
+  onOpenVideoUpload,
 }: DepartmentCardProps) {
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (onEdit) {
       onEdit(department);
+    }
+  };
+
+  const handleOpenVideoUpload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onOpenVideoUpload) {
+      onOpenVideoUpload(department);
     }
   };
 
@@ -85,7 +95,17 @@ export default function DepartmentCard({
                 </div>
               </div>
             )}
-
+            {onOpenVideoUpload && (
+              <Button
+                onClick={handleOpenVideoUpload}
+                variant="ghost"
+                size="sm"
+                className="mt-4 w-full h-9 px-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors  font-medium"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Загрузить видео
+              </Button>
+            )}
             {/* Action buttons */}
             {department.isActive && (onEdit || onDelete) ? (
               <div className="flex gap-2 pt-2 justify-end flex-wrap">

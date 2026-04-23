@@ -12,8 +12,11 @@ import DepartmentSort from "./departments-sort";
 import DepartmentCard from "./department-card";
 import { Department } from "@/entities/departments/types";
 import DeleteDepartmentAlertDialog from "./delete-department-alert";
+import { FileUploadDialog } from "@/entities/files/ui/file-upload-dialog";
+import { useUpdateDepartmentVideo } from "./model/use-update-department-video";
 
 export default function DepartmentList() {
+  const [isVideoDialogOpen, setVideoDialogOpen] = useState(false);
   const globalSearch = useGetGlobalFilter();
   const {
     name,
@@ -24,6 +27,8 @@ export default function DepartmentList() {
     orderBy,
     orderDirection,
   } = useGetDepartmentsFilter();
+
+  const { updateDepartmentVideo } = useUpdateDepartmentVideo();
 
   const {
     departments,
@@ -111,6 +116,10 @@ export default function DepartmentList() {
                 setSelectedDepartment(department);
                 setDeleteOpen(true);
               }}
+              onOpenVideoUpload={(department) => {
+                setSelectedDepartment(department);
+                setVideoDialogOpen(true);
+              }}
             />
           ))}
         </div>
@@ -132,6 +141,22 @@ export default function DepartmentList() {
       <div ref={cursorRef} className="flex justify-center py-4">
         {isFetchingNextPage && <Spinner />}
       </div>
+
+      {selectedDepartment && isVideoDialogOpen && (
+        <FileUploadDialog
+          open={isVideoDialogOpen}
+          onOpenChange={setVideoDialogOpen}
+          contextId={selectedDepartment.id}
+          context="department"
+          assetType="video"
+          onSuccess={async (videoId) => {
+            updateDepartmentVideo({
+              departmentId: selectedDepartment.id,
+              videoId,
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

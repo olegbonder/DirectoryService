@@ -483,3 +483,11 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 backend/SharedService/.vscode/launch.json
+backend/FileService/.qwen/settings.json
+.gitignore
+backend/SharedService/.vscode/settings.json
+backend/SharedService/.vscode/settings.json
+backend/FileService/.qwen/settings.json.orig
+backend/SharedService/.vscode/settings.json
+backend/SharedService/.vscode/settings.json
+backend/SharedService/.vscode/settings.json
