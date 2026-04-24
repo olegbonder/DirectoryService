@@ -32,3 +32,31 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+export const fsApiClient = axios.create({
+  baseURL: "http://localhost:5089/api/",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+fsApiClient.interceptors.response.use(
+  (response) => {
+    const data = response.data as Envelope;
+
+    if (data.isError && data.errorList) {
+      throw new EnvelopeError(data.errorList);
+    }
+    return response;
+  },
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const envelope = error.response.data as Envelope;
+      if (envelope.isError && envelope.errorList) {
+        const errorList = envelope.errorList as ApiError[];
+        throw new EnvelopeError(errorList);
+      }
+    }
+    return Promise.reject(error);
+  },
+);

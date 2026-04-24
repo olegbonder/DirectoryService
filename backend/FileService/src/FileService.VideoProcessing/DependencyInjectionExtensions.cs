@@ -1,5 +1,7 @@
 ﻿using FileService.Core;
+using FileService.Core.Processing;
 using FileService.VideoProcessing.FfmpegProcess;
+using FileService.VideoProcessing.Jobs;
 using FileService.VideoProcessing.Pipeline;
 using FileService.VideoProcessing.Pipeline.Steps;
 using FileService.VideoProcessing.ProcessRunner;
@@ -29,6 +31,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IProcessingStepHandler, GenerateHlsStepHandler>();
         services.AddScoped<IProcessingStepHandler, UploadeHlsStepHandler>();
         services.AddScoped<IProcessingStepHandler, CleanupStepHandler>();
+
+        services.AddScoped<IProcessingJobFactory, VideoProcessingJobFactory>();
 
         services.AddHostedService<ProgressConsumer>();
 

@@ -1,5 +1,6 @@
 ﻿using Core.Abstractions;
 using Core.Caching;
+using FileService.Core.Features.CheckMediaAssetExists;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,8 @@ namespace FileService.Core
             services.AddValidatorsFromAssembly(assembly);
 
             services.AddHandlers(assembly);
+
+            services.AddScoped<CheckMediaAssetExistsHandler>();
 
             services.AddDistributedAndLocalCache(configuration);
 

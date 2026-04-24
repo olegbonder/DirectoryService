@@ -84,6 +84,11 @@ export type DeletePositionDepartmentRequest = {
   departmentId: string;
 };
 
+export type UpdateDepartmentVideoRequest = {
+  departmentId: string;
+  videoId?: string;
+};
+
 export const departmentsApi = {
   getDepartmentDictionary: async (request: GetDepartmentDictionaryRequest) => {
     const response = await apiClient.get<
@@ -140,6 +145,15 @@ export const departmentsApi = {
   updateDepartment: async (request: UpdateDepartmentRequest) => {
     const response = await apiClient.patch<Envelope<string>>(
       `/departments/${request.id}`,
+      request,
+    );
+
+    return response.data.result;
+  },
+
+  updateDepartmentVideo: async (request: UpdateDepartmentVideoRequest) => {
+    const response = await apiClient.patch<Envelope<string>>(
+      `/departments/${request.departmentId}/video`,
       request,
     );
 
