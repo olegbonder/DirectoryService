@@ -18,7 +18,8 @@ public class VideoProcessingJobFactory : IProcessingJobFactory
         return JobBuilder.Create<VideoProcessingJob>()
             .WithIdentity($"video-processing-{mediaAsset.Id}", JOB_GROUP)
             .UsingJobData(VideoProcessingJob.VideoAssetIdKey.Name, mediaAsset.Id.ToString())
-            .StoreDurably(true)
+            .StoreDurably(false) // job delete if not triggers
+            .RequestRecovery(true) // job retry if application failed
             .Build();
     }
 

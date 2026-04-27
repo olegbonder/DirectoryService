@@ -48,8 +48,8 @@ namespace FileService.Core.Features.GetMediaAssetsInfo
             var mediaAssets = await _readDbContext.MediaAssetsQuery
                 .Where(m => query.MediaAssetIds.Contains(m.Id) && m.Status != MediaStatus.DELETED).ToListAsync(cancellationToken);
 
-            var readyMediaAssets = mediaAssets.Where(m => m.Status == MediaStatus.UPLOADED).ToList();
-            var keys = readyMediaAssets.Select(m => m.RawKey).ToList();
+            var readyMediaAssets = mediaAssets.Where(m => m.Status == MediaStatus.READY && m.FinalKey != null).ToList();
+            var keys = readyMediaAssets.Select(m => m.FinalKey).ToList();
 
             var urls = await GetPresignedUrlsFromCacheAsync(keys, cancellationToken);
 
@@ -57,7 +57,7 @@ namespace FileService.Core.Features.GetMediaAssetsInfo
             foreach (MediaAsset mediaAsset in mediaAssets)
             {
                 string? downloadUrl = null;
-                if (mediaAsset.UploadKey != null && urls.TryGetValue(mediaAsset.UploadKey, out string? url))
+                if (mediaAsset.FinalKey != null && urls.TryGetValue(mediaAsset.FinalKey, out string? url))
                 {
                     downloadUrl = url;
                 }

@@ -45,7 +45,7 @@ namespace FileService.Core.Features.GetMediaAssetInfo
 
             if (mediaAsset.Status == MediaStatus.READY)
             {
-                var urlsResult = await _fileStorageProvider.GenerateDownloadUrlAsync(mediaAsset.RawKey);
+                var urlsResult = await _fileStorageProvider.GenerateDownloadUrlAsync(mediaAsset.FinalKey!);
                 if (urlsResult.IsFailure)
                     return urlsResult.Errors;
 
