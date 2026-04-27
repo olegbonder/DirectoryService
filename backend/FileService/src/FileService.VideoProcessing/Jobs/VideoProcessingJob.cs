@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using FileService.VideoProcessing.Pipeline;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -21,7 +21,8 @@ public class VideoProcessingJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var videoAssetId = context.JobDetail.JobDataMap.GetGuid(VideoAssetIdKey.Name);
+        var videoAssetIdStr = context.JobDetail.JobDataMap.GetString(VideoAssetIdKey.Name);
+        var videoAssetId = Guid.Parse(videoAssetIdStr);
 
         _logger.LogInformation("Starting video processing job for asset {VideoAssetId}", videoAssetId);
 

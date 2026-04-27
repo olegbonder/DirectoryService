@@ -4,12 +4,14 @@ import { useState } from "react";
 import useDepartment from "./model/use-department";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowLeft, Pencil, MapPin, Briefcase } from "lucide-react";
+import { ArrowLeft, Pencil, MapPin, Briefcase, Film } from "lucide-react";
 import Link from "next/link";
 import UpdateDepartmentDialog from "@/features/departments/update-department-dialog";
 import ManageDepartmentLocationsDialog from "@/features/departments/manage-department-locations-dialog";
 import DepartmentPath from "./department-path";
 import ChildDepartmentsList from "./child-departments-list";
+import { FileUploadDialog } from "@/entities/files/ui/file-upload-dialog";
+import { useUpdateDepartmentVideo } from "./model/use-update-department-video";
 
 type DepartmentDetailProps = {
   id: string;
@@ -17,6 +19,9 @@ type DepartmentDetailProps = {
 export default function DepartmentDetail({ id }: DepartmentDetailProps) {
   const [updateDepartmentOpen, setUpdateDepartmentOpen] = useState(false);
   const [manageLocationsOpen, setManageLocationsOpen] = useState(false);
+  const [uploadVideoOpen, setUploadVideoOpen] = useState(false);
+
+  const { updateDepartmentVideo } = useUpdateDepartmentVideo();
 
   const { department, isPending, isError, error } = useDepartment(id);
 
@@ -30,6 +35,12 @@ export default function DepartmentDetail({ id }: DepartmentDetailProps) {
     e.preventDefault();
     e.stopPropagation();
     setManageLocationsOpen(true);
+  };
+
+  const handleUploadVideo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadVideoOpen(true);
   };
 
   if (isPending) {
@@ -150,6 +161,86 @@ export default function DepartmentDetail({ id }: DepartmentDetailProps) {
           </div>
         </div>
 
+        {/* Card with video */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+              <Film className="h-5 w-5 text-purple-600" />
+              Видео подразделения
+            </h2>
+          </div>
+
+          {department.video ? (
+            <div className="space-y-4">
+              <div
+                className="relative w-full bg-slate-100 rounded-lg overflow-hidden"
+                style={{ aspectRatio: "16/9" }}
+              >
+                {department.video.url ? (
+                  <video
+                    src={department.video.url}
+                    controls
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+                    <div className="text-center">
+                      <Film className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                      <p className="text-slate-500">Видео загружается...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-600">Статус:</span>
+                  <span
+                    className={`px-2 py-1 rounded text-sm font-medium ${
+                      department.video.status === "ready"
+                        ? "bg-green-100 text-green-800"
+                        : department.video.status === "processing"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-slate-100 text-slate-800"
+                    }`}
+                  >
+                    {department.video.status === "ready" && "Готово"}
+                    {department.video.status === "processing" && "Обработка"}
+                    {!["ready", "processing"].includes(
+                      department.video.status,
+                    ) && department.video.status}
+                  </span>
+                </div>
+                {department.isActive &&
+                  !["uploaded", "processing"].includes(
+                    department.video.status,
+                  ) && (
+                    <Button
+                      onClick={handleUploadVideo}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      <Film className="h-4 w-4 mr-2" />
+                      Изменить видео
+                    </Button>
+                  )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-slate-50 rounded-lg border-2 border-dashed border-slate-300">
+              <Film className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+              <p className="text-slate-500">Видео не загружено</p>
+              {department.isActive && (
+                <Button
+                  onClick={handleUploadVideo}
+                  className="mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  <Film className="h-4 w-4 mr-2" />
+                  Загрузить видео
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Card with locations list */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -230,6 +321,21 @@ export default function DepartmentDetail({ id }: DepartmentDetailProps) {
             open={manageLocationsOpen}
             onOpenChange={setManageLocationsOpen}
           />
+          {uploadVideoOpen && (
+            <FileUploadDialog
+              open={uploadVideoOpen}
+              onOpenChange={setUploadVideoOpen}
+              contextId={id}
+              context="department"
+              assetType="video"
+              onSuccess={async (videoId) => {
+                updateDepartmentVideo({
+                  departmentId: id,
+                  videoId,
+                });
+              }}
+            />
+          )}
         </>
       )}
     </>

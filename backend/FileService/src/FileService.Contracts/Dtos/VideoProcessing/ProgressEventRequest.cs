@@ -1,3 +1,3 @@
-﻿namespace FileService.Contracts.Dtos.MediaAssets.DownloadFile;
+﻿namespace FileService.Contracts.Dtos.VideoProcessing;
 
 public record ProgressEventRequest(Guid VideoAssetId);

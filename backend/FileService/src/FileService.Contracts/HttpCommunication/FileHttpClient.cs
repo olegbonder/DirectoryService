@@ -24,7 +24,7 @@ internal sealed class FileHttpClient : IFileCommunicationService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"/files/{mediaAssetId}", cancellationToken);
+            var response = await _httpClient.GetAsync($"api/files/{mediaAssetId}", cancellationToken);
             return await response.HandleResponseAsync<GetMediaAssetResponse>(cancellationToken);
         }
         catch (Exception ex)

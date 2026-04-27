@@ -3,6 +3,8 @@ using DirectoryService.Application.Abstractions.Database;
 using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.GetDepartment;
 using DirectoryService.Domain.Departments;
+using FileService.Contracts;
+using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
@@ -12,13 +14,16 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
     public sealed class GetDepartmentDetailHandler : IQueryHandler<DepartmentDetailDTO?, GetDepartmentRequest>
     {
         private readonly IReadDbContext _readDbContext;
+        private readonly IFileCommunicationService _fileCommunicationService;
         private readonly ILogger<GetDepartmentDetailHandler> _logger;
 
         public GetDepartmentDetailHandler(
             IReadDbContext readDbContext,
+            IFileCommunicationService fileCommunicationService,
             ILogger<GetDepartmentDetailHandler> logger)
         {
             _readDbContext = readDbContext;
+            _fileCommunicationService = fileCommunicationService;
             _logger = logger;
         }
 
@@ -44,8 +49,31 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                         .Where(p => p.DepartmentPositions.Any(dp => dp.DepartmentId == d.Id))
                         .Select(p => p.Name.Value).ToList(),
                     IsActive = d.IsActive,
-                    CreatedAt = d.CreatedAt
+                    CreatedAt = d.CreatedAt,
+                    Video = d.VideoId.HasValue ? new MediaDto
+                    {
+                        Id = d.VideoId.Value
+                    } : null
                 }).FirstOrDefaultAsync(cancellationToken);
+
+                if (department != null && department.Video != null)
+                {
+                    var mediaAssetResult = await _fileCommunicationService
+                        .GetMediaAssetInfo(department.Video.Id, cancellationToken);
+                    //var mediaAssetResult = await GetMediaAssetInfo(department.Video.Id, cancellationToken);
+                    if (mediaAssetResult.IsFailure)
+                        return mediaAssetResult.Errors;
+                    var mediaAsset = mediaAssetResult.Value;
+                    if (mediaAsset.Id == department.Video.Id)
+                    {
+                        department.Video = new MediaDto
+                        {
+                            Id = mediaAsset.Id,
+                            Status = mediaAsset.Status,
+                            Url = mediaAsset.DownloadUrl,
+                        };
+                    }
+                }
 
                 _logger.LogInformation("Получение информации о департаменте с id={DepartmentId}", request.DepartmentId);
             }
@@ -55,6 +83,23 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
             }
 
             return department;
+        }
+
+        public async Task<Result<GetMediaAssetResponse>> GetMediaAssetInfo(
+        Guid mediaAssetId,
+        CancellationToken cancellationToken)
+        {
+            try
+            {
+                var httpClient = new HttpClient{BaseAddress = new Uri("http://localhost:5089")}; // You should ideally inject this
+                var response = await httpClient.GetAsync($"/api/files/{mediaAssetId}", cancellationToken);
+                return await response.HandleResponseAsync<GetMediaAssetResponse>(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting media asset for {MediaAssetId}",  mediaAssetId);
+                return Error.Failure("server.error", "Failed to get media asset");
+            }
         }
     }
 }

@@ -1,5 +1,11 @@
 import { DictionaryItemResponse } from "@/shared/api/types";
 
+export type Video = {
+  id: string;
+  url?: string | null;
+  status: string;
+};
+
 export type Department = {
   id: string;
   parentId?: string;
@@ -21,6 +27,7 @@ export type DepartmentDetail = {
   positions: string[];
   isActive: boolean;
   createdAt: Date;
+  video?: Video | null;
 };
 
 export type ChildDepartment = {
