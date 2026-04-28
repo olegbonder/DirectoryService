@@ -60,7 +60,6 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
                 {
                     var mediaAssetResult = await _fileCommunicationService
                         .GetMediaAssetInfo(department.Video.Id, cancellationToken);
-                    //var mediaAssetResult = await GetMediaAssetInfo(department.Video.Id, cancellationToken);
                     if (mediaAssetResult.IsFailure)
                         return mediaAssetResult.Errors;
                     var mediaAsset = mediaAssetResult.Value;
@@ -83,23 +82,6 @@ namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmen
             }
 
             return department;
-        }
-
-        public async Task<Result<GetMediaAssetResponse>> GetMediaAssetInfo(
-        Guid mediaAssetId,
-        CancellationToken cancellationToken)
-        {
-            try
-            {
-                var httpClient = new HttpClient{BaseAddress = new Uri("http://localhost:5089")}; // You should ideally inject this
-                var response = await httpClient.GetAsync($"/api/files/{mediaAssetId}", cancellationToken);
-                return await response.HandleResponseAsync<GetMediaAssetResponse>(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting media asset for {MediaAssetId}",  mediaAssetId);
-                return Error.Failure("server.error", "Failed to get media asset");
-            }
         }
     }
 }
