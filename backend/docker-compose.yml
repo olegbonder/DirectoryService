@@ -32,6 +32,8 @@
         NUGET_PASSWORD: ${NUGET_PASSWORD}
     ports:
       - "8091:8090"
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8090
@@ -40,6 +42,26 @@
     restart: always
     depends_on:
       - fs-postgres-prod
+      - seq-prod
+
+  as-backend-prod:
+    container_name: as-backend-prod
+    build:
+      context: ./AuthService
+      dockerfile: src/AuthService.Presentation/Dockerfile
+      args:
+        NUGET_USERNAME: ${NUGET_USERNAME}
+        NUGET_PASSWORD: ${NUGET_PASSWORD}
+    ports:
+      - "8092:8090"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8090
+    networks:
+      - prod-network
+    restart: always
+    depends_on:
+      - as-postgres-prod
       - seq-prod
 
   ds-postgres-prod:
@@ -72,6 +94,26 @@
       POSTGRES_PASSWORD: postgres
     ports:
       - "5438:5432"
+    volumes:
+      - postgres-prod-data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  as-postgres-prod:
+    container_name: as-postgres-prod
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: auth_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5441:5432"
     volumes:
       - postgres-prod-data:/var/lib/postgresql/data
     networks:
