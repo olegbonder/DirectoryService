@@ -2,6 +2,8 @@
 
     <ItemGroup>
       <PackageReference Include="Manuilov.SharedKernel" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Stores" />
     </ItemGroup>
 
 </Project>
