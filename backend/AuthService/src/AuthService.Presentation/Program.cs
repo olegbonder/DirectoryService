@@ -1,4 +1,5 @@
 using AuthService.Infrastructure;
+using AuthService.Infrastructure.Migrations;
 using AuthService.Presentation.Configuration;
 using Serilog;
 
@@ -23,6 +24,11 @@ try
     var app = builder.Build();
 
     app.ConfigureApp();
+
+    if (app.Environment.IsDevelopment())
+    {
+        await app.Services.RunMigrations();
+    }
 
     app.Run();
 }
