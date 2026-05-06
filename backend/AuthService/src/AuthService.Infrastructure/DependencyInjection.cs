@@ -1,5 +1,6 @@
 ﻿using AuthService.Application;
 using AuthService.Domain;
+using AuthService.Infrastructure.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +16,8 @@ namespace AuthService.Infrastructure
         {
             services
                 .AddDbContext(configuration)
-                .AddIdentity();
+                .AddIdentity()
+                .AddIdentitySeeding(configuration);
 
             return services;
         }
@@ -33,7 +35,8 @@ namespace AuthService.Infrastructure
                     options.Lockout.MaxFailedAccessAttempts = 5;
                     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 })
-                .AddEntityFrameworkStores<AuthDbContext>();
+                .AddEntityFrameworkStores<AuthDbContext>()
+                .AddDefaultTokenProviders();
 
             return services;
         }
@@ -56,12 +59,14 @@ namespace AuthService.Infrastructure
 
                 options.UseLoggerFactory(loggerFactory);
             });
-            /*services.AddDbContext<AuthDbContext>(options =>
-                options.UseNpgsql(connectionString)
-                    .UseLoggerFactory(CreateLoggerFactory())
-                    .EnableSensitiveDataLogging());*/
-            /*string? connectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE);
-            services.AddScoped(s => new AuthDbContext(connectionString!));*/
+
+            return services;
+        }
+
+        private static IServiceCollection AddIdentitySeeding(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<AdminOptions>(configuration.GetSection(AdminOptions.SECTION_NAME));
+            services.AddHostedService<RolesInitializationService>();
 
             return services;
         }

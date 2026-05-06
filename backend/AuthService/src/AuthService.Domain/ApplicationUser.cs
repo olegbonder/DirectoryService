@@ -5,7 +5,7 @@ using SharedKernel.Result;
 
 namespace AuthService.Domain
 {
-    public class ApplicationUser : IdentityUser<Guid>
+    public sealed class ApplicationUser : IdentityUser<Guid>
     {
         private List<RefreshToken> _refreshTokens = [];
 
@@ -24,16 +24,36 @@ namespace AuthService.Domain
 
         public List<RefreshToken> RefreshTokens => _refreshTokens;
 
-        private ApplicationUser(string firstName, string lastName)
+        private ApplicationUser(
+            string email,
+            string userName,
+            string firstName,
+            string lastName)
         {
+            Email = email;
+            UserName = userName;
             FirstName = firstName;
             LastName = lastName;
             CreatedAt = DateTime.UtcNow;
             IsActive = true;
         }
 
-        public static Result<ApplicationUser> Create(string firstName, string lastName)
+        public static Result<ApplicationUser> Create(
+            string email,
+            string userName,
+            string firstName,
+            string lastName)
         {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return UserErrors.EmailIsEmpty();
+            }
+
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return UserErrors.UserNameIsEmpty();
+            }
+
             if (string.IsNullOrWhiteSpace(firstName))
             {
                 return UserErrors.FirstNameIsEmpty();
@@ -57,7 +77,7 @@ namespace AuthService.Domain
                 return UserErrors.LastNameLengthOutOfRange(min, max);
             }
 
-            return new ApplicationUser(firstName, lastName);
+            return new ApplicationUser(email, userName, firstName, lastName);
         }
     }
 }
