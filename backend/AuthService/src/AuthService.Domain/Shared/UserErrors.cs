@@ -4,6 +4,16 @@ namespace AuthService.Domain.Shared;
 
 public static class UserErrors
 {
+    public static Error EmailIsEmpty()
+    {
+        return GeneralErrors.PropertyIsEmpty("user.email");
+    }
+
+    public static Error UserNameIsEmpty()
+    {
+        return GeneralErrors.PropertyIsEmpty("user.login");
+    }
+
     public static Error FirstNameIsEmpty()
     {
         return GeneralErrors.PropertyIsEmpty("user.firstName");
