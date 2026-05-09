@@ -24,6 +24,9 @@ namespace AuthService.Presentation.Configuration
 
             app.ConfigureCors("http://localhost:3000");
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             return app;
         }
     }

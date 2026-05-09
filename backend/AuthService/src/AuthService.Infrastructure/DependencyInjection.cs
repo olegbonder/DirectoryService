@@ -1,5 +1,9 @@
 ﻿using AuthService.Application;
+using AuthService.Application.Database;
 using AuthService.Domain;
+using AuthService.Infrastructure.Database;
+using AuthService.Infrastructure.Jwt;
+using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +21,8 @@ namespace AuthService.Infrastructure
             services
                 .AddDbContext(configuration)
                 .AddIdentity()
-                .AddIdentitySeeding(configuration);
+                .AddIdentitySeeding(configuration)
+                .AddJwtAuthentication(configuration);
 
             return services;
         }
@@ -43,6 +48,9 @@ namespace AuthService.Infrastructure
 
         private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped<ITransactionManager, TransactionManager>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
             services.AddDbContextPool<AuthDbContext>((sp, options) =>
             {
                 string? connectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE);
@@ -67,6 +75,16 @@ namespace AuthService.Infrastructure
         {
             services.Configure<AdminOptions>(configuration.GetSection(AdminOptions.SECTION_NAME));
             services.AddHostedService<RolesInitializationService>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SECTION_NAME));
+            services.AddScoped<ITokenProvider, TokenProvider>();
+            services.AddAuthentication()
+                .AddJwtBearer();
 
             return services;
         }
