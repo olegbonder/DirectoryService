@@ -58,7 +58,7 @@ public sealed class RegisterUserHandler : ICommandHandler<Guid, RegisterUserComm
             return createUserRoleResult.Errors.ToErrors();
         }
 
-        _logger.LogInformation("Create user email:{Email} with {Role}", email, role);
+        _logger.LogInformation("Create user email: {Email} with {Role}", email, role);
 
         string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var userId = user.Id;
