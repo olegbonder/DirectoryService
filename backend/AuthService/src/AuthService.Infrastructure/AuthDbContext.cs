@@ -1,4 +1,5 @@
 ﻿using AuthService.Domain;
+using AuthService.Domain.Token;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,6 @@ public class AuthDbContext
         : base(options)
     {
     }
-    /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseNpgsql(connectionString);
-        optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
-        optionsBuilder.EnableSensitiveDataLogging();
-    }*/
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,4 +25,6 @@ public class AuthDbContext
     {
         return LoggerFactory.Create(builder => builder.AddConsole());
     }
+
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 }

@@ -9,7 +9,7 @@ public class RefreshToken
 
     public Guid Id { get; init; }
 
-    public required Base64Token Token { get; init; }
+    public Base64Token Token { get; init; }
 
     public Guid UserId { get; init; }
 
@@ -19,20 +19,24 @@ public class RefreshToken
 
     public DateTime CreatedAt { get; init; }
 
-    public DateTime? RevokedAt { get; init; }
+    public DateTime? RevokedAt { get; set; }
 
-    public string? ReplacedByToken { get; init; }
+    public string? ReplacedByToken { get; set; }
 
     public RefreshToken(
         Guid id,
-        Base64Token token,
         Guid userId,
         DateTime expiresAt)
     {
         Id = id;
-        Token = token;
+        Token = Base64Token.Create();
         UserId = userId;
         ExpiresAt = expiresAt;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void Revoke()
+    {
+        RevokedAt = DateTime.UtcNow;
     }
 }
