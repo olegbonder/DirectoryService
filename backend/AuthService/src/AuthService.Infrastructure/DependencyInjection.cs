@@ -31,6 +31,11 @@ namespace AuthService.Infrastructure
 
         private static IServiceCollection AddIdentity(this IServiceCollection services)
         {
+            services.Configure<PasswordHasherOptions>(options =>
+            {
+                // Пробуем старую версию (IdentityV2)
+                options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV2;
+            });
             services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
                 {
                     options.Password.RequiredLength = 8;

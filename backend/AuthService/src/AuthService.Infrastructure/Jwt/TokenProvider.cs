@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using AuthService.Application;
 using AuthService.Application.Database;
+using AuthService.Application.Model;
 using AuthService.Domain;
 using AuthService.Domain.Permissions;
 using AuthService.Domain.Token;
@@ -32,7 +33,7 @@ public class TokenProvider : ITokenProvider
         _logger = logger;
     }
 
-    public Result<string?> GenerateAccessToken(ApplicationUser user, IEnumerable<string> roles)
+    public Result<AccessToken> GenerateAccessToken(ApplicationUser user, IEnumerable<string> roles)
     {
         var claims = new List<Claim>
         {
@@ -56,6 +57,8 @@ public class TokenProvider : ITokenProvider
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
+        var currentDt = DateTime.UtcNow;
+        var expires = currentDt.AddMinutes(_options.AccessTokenLifetimeMinutes);
         try
         {
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -63,11 +66,13 @@ public class TokenProvider : ITokenProvider
                 issuer: _options.Issuer,
                 audience: _options.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_options.AccessTokenLifetimeMinutes),
+                expires: expires,
                 signingCredentials: credentials);
 
-            string? jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
-            return Result<string?>.Success(jwtToken);
+            string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
+            var accessToken = new AccessToken(jwtToken, (int)(expires - currentDt).TotalSeconds);
+
+            return Result<AccessToken>.Success(accessToken);
         }
         catch (Exception ex)
         {
@@ -100,10 +105,10 @@ public class TokenProvider : ITokenProvider
         return refreshToken;
     }
 
-    public async Task<Result<RefreshToken>> RotateRefreshTokenAsync(string token, CancellationToken cancellationToken)
+    public async Task<Result<RefreshToken>> RotateRefreshTokenAsync(Guid userId, string token, CancellationToken cancellationToken)
     {
         var existingToken = await _repository
-            .GetBy(rt => rt.Token.Value == token, cancellationToken);
+            .GetBy(rt => rt.UserId == userId && rt.Token.Value == token, cancellationToken);
 
         if (existingToken == null)
         {
@@ -111,11 +116,17 @@ public class TokenProvider : ITokenProvider
             return Error.NotFound("refresh_token.not.found", "Refresh token not found");
         }
 
-        var userId = existingToken.UserId;
+        if (existingToken.ExpiresAt <= DateTime.UtcNow)
+        {
+            _logger.LogWarning("Refresh token expired for user {UserId}", userId);
+            return Error.Failure("refresh_token.expired", "Refresh token expired");
+        }
 
         if (existingToken.RevokedAt.HasValue)
         {
             _logger.LogWarning("Attempt to use revoked refresh token for user {UserId}", userId);
+
+            await RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
         }
 
         var newTokenResult = await CreateRefreshTokenAsync(userId, cancellationToken);
@@ -171,5 +182,55 @@ public class TokenProvider : ITokenProvider
         }
 
         return Result.Success();
+    }
+
+    public Result<string> ExtactUserIdFromAccessToken(string accessToken)
+    {
+        var result = ValidateAccessToken(accessToken);
+        if (result.IsFailure)
+        {
+            return result.Errors;
+        }
+
+        var principal = result.Value;
+        if (principal == null)
+        {
+            return Error.Failure("jwt.invalid_token", "Invalid access token");
+        }
+
+        var userIdClaim = principal.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            return Error.Failure("jwt.not.found.user_id.claim", "Not found user id claim in access token");
+        }
+
+        return Result<string>.Success(userIdClaim);
+    }
+
+    private Result<ClaimsPrincipal> ValidateAccessToken(string accessToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_options.Secret);
+
+        try
+        {
+            var principal = tokenHandler.ValidateToken(accessToken, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _options.Issuer,
+                ValidateAudience = true,
+                ValidAudience = _options.Audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateLifetime = false
+            }, out SecurityToken validatedToken);
+
+            return Result<ClaimsPrincipal>.Success(principal);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Invalid access token: {Message}", ex.Message);
+            return Error.Failure("jwt.invalid_token", "Invalid access token");
+        }
     }
 }

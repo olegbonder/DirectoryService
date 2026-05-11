@@ -109,7 +109,7 @@ public class TransactionManager : ITransactionManager
             }
         }
 
-        private async Task RollbackAsync(CancellationToken cancellationToken)
+        public async Task RollbackAsync(CancellationToken cancellationToken)
         {
             try
             {

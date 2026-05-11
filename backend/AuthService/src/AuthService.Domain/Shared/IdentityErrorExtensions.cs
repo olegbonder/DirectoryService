@@ -10,4 +10,10 @@ public static class IdentityErrorExtensions
         var errors = identityErrors.Select(e => Error.Failure(e.Code, e.Description));
         return new Errors(errors);
     }
+
+    public static string ToErrorString(this IEnumerable<IdentityError> identityErrors)
+    {
+        var messages = string.Join("; ", identityErrors.Select(e => $"{e.Code}: {e.Description}"));
+        return messages;
+    }
 }

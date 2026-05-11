@@ -11,5 +11,7 @@ public interface ITransactionManager
 
     Task<Result> CommitTransactionAsync(CancellationToken cancellationToken);
 
+    Task RollbackAsync(CancellationToken cancellationToken);
+
     DbConnection GetDbConnection();
 }
