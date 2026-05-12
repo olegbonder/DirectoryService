@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="MailKit" Version="4.16.0" />
     <PackageVersion Include="Manuilov.Core" Version="0.0.7" />
     <PackageVersion Include="Manuilov.Framework" Version="0.0.5" />
     <PackageVersion Include="Manuilov.SharedKernel" Version="0.0.7" />
@@ -19,6 +20,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.18.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />

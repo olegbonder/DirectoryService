@@ -3,15 +3,12 @@
     <ItemGroup>
       <PackageReference Include="Manuilov.Core" />
       <PackageReference Include="Manuilov.Framework" />
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\AuthService.Contracts\AuthService.Contracts.csproj" />
       <ProjectReference Include="..\AuthService.Domain\AuthService.Domain.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Features\" />
     </ItemGroup>
 
 </Project>

@@ -16,7 +16,8 @@ namespace AuthService.Presentation.Configuration
                 .AddOpenApiSpec()
                 .AddCore(configuration)
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
-                .AddCors();
+                .AddCors()
+                .AddAuthorization();
 
             return services;
         }

@@ -97,7 +97,7 @@ public class RolesInitializationService : IHostedService
             string userName = _options.UserName;
             var createAdminResult = ApplicationUser.Create(
                 _options.Email,
-                userName,
+                _options.Email,
                 userName,
                 userName);
             if (createAdminResult.IsFailure)

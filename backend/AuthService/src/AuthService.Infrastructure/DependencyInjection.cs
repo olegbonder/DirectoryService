@@ -2,6 +2,7 @@
 using AuthService.Application.Database;
 using AuthService.Domain;
 using AuthService.Infrastructure.Database;
+using AuthService.Infrastructure.EmailSender;
 using AuthService.Infrastructure.Jwt;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
@@ -22,7 +23,8 @@ namespace AuthService.Infrastructure
                 .AddDbContext(configuration)
                 .AddIdentity()
                 .AddIdentitySeeding(configuration)
-                .AddJwtAuthentication(configuration);
+                .AddJwtAuthentication(configuration)
+                .AddEmail(configuration);
 
             return services;
         }
@@ -85,6 +87,14 @@ namespace AuthService.Infrastructure
             services.AddScoped<ITokenProvider, TokenProvider>();
             services.AddAuthentication()
                 .AddJwtBearer();
+
+            return services;
+        }
+
+        private static IServiceCollection AddEmail(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<MailOptions>(configuration.GetSection(MailOptions.SECTION_NAME));
+            services.AddScoped<IEmailSender, EmailSender.EmailSender>();
 
             return services;
         }

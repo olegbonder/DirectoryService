@@ -119,6 +119,18 @@
     networks:
       - dev-network
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP порт
+      - "8025:8025" # Веб-интерфейс
+    environment:
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/tmp/mailhog
+    networks:
+      - dev-network
+
 networks:
   dev-network:
     driver: bridge
