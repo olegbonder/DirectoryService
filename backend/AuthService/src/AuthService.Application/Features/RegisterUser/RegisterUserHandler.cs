@@ -5,7 +5,9 @@ using AuthService.Domain.Shared;
 using Core.Abstractions;
 using Core.Validation;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SharedKernel.Result;
@@ -18,6 +20,8 @@ public sealed class RegisterUserHandler : ICommandHandler<Guid, RegisterUserComm
     private readonly IValidator<RegisterUserCommand> _validator;
     private readonly IEmailSender _emailSender;
     private readonly ITransactionManager _transactionManager;
+    private readonly LinkGenerator _linkGenerator;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<RegisterUserHandler> _logger;
 
     public RegisterUserHandler(
@@ -25,12 +29,16 @@ public sealed class RegisterUserHandler : ICommandHandler<Guid, RegisterUserComm
         IValidator<RegisterUserCommand> validator,
         IEmailSender emailSender,
         ITransactionManager transactionManager,
+        LinkGenerator linkGenerator,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<RegisterUserHandler> logger)
     {
         _userManager = userManager;
         _validator = validator;
         _emailSender = emailSender;
         _transactionManager = transactionManager;
+        _linkGenerator = linkGenerator;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -86,9 +94,14 @@ public sealed class RegisterUserHandler : ICommandHandler<Guid, RegisterUserComm
 
         string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var userId = user.Id;
-        string confirmationLink = "http://localhost:5016/api/auth/confirm-email/" +
-                                    $"?userId={userId}" +
-                                    $"&token={Base64UrlEncoder.Encode(confirmationToken)}";
+
+        var confirmationLink = _linkGenerator.GetUriByName(
+                _httpContextAccessor.HttpContext!,
+                "ConfirmEmail",
+                new {
+                    userId,
+                    token = Base64UrlEncoder.Encode(confirmationToken)
+                });
         var sendEmailConfirmResult = await _emailSender.SendEmailConfirmationAsync(
             request.Email,
             confirmationLink,
