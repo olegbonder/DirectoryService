@@ -21,6 +21,6 @@ public sealed class VerifyEmailEndpoint : IEndpoint
             {
                 var command = new VerifyEmailCommand(request);
                 return await handler.Handle(command, cancellationToken);
-            });
+            }).WithName("ConfirmEmail");
     }
 }
