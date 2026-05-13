@@ -2,51 +2,62 @@
 using AuthService.Domain;
 using AuthService.Domain.Shared;
 using Core.Abstractions;
+using Core.Validation;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using SharedKernel.Result;
 
-namespace AuthService.Application.Features.ResetPassword;
+namespace AuthService.Application.Features.Logout;
 
-public class ResetPasswordHandler : IResultCommandHandler<ResetPasswordCommand>
+public sealed class LogoutHandler : IResultCommandHandler<LogoutCommand>
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IValidator<LogoutCommand> _validator;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITransactionManager _transactionManager;
-    private readonly ILogger<ResetPasswordHandler> _logger;
+    private readonly ILogger<LogoutHandler> _logger;
 
-    public ResetPasswordHandler(
+    public LogoutHandler(
         UserManager<ApplicationUser> userManager,
+        IValidator<LogoutCommand> validator,
         ITokenProvider tokenProvider,
         ITransactionManager transactionManager,
-        ILogger<ResetPasswordHandler> logger)
+        ILogger<LogoutHandler> logger)
     {
         _userManager = userManager;
+        _validator = validator;
         _tokenProvider = tokenProvider;
         _transactionManager = transactionManager;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(LogoutCommand command, CancellationToken cancellationToken)
     {
-        var request = command.Request;
-        var userId = request.UserId;
+        var validResult = await _validator.ValidateAsync(command, cancellationToken);
+        if (validResult.IsValid == false)
+        {
+            return validResult.ToList();
+        }
 
+        var request = command.Request;
+        string accessToken = request.AccessToken;
+        var userIdClaimResult = _tokenProvider.ExtactUserIdFromAccessToken(accessToken);
+        if (userIdClaimResult.IsFailure)
+        {
+            _logger.LogError("User id claim not found in access token {AccessToken}", accessToken);
+            return userIdClaimResult.Errors;
+        }
+
+        var userId = userIdClaimResult.Value;
         await _transactionManager.BeginTransactionAsync(cancellationToken);
+
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
-            return UserErrors.UserNotFound(userId);
-        }
-
-        var decodedToken = Base64UrlEncoder.Decode(request.Token);
-
-        var resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
-        if (!resetPasswordResult.Succeeded)
-        {
             await _transactionManager.RollbackAsync(cancellationToken);
-            return resetPasswordResult.Errors.ToErrors();
+            _logger.LogError("User {UserId} not found", userId);
+            return UserErrors.UserNotFound(userId);
         }
 
         var revokeResult = await _tokenProvider.RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
@@ -65,7 +76,7 @@ public class ResetPasswordHandler : IResultCommandHandler<ResetPasswordCommand>
 
         await _transactionManager.CommitTransactionAsync(cancellationToken);
 
-        _logger.LogInformation("User's {UserId} password being reset",  userId);
+        _logger.LogInformation("Logout user {UserId}", userId);
 
         return Result.Success();
     }

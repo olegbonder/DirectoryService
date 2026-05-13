@@ -9,7 +9,7 @@ using SharedKernel.Result;
 
 namespace AuthService.Application.Features.VerifyResetPassword;
 
-public class VerifyResetPasswordHandler : IQueryHandler<Guid, VerifyEmailRequest>
+public class VerifyResetPasswordHandler : IQueryHandler<VerifyEmailRequest, VerifyEmailRequest>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -28,7 +28,7 @@ public class VerifyResetPasswordHandler : IQueryHandler<Guid, VerifyEmailRequest
     public async Task<Result<VerifyEmailRequest>> Handle(VerifyEmailRequest query, CancellationToken cancellationToken)
     {
         var userId = query.UserId;
-        var token = query.Token;
+        var token = Base64UrlEncoder.Decode(query.Token);
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {

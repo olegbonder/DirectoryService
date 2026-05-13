@@ -195,7 +195,7 @@ public class TokenProvider : ITokenProvider
         return Result.Success();
     }
 
-    public Result<string> ExtactUserIdFromAccessToken(string accessToken)
+    public Result<Guid> ExtactUserIdFromAccessToken(string accessToken)
     {
         var result = ValidateAccessToken(accessToken);
         if (result.IsFailure)
@@ -215,7 +215,14 @@ public class TokenProvider : ITokenProvider
             return Error.Failure("jwt.not.found.user_id.claim", "Not found user id claim in access token");
         }
 
-        return Result<string>.Success(userIdClaim);
+        var tryParseUserId = Guid.TryParse(userIdClaim, out var userId);
+        if (!tryParseUserId)
+        {
+            _logger.LogError("Incorrect guid for user id claim in access token {AccessToken}", accessToken);
+            return TokenErrors.IncorrectGuidForUserIdInAccessToken();
+        }
+
+        return Result<Guid>.Success(userId);
     }
 
     private Result<ClaimsPrincipal> ValidateAccessToken(string accessToken)

@@ -1,6 +1,7 @@
 ﻿using AuthService.Application.Database;
 using AuthService.Contracts.Dtos.Login;
 using AuthService.Domain;
+using AuthService.Domain.Shared;
 using Core.Abstractions;
 using Core.Validation;
 using FluentValidation;
@@ -50,22 +51,15 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
             return userIdClaimResult.Errors;
         }
 
-        var userIdStr = userIdClaimResult.Value;
-        var tryParseUserId = Guid.TryParse(userIdStr, out var userId);
-        if (!tryParseUserId)
-        {
-            _logger.LogError("Incorrect guid for user id claim in access token {AccessToken}", accessToken);
-            return GeneralErrors.Failure("Incorrect guid for user id claim in access token");
-        }
-
+        var userId = userIdClaimResult.Value;
         await _transactionManager.BeginTransactionAsync(cancellationToken);
 
-        var user = await _userManager.FindByIdAsync(userIdStr);
+        var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
             await _transactionManager.RollbackAsync(cancellationToken);
             _logger.LogError("User {UserId} not found", userId);
-            return GeneralErrors.NotFound("user.not.found", userId);
+            return UserErrors.UserNotFound(userId);
         }
 
         var refreshTokenResult = await _tokenProvider.RotateRefreshTokenAsync(userId, refreshToken, cancellationToken);
