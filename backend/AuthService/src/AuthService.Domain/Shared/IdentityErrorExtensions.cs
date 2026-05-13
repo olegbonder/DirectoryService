@@ -11,6 +11,9 @@ public static class IdentityErrorExtensions
         return new Errors(errors);
     }
 
-    public static string ToErrorString(this IEnumerable<IdentityError> identityErrors) =>
-        string.Join(", ", identityErrors.Select(e => $"{e.Code}: {e.Description}"));
+    public static string ToErrorString(this IEnumerable<IdentityError> identityErrors)
+    {
+        var messages = string.Join("; ", identityErrors.Select(e => $"{e.Code}: {e.Description}"));
+        return messages;
+    }
 }

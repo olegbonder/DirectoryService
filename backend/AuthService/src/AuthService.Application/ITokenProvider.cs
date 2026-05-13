@@ -1,4 +1,5 @@
-﻿using AuthService.Domain;
+﻿using AuthService.Application.Model;
+using AuthService.Domain;
 using AuthService.Domain.Token;
 using SharedKernel.Result;
 
@@ -6,11 +7,13 @@ namespace AuthService.Application;
 
 public interface ITokenProvider
 {
-    Result<string?> GenerateAccessToken(ApplicationUser user, IEnumerable<string> roles);
+    Result<AccessToken> GenerateAccessToken(ApplicationUser user, IEnumerable<string> roles);
+
+    Result<string> ExtactUserIdFromAccessToken(string accessToken);
 
     Task<Result<RefreshToken>> CreateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken);
 
-    Task<Result<RefreshToken>> RotateRefreshTokenAsync(string token, CancellationToken cancellationToken);
+    Task<Result<RefreshToken>> RotateRefreshTokenAsync(Guid userId, string token, CancellationToken cancellationToken);
 
     Task RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken);
 
