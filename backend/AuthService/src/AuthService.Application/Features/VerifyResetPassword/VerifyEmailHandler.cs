@@ -9,7 +9,7 @@ using SharedKernel.Result;
 
 namespace AuthService.Application.Features.VerifyResetPassword;
 
-public class VerifyResetPasswordHandler : IQueryHandler<Guid, VerifyEmailRequest>
+public class VerifyResetPasswordHandler : IQueryHandler<VerifyEmailRequest, VerifyEmailRequest>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IRefreshTokenRepository _refreshTokenRepository;

@@ -43,25 +43,9 @@ public class ResetPasswordHandler : IResultCommandHandler<ResetPasswordCommand>
             return UserErrors.UserNotFound(userId);
         }
 
-        var refreshTokenStr = Base64UrlEncoder.Decode(request.Token);
-        var refreshToken = await _refreshTokenRepo.GetBy(rt => rt.UserId == userId && rt.Token.Value == refreshTokenStr, cancellationToken);
-        if (refreshToken == null)
-        {
-            _logger.LogWarning("Refresh token not found for user {UserId}", userId);
+        var decodedToken = Base64UrlEncoder.Decode(request.Token);
 
-            await _transactionManager.RollbackAsync(cancellationToken);
-            return TokenErrors.RefreshTokenNotFound();
-        }
-
-        if (refreshToken.ExpiresAt <= DateTime.UtcNow)
-        {
-            _logger.LogWarning("Refresh token expired for user {UserId}", userId);
-
-            await _transactionManager.RollbackAsync(cancellationToken);
-            return TokenErrors.RefreshTokenExpired();
-        }
-
-        var resetPasswordResult = await _userManager.ResetPasswordAsync(user, refreshTokenStr, request.NewPassword);
+        var resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
         if (!resetPasswordResult.Succeeded)
         {
             await _transactionManager.RollbackAsync(cancellationToken);
