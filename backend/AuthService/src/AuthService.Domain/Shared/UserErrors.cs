@@ -9,6 +9,11 @@ public static class UserErrors
         return GeneralErrors.PropertyIsEmpty("user.email");
     }
 
+    public static Error EmailNotValid()
+    {
+        return Error.Validation("user.email", "Not valid email");
+    }
+
     public static Error UserNameIsEmpty()
     {
         return GeneralErrors.PropertyIsEmpty("user.login");
@@ -52,5 +57,10 @@ public static class UserErrors
     public static Error UserLockedOut(DateTimeOffset? lockoutEndDate)
     {
         return Error.Failure("user.lockout", "User is locked-out at " + lockoutEndDate);
+    }
+
+    public static Error UserNotFound(Guid userId)
+    {
+        return GeneralErrors.NotFound("user", userId);
     }
 }

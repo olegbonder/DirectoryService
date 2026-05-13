@@ -1,4 +1,5 @@
-﻿using Core.Validation;
+﻿using AuthService.Domain.Shared;
+using Core.Validation;
 using FluentValidation;
 using SharedKernel.Result;
 
@@ -13,9 +14,9 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
             .WithError(GeneralErrors.RequestIsNull());
         RuleFor(f => f.Request.Email)
             .NotEmpty()
-            .WithError(GeneralErrors.ValueIsRequired("user.email"))
+            .WithError(UserErrors.EmailIsEmpty())
             .EmailAddress()
-            .WithError(Error.Validation("user.email", "Not valid email"));
+            .WithError(UserErrors.EmailNotValid());
         RuleFor(f => f.Request.Password)
             .NotEmpty()
             .WithError(GeneralErrors.ValueIsRequired("user.password"))

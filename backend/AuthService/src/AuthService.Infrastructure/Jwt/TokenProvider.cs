@@ -6,6 +6,7 @@ using AuthService.Application.Database;
 using AuthService.Application.Model;
 using AuthService.Domain;
 using AuthService.Domain.Permissions;
+using AuthService.Domain.Shared;
 using AuthService.Domain.Token;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -113,20 +114,24 @@ public class TokenProvider : ITokenProvider
         if (existingToken == null)
         {
             _logger.LogWarning("Refresh token not found: {Token}", token);
-            return Error.NotFound("refresh_token.not.found", "Refresh token not found");
+            return TokenErrors.RefreshTokenNotFound();
         }
 
         if (existingToken.ExpiresAt <= DateTime.UtcNow)
         {
             _logger.LogWarning("Refresh token expired for user {UserId}", userId);
-            return Error.Failure("refresh_token.expired", "Refresh token expired");
+            return TokenErrors.RefreshTokenExpired();
         }
 
         if (existingToken.RevokedAt.HasValue)
         {
             _logger.LogWarning("Attempt to use revoked refresh token for user {UserId}", userId);
 
-            await RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+            var revokeResult = await RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+            if (revokeResult.IsFailure)
+            {
+                return revokeResult.Errors;
+            }
         }
 
         var newTokenResult = await CreateRefreshTokenAsync(userId, cancellationToken);
@@ -146,7 +151,7 @@ public class TokenProvider : ITokenProvider
         return newToken;
     }
 
-    public async Task RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<Result> RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
     {
         var userTokens = await _repository
             .GetCollectionBy(rt => rt.UserId == userId && !rt.RevokedAt.HasValue, cancellationToken);
@@ -156,12 +161,18 @@ public class TokenProvider : ITokenProvider
             token.Revoke();
         }
 
-        await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+        {
+            return saveResult.Errors;
+        }
 
         _logger.LogWarning(
             "ALL refresh tokens revoked for user {UserId}. Tokens affected: {Count}",
             userId,
             userTokens.Count);
+
+        return Result.Success();
     }
 
     public async Task<Result> CleanupExpiredTokensAsync(DateTime olderThan, CancellationToken cancellationToken)
@@ -172,10 +183,10 @@ public class TokenProvider : ITokenProvider
         if (expiredTokens.Any())
         {
             _repository.DeleteTokensAsync(expiredTokens);
-            var deleteResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-            if (deleteResult.IsFailure)
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
             {
-                return deleteResult.Errors;
+                return saveResult.Errors;
             }
 
             _logger.LogInformation("Cleaned up expired refresh tokens older than {Date}", olderThan);
@@ -195,7 +206,7 @@ public class TokenProvider : ITokenProvider
         var principal = result.Value;
         if (principal == null)
         {
-            return Error.Failure("jwt.invalid_token", "Invalid access token");
+            return TokenErrors.InvalidAccessToken();
         }
 
         var userIdClaim = principal.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? principal.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -230,7 +241,7 @@ public class TokenProvider : ITokenProvider
         catch (Exception ex)
         {
             _logger.LogWarning("Invalid access token: {Message}", ex.Message);
-            return Error.Failure("jwt.invalid_token", "Invalid access token");
+            return TokenErrors.InvalidAccessToken();
         }
     }
 }
