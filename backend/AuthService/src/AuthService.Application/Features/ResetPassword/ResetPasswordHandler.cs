@@ -42,6 +42,17 @@ public class ResetPasswordHandler : IResultCommandHandler<ResetPasswordCommand>
 
         var decodedToken = Base64UrlEncoder.Decode(request.Token);
 
+        var isTokenValid = await _userManager.VerifyUserTokenAsync(
+                user,
+                _userManager.Options.Tokens.PasswordResetTokenProvider,
+                "ResetPassword",
+                decodedToken);
+
+        if (!isTokenValid)
+        {
+            return Error.Validation("reset.password.token", "Token is not valid");
+        }
+
         var resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
         if (!resetPasswordResult.Succeeded)
         {

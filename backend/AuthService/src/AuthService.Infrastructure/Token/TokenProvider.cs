@@ -13,13 +13,12 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SharedKernel.Result;
 
-namespace AuthService.Infrastructure.Jwt;
+namespace AuthService.Infrastructure.Token;
 
 public class TokenProvider : ITokenProvider
 {
     private readonly JwtOptions _options;
     private readonly IRefreshTokenRepository _repository;
-    private readonly ITransactionManager _transactionManager;
     private readonly ILogger<TokenProvider> _logger;
 
     public TokenProvider(
@@ -30,7 +29,6 @@ public class TokenProvider : ITokenProvider
     {
         _options = options.Value;
         _repository = repository;
-        _transactionManager = transactionManager;
         _logger = logger;
     }
 
@@ -93,16 +91,6 @@ public class TokenProvider : ITokenProvider
             return createResult.Errors;
         }
 
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-        if (saveResult.IsFailure)
-        {
-            return saveResult.Errors;
-        }
-
-        _logger.LogInformation(
-            "Refresh token created for user {UserId}",
-            userId);
-
         return refreshToken;
     }
 
@@ -144,10 +132,6 @@ public class TokenProvider : ITokenProvider
         existingToken.Revoke();
         existingToken.ReplacedByToken = newToken.Token.Value;
 
-        _logger.LogInformation(
-            "Refresh token rotated for user {UserId}. Old token: {OldToken}, New token: {NewToken}",
-            existingToken.UserId, existingToken.Token.Value, newToken.Token.Value);
-
         return newToken;
     }
 
@@ -161,17 +145,6 @@ public class TokenProvider : ITokenProvider
             token.Revoke();
         }
 
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-        if (saveResult.IsFailure)
-        {
-            return saveResult.Errors;
-        }
-
-        _logger.LogWarning(
-            "ALL refresh tokens revoked for user {UserId}. Tokens affected: {Count}",
-            userId,
-            userTokens.Count);
-
         return Result.Success();
     }
 
@@ -183,13 +156,6 @@ public class TokenProvider : ITokenProvider
         if (expiredTokens.Any())
         {
             _repository.DeleteTokensAsync(expiredTokens);
-            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-            if (saveResult.IsFailure)
-            {
-                return saveResult.Errors;
-            }
-
-            _logger.LogInformation("Cleaned up expired refresh tokens older than {Date}", olderThan);
         }
 
         return Result.Success();
