@@ -6,12 +6,15 @@ using AuthService.Infrastructure.EmailSender;
 using AuthService.Infrastructure.Jwt;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
+using AuthService.Infrastructure.UserScope;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AuthService.Infrastructure
 {
@@ -23,6 +26,7 @@ namespace AuthService.Infrastructure
                 .AddDbContext(configuration)
                 .AddIdentity()
                 .AddIdentitySeeding(configuration)
+                .AddUserScopedData()
                 .AddJwtAuthentication(configuration)
                 .AddEmail(configuration);
 
@@ -31,11 +35,6 @@ namespace AuthService.Infrastructure
 
         private static IServiceCollection AddIdentity(this IServiceCollection services)
         {
-            services.Configure<PasswordHasherOptions>(options =>
-            {
-                // Пробуем старую версию (IdentityV2)
-                options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV2;
-            });
             services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
                 {
                     options.Password.RequiredLength = 8;
@@ -90,8 +89,23 @@ namespace AuthService.Infrastructure
         {
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SECTION_NAME));
             services.AddScoped<ITokenProvider, TokenProvider>();
-            services.AddAuthentication()
-                .AddJwtBearer();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    var jwtOptions = configuration.GetSection(JwtOptions.SECTION_NAME).Get<JwtOptions>() 
+                        ?? throw new ArgumentNullException(nameof(JwtOptions));
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwtOptions.Audience,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
 
             return services;
         }
@@ -101,6 +115,12 @@ namespace AuthService.Infrastructure
             services.Configure<MailOptions>(configuration.GetSection(MailOptions.SECTION_NAME));
             services.AddScoped<IEmailSender, EmailSender.EmailSender>();
 
+            return services;
+        }
+
+        private static IServiceCollection AddUserScopedData(this IServiceCollection services)
+        {
+            services.AddScoped<UserScopedData>();
             return services;
         }
     }
