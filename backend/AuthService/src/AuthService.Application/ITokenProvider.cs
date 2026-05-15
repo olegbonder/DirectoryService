@@ -15,7 +15,7 @@ public interface ITokenProvider
 
     Task<Result<RefreshToken>> RotateRefreshTokenAsync(Guid userId, string token, CancellationToken cancellationToken);
 
-    Task RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken);
+    Task<Result> RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken);
 
     Task<Result> CleanupExpiredTokensAsync(DateTime olderThan, CancellationToken cancellationToken);
 }

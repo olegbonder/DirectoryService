@@ -6,19 +6,19 @@ using AuthService.Application.Database;
 using AuthService.Application.Model;
 using AuthService.Domain;
 using AuthService.Domain.Permissions;
+using AuthService.Domain.Shared;
 using AuthService.Domain.Token;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SharedKernel.Result;
 
-namespace AuthService.Infrastructure.Jwt;
+namespace AuthService.Infrastructure.Token;
 
 public class TokenProvider : ITokenProvider
 {
     private readonly JwtOptions _options;
     private readonly IRefreshTokenRepository _repository;
-    private readonly ITransactionManager _transactionManager;
     private readonly ILogger<TokenProvider> _logger;
 
     public TokenProvider(
@@ -29,7 +29,6 @@ public class TokenProvider : ITokenProvider
     {
         _options = options.Value;
         _repository = repository;
-        _transactionManager = transactionManager;
         _logger = logger;
     }
 
@@ -92,16 +91,6 @@ public class TokenProvider : ITokenProvider
             return createResult.Errors;
         }
 
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-        if (saveResult.IsFailure)
-        {
-            return saveResult.Errors;
-        }
-
-        _logger.LogInformation(
-            "Refresh token created for user {UserId}",
-            userId);
-
         return refreshToken;
     }
 
@@ -113,20 +102,24 @@ public class TokenProvider : ITokenProvider
         if (existingToken == null)
         {
             _logger.LogWarning("Refresh token not found: {Token}", token);
-            return Error.NotFound("refresh_token.not.found", "Refresh token not found");
+            return TokenErrors.RefreshTokenNotFound();
         }
 
         if (existingToken.ExpiresAt <= DateTime.UtcNow)
         {
             _logger.LogWarning("Refresh token expired for user {UserId}", userId);
-            return Error.Failure("refresh_token.expired", "Refresh token expired");
+            return TokenErrors.RefreshTokenExpired();
         }
 
         if (existingToken.RevokedAt.HasValue)
         {
             _logger.LogWarning("Attempt to use revoked refresh token for user {UserId}", userId);
 
-            await RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+            var revokeResult = await RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+            if (revokeResult.IsFailure)
+            {
+                return revokeResult.Errors;
+            }
         }
 
         var newTokenResult = await CreateRefreshTokenAsync(userId, cancellationToken);
@@ -139,14 +132,10 @@ public class TokenProvider : ITokenProvider
         existingToken.Revoke();
         existingToken.ReplacedByToken = newToken.Token.Value;
 
-        _logger.LogInformation(
-            "Refresh token rotated for user {UserId}. Old token: {OldToken}, New token: {NewToken}",
-            existingToken.UserId, existingToken.Token.Value, newToken.Token.Value);
-
         return newToken;
     }
 
-    public async Task RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<Result> RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
     {
         var userTokens = await _repository
             .GetCollectionBy(rt => rt.UserId == userId && !rt.RevokedAt.HasValue, cancellationToken);
@@ -156,12 +145,7 @@ public class TokenProvider : ITokenProvider
             token.Revoke();
         }
 
-        await _transactionManager.SaveChangesAsync(cancellationToken);
-
-        _logger.LogWarning(
-            "ALL refresh tokens revoked for user {UserId}. Tokens affected: {Count}",
-            userId,
-            userTokens.Count);
+        return Result.Success();
     }
 
     public async Task<Result> CleanupExpiredTokensAsync(DateTime olderThan, CancellationToken cancellationToken)
@@ -172,13 +156,6 @@ public class TokenProvider : ITokenProvider
         if (expiredTokens.Any())
         {
             _repository.DeleteTokensAsync(expiredTokens);
-            var deleteResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-            if (deleteResult.IsFailure)
-            {
-                return deleteResult.Errors;
-            }
-
-            _logger.LogInformation("Cleaned up expired refresh tokens older than {Date}", olderThan);
         }
 
         return Result.Success();
@@ -195,7 +172,7 @@ public class TokenProvider : ITokenProvider
         var principal = result.Value;
         if (principal == null)
         {
-            return Error.Failure("jwt.invalid_token", "Invalid access token");
+            return TokenErrors.InvalidAccessToken();
         }
 
         var userIdClaim = principal.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? principal.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -230,7 +207,7 @@ public class TokenProvider : ITokenProvider
         catch (Exception ex)
         {
             _logger.LogWarning("Invalid access token: {Message}", ex.Message);
-            return Error.Failure("jwt.invalid_token", "Invalid access token");
+            return TokenErrors.InvalidAccessToken();
         }
     }
 }
