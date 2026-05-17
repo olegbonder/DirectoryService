@@ -18,6 +18,6 @@ public sealed class LoginUserEndpoint : IEndpoint
         {
             var command = new LoginUserCommand(request);
             return await handler.Handle(command, cancellationToken);
-        });
+        }).AllowAnonymous();
     }
 }

@@ -18,6 +18,6 @@ public sealed class ForgotPasswordEndpoint : IEndpoint
         {
             var command = new ForgotPasswordCommand(request);
             return await handler.Handle(command, cancellationToken);
-        });
+        }).AllowAnonymous();
     }
 }

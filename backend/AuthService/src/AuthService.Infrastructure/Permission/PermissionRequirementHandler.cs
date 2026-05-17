@@ -1,4 +1,4 @@
-﻿using AuthService.Infrastructure.UserScope;
+﻿using AuthService.Application;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
@@ -6,11 +6,11 @@ namespace AuthService.Infrastructure.Permission
 {
     public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequirement>
     {
-        private readonly UserScopedData _userScopedData;
+        private readonly IUserScopedData _userScopedData;
         private readonly ILogger<PermissionRequirementHandler> _logger;
 
         public PermissionRequirementHandler(
-            UserScopedData userScopedData,
+            IUserScopedData userScopedData,
             ILogger<PermissionRequirementHandler> logger)
         {
             _userScopedData = userScopedData;

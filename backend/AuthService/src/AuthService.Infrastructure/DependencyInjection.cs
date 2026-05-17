@@ -1,13 +1,16 @@
 ﻿using AuthService.Application;
 using AuthService.Application.Database;
+using AuthService.Application.Permission;
 using AuthService.Domain;
 using AuthService.Infrastructure.Database;
 using AuthService.Infrastructure.EmailSender;
 using AuthService.Infrastructure.Jwt;
+using AuthService.Infrastructure.Permission;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
 using AuthService.Infrastructure.UserScope;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +31,8 @@ namespace AuthService.Infrastructure
                 .AddIdentitySeeding(configuration)
                 .AddUserScopedData()
                 .AddJwtAuthentication(configuration)
-                .AddEmail(configuration);
+                .AddEmail(configuration)
+                .AddPermissionAuthorization();
 
             return services;
         }
@@ -120,7 +124,15 @@ namespace AuthService.Infrastructure
 
         private static IServiceCollection AddUserScopedData(this IServiceCollection services)
         {
-            services.AddScoped<UserScopedData>();
+            services.AddScoped<IUserScopedData, UserScopedData>();
+            return services;
+        }
+
+        private static IServiceCollection AddPermissionAuthorization(this IServiceCollection services)
+        {
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
+
             return services;
         }
     }

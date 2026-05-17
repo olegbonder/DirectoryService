@@ -18,6 +18,6 @@ public sealed class ReconfirmEmailEndpoint : IEndpoint
         {
             var command = new ReconfirmEmailCommand(request);
             return await handler.Handle(command, cancellationToken);
-        });
+        }).AllowAnonymous();
     }
 }

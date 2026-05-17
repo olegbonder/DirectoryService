@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AuthService.Application;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace AuthService.Infrastructure.UserScope
@@ -14,7 +15,7 @@ namespace AuthService.Infrastructure.UserScope
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context, UserScopedData userScopedData)
+        public async Task InvokeAsync(HttpContext context, IUserScopedData userScopedData)
         {
             var user = context.User;
 
@@ -23,8 +24,8 @@ namespace AuthService.Infrastructure.UserScope
                 userScopedData.Authenticate(user);
                 _logger.LogInformation(
                     "User authenticated: {UserId}, {Email}",
-                    userScopedData.UserId,
-                    userScopedData.Email);
+                    userScopedData.Profile.Id,
+                    userScopedData.Profile.Email);
             }
             else
             {
