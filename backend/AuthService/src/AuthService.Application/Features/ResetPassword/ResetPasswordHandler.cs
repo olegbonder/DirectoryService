@@ -12,20 +12,17 @@ namespace AuthService.Application.Features.ResetPassword;
 public class ResetPasswordHandler : IResultCommandHandler<ResetPasswordCommand>
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IRefreshTokenRepository _refreshTokenRepo;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITransactionManager _transactionManager;
     private readonly ILogger<ResetPasswordHandler> _logger;
 
     public ResetPasswordHandler(
         UserManager<ApplicationUser> userManager,
-        IRefreshTokenRepository refreshTokenRepo,
         ITokenProvider tokenProvider,
         ITransactionManager transactionManager,
         ILogger<ResetPasswordHandler> logger)
     {
         _userManager = userManager;
-        _refreshTokenRepo = refreshTokenRepo;
         _tokenProvider = tokenProvider;
         _transactionManager = transactionManager;
         _logger = logger;

@@ -1,5 +1,4 @@
 ﻿using AuthService.Application.Database;
-using AuthService.Contracts.Dtos.Login;
 using AuthService.Domain;
 using AuthService.Domain.Shared;
 using Core.Abstractions;
@@ -9,22 +8,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;
 
-namespace AuthService.Application.Features.UpdateRefreshToken;
+namespace AuthService.Application.Features.Logout;
 
-public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, UpdateRefreshTokenCommand>
+public sealed class LogoutHandler : IResultCommandHandler<LogoutCommand>
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IValidator<UpdateRefreshTokenCommand> _validator;
+    private readonly IValidator<LogoutCommand> _validator;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITransactionManager _transactionManager;
-    private readonly ILogger<UpdateRefreshTokenHandler> _logger;
+    private readonly ILogger<LogoutHandler> _logger;
 
-    public UpdateRefreshTokenHandler(
+    public LogoutHandler(
         UserManager<ApplicationUser> userManager,
-        IValidator<UpdateRefreshTokenCommand> validator,
+        IValidator<LogoutCommand> validator,
         ITokenProvider tokenProvider,
         ITransactionManager transactionManager,
-        ILogger<UpdateRefreshTokenHandler> logger)
+        ILogger<LogoutHandler> logger)
     {
         _userManager = userManager;
         _validator = validator;
@@ -33,7 +32,7 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
         _logger = logger;
     }
 
-    public async Task<Result<LoginResponse>> Handle(UpdateRefreshTokenCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(LogoutCommand command, CancellationToken cancellationToken)
     {
         var validResult = await _validator.ValidateAsync(command, cancellationToken);
         if (validResult.IsValid == false)
@@ -43,7 +42,6 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
 
         var request = command.Request;
         string accessToken = request.AccessToken;
-        string refreshToken = request.RefreshToken;
         var userIdClaimResult = _tokenProvider.ExtactUserIdFromAccessToken(accessToken);
         if (userIdClaimResult.IsFailure)
         {
@@ -62,19 +60,11 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
             return UserErrors.UserNotFound(userId);
         }
 
-        var refreshTokenResult = await _tokenProvider.RotateRefreshTokenAsync(userId, refreshToken, cancellationToken);
-        if (refreshTokenResult.IsFailure)
+        var revokeResult = await _tokenProvider.RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+        if (revokeResult.IsFailure)
         {
             await _transactionManager.RollbackAsync(cancellationToken);
-            return refreshTokenResult.Errors;
-        }
-
-        var userRoles = await _userManager.GetRolesAsync(user);
-        var accessTokenResult = _tokenProvider.GenerateAccessToken(user, userRoles);
-        if (accessTokenResult.IsFailure)
-        {
-            await _transactionManager.RollbackAsync(cancellationToken);
-            return accessTokenResult.Errors;
+            return revokeResult.Errors;
         }
 
         var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
@@ -86,13 +76,8 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
 
         await _transactionManager.CommitTransactionAsync(cancellationToken);
 
-        _logger.LogInformation("Refresh token updated for user {UserId}", userId);
+        _logger.LogInformation("Logout user {UserId}", userId);
 
-        var accessTokenDto = accessTokenResult.Value;
-        var loginResponse = new LoginResponse(
-            accessTokenDto.Token,
-            refreshTokenResult.Value.Token.Value,
-            accessTokenDto.ExpiresAt);
-        return loginResponse;
+        return Result.Success();
     }
 }

@@ -9,7 +9,7 @@ public interface ITokenProvider
 {
     Result<AccessToken> GenerateAccessToken(ApplicationUser user, IEnumerable<string> roles);
 
-    Result<string> ExtactUserIdFromAccessToken(string accessToken);
+    Result<Guid> ExtactUserIdFromAccessToken(string accessToken);
 
     Task<Result<RefreshToken>> CreateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken);
 
