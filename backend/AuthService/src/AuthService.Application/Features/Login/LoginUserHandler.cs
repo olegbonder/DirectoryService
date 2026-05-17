@@ -116,6 +116,8 @@ public sealed class LoginUserHandler : ICommandHandler<LoginResponse, LoginUserC
 
         await _transactionManager.CommitTransactionAsync(cancellationToken);
 
+        _logger.LogInformation("User {Email} logged in", email);
+
         var result = new LoginResponse(
             accessTokenResult.Value.Token,
             refreshTokenResult.Value.Token.Value,

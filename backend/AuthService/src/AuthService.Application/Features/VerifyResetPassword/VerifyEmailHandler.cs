@@ -25,10 +25,10 @@ public class VerifyResetPasswordHandler : IQueryHandler<VerifyEmailRequest, Veri
         _logger = logger;
     }
 
-    public async Task<Result<VerifyEmailRequest>> Handle(VerifyEmailRequest query, CancellationToken cancellationToken)
+    public async Task<Result<VerifyEmailRequest>> Handle(VerifyEmailRequest request, CancellationToken cancellationToken)
     {
-        var userId = query.UserId;
-        var token = Base64UrlEncoder.Decode(query.Token);
+        var userId = request.UserId;
+        var token = request.Token;
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
@@ -43,6 +43,6 @@ public class VerifyResetPasswordHandler : IQueryHandler<VerifyEmailRequest, Veri
 
         _logger.LogInformation("Get User {UserId} and refresh token {Token} success", userId, token);
 
-        return query;
+        return request;
     }
 }
