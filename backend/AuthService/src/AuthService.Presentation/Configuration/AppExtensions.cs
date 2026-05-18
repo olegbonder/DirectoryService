@@ -1,4 +1,5 @@
-﻿using Framework.Cors;
+﻿using AuthService.Infrastructure.UserScope;
+using Framework.Cors;
 using Framework.Endpoints;
 using Framework.Middlewares;
 using Framework.Swagger;
@@ -25,6 +26,7 @@ namespace AuthService.Presentation.Configuration
             app.ConfigureCors("http://localhost:3000");
 
             app.UseAuthentication();
+            app.UseUserScopedData();
             app.UseAuthorization();
 
             return app;

@@ -20,6 +20,6 @@ public sealed class VerifyResetPasswordEndpoint : IEndpoint
                 CancellationToken cancellationToken) =>
             {
                 return await handler.Handle(request, cancellationToken);
-            }).WithName("VerifyResetPassword");
+            }).WithName("VerifyResetPassword").AllowAnonymous();
     }
 }

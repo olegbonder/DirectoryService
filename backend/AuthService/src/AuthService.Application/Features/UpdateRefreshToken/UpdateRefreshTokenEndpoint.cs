@@ -19,6 +19,6 @@ public sealed class UpdateRefreshTokenEndpoint : IEndpoint
         {
             var command = new UpdateRefreshTokenCommand(request);
             return await handler.Handle(command, cancellationToken);
-        });
+        }).AllowAnonymous();
     }
 }

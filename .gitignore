@@ -491,6 +491,10 @@ backend/FileService/.qwen/settings.json.orig
 backend/SharedService/.vscode/settings.json
 backend/SharedService/.vscode/settings.json
 backend/SharedService/.vscode/settings.json
+backend/AuthService/src/AuthService.Presentation/AuthService.Presentation.csproj.lscache
+backend/DirectoryService/src/DirectoryService.Application/DirectoryService.Application.csproj.lscache
+backend/DirectoryService/src/DirectoryService.Contracts/DirectoryService.Contracts.csproj.lscache
+backend/DirectoryService/src/DirectoryService.Domain/DirectoryService.Domain.csproj.lscache
 backend/DirectoryService/src/DirectoryService.Infrastructure/DirectoryService.Infrastructure.csproj.lscache
 backend/DirectoryService/src/DirectoryService.Infrastructure.Postgres/DirectoryService.Infrastructure.Postgres.csproj.lscache
 backend/DirectoryService/src/DirectoryService.Presenters/DirectoryService.Presenters.csproj.lscache
@@ -511,11 +515,7 @@ backend/SharedService/Core/Core.csproj.lscache
 backend/SharedService/Framework/Framework.csproj.lscache
 backend/SharedService/Messaging/IntegrationEvents/IntegrationEvents.csproj.lscache
 backend/SharedService/SharedKernel/SharedKernel.csproj.lscache
-backend/AuthService/src/AuthService.Application/AuthService.Application.csproj.lscache
 backend/AuthService/src/AuthService.Contracts/AuthService.Contracts.csproj.lscache
 backend/AuthService/src/AuthService.Domain/AuthService.Domain.csproj.lscache
 backend/AuthService/src/AuthService.Infrastructure/AuthService.Infrastructure.csproj.lscache
-backend/AuthService/src/AuthService.Presentation/AuthService.Presentation.csproj.lscache
-backend/DirectoryService/src/DirectoryService.Application/DirectoryService.Application.csproj.lscache
-backend/DirectoryService/src/DirectoryService.Contracts/DirectoryService.Contracts.csproj.lscache
-backend/DirectoryService/src/DirectoryService.Domain/DirectoryService.Domain.csproj.lscache
+backend/AuthService/src/AuthService.Application/AuthService.Application.csproj.lscache

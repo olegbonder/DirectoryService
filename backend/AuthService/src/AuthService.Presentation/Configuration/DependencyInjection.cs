@@ -11,7 +11,7 @@ namespace AuthService.Presentation.Configuration
         public static IServiceCollection AddProgramDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services
-                .AddSerilogLogging(configuration, "FileService")
+                .AddSerilogLogging(configuration, "AuthService")
                 .AddDistributedCache(configuration)
                 .AddOpenApiSpec()
                 .AddCore(configuration)

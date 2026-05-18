@@ -20,6 +20,6 @@ public sealed class ResetPasswordEndpoint : IEndpoint
             {
                 var command = new ResetPasswordCommand(request);
                 return await handler.Handle(command, cancellationToken);
-            });
+            }).AllowAnonymous();
     }
 }
