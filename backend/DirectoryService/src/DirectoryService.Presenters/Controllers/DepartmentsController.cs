@@ -22,8 +22,8 @@ using DirectoryService.Contracts.Departments.UpdateDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using Framework.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
 using SharedKernel;
+using SharedKernel.PaginationAndOrder;
 
 namespace DirectoryService.Presenters.Controllers
 {

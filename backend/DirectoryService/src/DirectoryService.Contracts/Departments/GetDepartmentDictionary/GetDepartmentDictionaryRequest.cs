@@ -1,4 +1,6 @@
-﻿namespace DirectoryService.Contracts.Departments.GetDepartmentDictionary
+﻿using SharedKernel.PaginationAndOrder;
+
+namespace DirectoryService.Contracts.Departments.GetDepartmentDictionary
 {
     public record GetDepartmentDictionaryRequest : PaginationRequest
     {

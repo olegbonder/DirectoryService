@@ -8,7 +8,7 @@ using DirectoryService.Domain.Departments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Shared;
+using SharedKernel.PaginationAndOrder;
 using SharedKernel.Result;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartmentDictionary

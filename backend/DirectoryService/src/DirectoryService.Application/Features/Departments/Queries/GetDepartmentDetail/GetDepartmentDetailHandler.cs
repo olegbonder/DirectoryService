@@ -4,7 +4,6 @@ using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.GetDepartment;
 using DirectoryService.Domain.Departments;
 using FileService.Contracts;
-using FileService.Contracts.Dtos.MediaAssets.GetMediaAsset;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Result;

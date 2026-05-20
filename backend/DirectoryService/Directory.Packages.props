@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="manuilov.fileservice.contracts" Version="0.0.3" />
     <PackageVersion Include="Manuilov.IntegrationEvents" Version="0.0.3" />
+    <PackageVersion Include="Manuilov.SharedKernel" Version="0.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="manuilov.sharedkernel" Version="0.0.2" />

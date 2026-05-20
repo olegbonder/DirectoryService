@@ -4,6 +4,7 @@
       <PackageReference Include="Manuilov.Core" />
       <PackageReference Include="Manuilov.Framework" />
       <PackageReference Include="Microsoft.IdentityModel.Tokens" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" />
     </ItemGroup>
 
     <ItemGroup>

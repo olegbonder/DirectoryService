@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using AuthService.Application;
 using AuthService.Domain;
+using AuthService.Domain.Permissions;
 
 namespace AuthService.Infrastructure.UserScope
 {
@@ -11,8 +12,9 @@ namespace AuthService.Infrastructure.UserScope
 
         public void Authenticate(ClaimsPrincipal user)
         {
-            var tryParseUserId = Guid.TryParse(user.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId);
-            var email = user.FindFirstValue(JwtRegisteredClaimNames.Email) ?? string.Empty;
+            var userIdStr = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tryParseUserId = Guid.TryParse(userIdStr, out var userId);
+            var email = user.FindFirstValue(JwtRegisteredClaimNames.Email) ?? user.FindFirstValue(ClaimTypes.Email);
 
             var name = user.FindFirstValue(JwtRegisteredClaimNames.Name);
             var firstName = string.Empty;
@@ -30,6 +32,7 @@ namespace AuthService.Infrastructure.UserScope
         }
 
         public bool HasPermission(string permission) =>
-            Profile?.Permissions.Contains(permission) ?? false;
+            Profile is not null &&
+            (Profile.Permissions.Contains(PlatformPermissions.ALL) || Profile.Permissions.Contains(permission));
     }
 }

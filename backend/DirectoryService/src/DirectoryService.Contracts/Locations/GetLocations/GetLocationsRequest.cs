@@ -1,4 +1,6 @@
-﻿namespace DirectoryService.Contracts.Locations.GetLocations
+﻿using SharedKernel.PaginationAndOrder;
+
+namespace DirectoryService.Contracts.Locations.GetLocations
 {
     public record GetLocationsRequest : PaginationRequest
     {

@@ -1,4 +1,4 @@
-﻿namespace DirectoryService.Contracts
+﻿namespace SharedKernel.PaginationAndOrder
 {
     public record PaginationRequest
     {
