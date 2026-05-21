@@ -1,4 +1,4 @@
-﻿using DirectoryService.Contracts;
+﻿using SharedKernel.PaginationAndOrder;
 
 namespace DirectoryService.Application.Features.Departments.Queries.GetDepartments;
 

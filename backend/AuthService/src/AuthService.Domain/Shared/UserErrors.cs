@@ -63,4 +63,12 @@ public static class UserErrors
     {
         return GeneralErrors.NotFound("user", userId);
     }
+
+    public static Error PasswordIsEmpty() => GeneralErrors.PropertyIsEmpty("user.password");
+
+    public static Error RoleIsEmpty() => GeneralErrors.PropertyIsEmpty("user.role");
+
+    public static Error UserIdIsNull() => GeneralErrors.PropertyIsEmpty("user.id");
+
+    public static Result RoleNotFound(string role) => Error.NotFound("role", $"Role {role} not found");
 }

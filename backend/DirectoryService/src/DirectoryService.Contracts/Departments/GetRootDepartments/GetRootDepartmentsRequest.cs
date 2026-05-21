@@ -1,4 +1,6 @@
-﻿namespace DirectoryService.Contracts.Departments.GetRootDepartments
+﻿using SharedKernel.PaginationAndOrder;
+
+namespace DirectoryService.Contracts.Departments.GetRootDepartments
 {
     public record GetRootDepartmentsRequest : PaginationRequest
     {

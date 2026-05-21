@@ -20,7 +20,7 @@ namespace AuthService.Domain
 
         public DateTime CreatedAt { get; init; }
 
-        public bool IsActive { get; init; }
+        public bool IsActive { get; set; }
 
         public List<RefreshToken> RefreshTokens => _refreshTokens;
 
@@ -78,6 +78,11 @@ namespace AuthService.Domain
             }
 
             return new ApplicationUser(email, userName, firstName, lastName);
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
         }
     }
 }

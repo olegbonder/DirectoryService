@@ -106,7 +106,7 @@ public class RolesInitializationService : IHostedService
             }
 
             user = createAdminResult.Value;
-            var createUserResult = await userManager.CreateAsync(user);
+            var createUserResult = await userManager.CreateAsync(user, _options.Password);
             if (!createUserResult.Succeeded)
             {
                 return Error.Failure(

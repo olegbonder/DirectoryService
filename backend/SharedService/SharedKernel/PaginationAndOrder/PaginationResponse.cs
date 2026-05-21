@@ -1,4 +1,4 @@
-namespace Shared
+﻿namespace SharedKernel.PaginationAndOrder
 {
     public record PaginationResponse<T>(
         IReadOnlyList<T> Items,

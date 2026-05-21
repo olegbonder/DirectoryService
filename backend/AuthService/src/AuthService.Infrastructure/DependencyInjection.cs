@@ -1,14 +1,14 @@
 ﻿using AuthService.Application;
 using AuthService.Application.Database;
-using AuthService.Application.Permission;
 using AuthService.Domain;
 using AuthService.Infrastructure.Database;
 using AuthService.Infrastructure.EmailSender;
-using AuthService.Infrastructure.Jwt;
 using AuthService.Infrastructure.Permission;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
+using AuthService.Infrastructure.Token;
 using AuthService.Infrastructure.UserScope;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -78,6 +78,23 @@ namespace AuthService.Infrastructure
                 options.UseLoggerFactory(loggerFactory);
             });
 
+            services.AddDbContextPool<IReadDbContext, AuthDbContext>((sp, options) =>
+            {
+                string? connectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE);
+                var hostEnvironment = sp.GetRequiredService<IHostEnvironment>();
+                var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+
+                options.UseNpgsql(connectionString);
+
+                if (hostEnvironment.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.EnableDetailedErrors();
+                }
+
+                options.UseLoggerFactory(loggerFactory);
+            });
+
             return services;
         }
 
@@ -93,23 +110,27 @@ namespace AuthService.Infrastructure
         {
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SECTION_NAME));
             services.AddScoped<ITokenProvider, TokenProvider>();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                var jwtOptions = configuration.GetSection(JwtOptions.SECTION_NAME).Get<JwtOptions>() 
+                    ?? throw new ArgumentNullException(nameof(JwtOptions));
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    var jwtOptions = configuration.GetSection(JwtOptions.SECTION_NAME).Get<JwtOptions>() 
-                        ?? throw new ArgumentNullException(nameof(JwtOptions));
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtOptions.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = jwtOptions.Audience,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtOptions.Secret)),
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
             return services;
         }

@@ -19,7 +19,7 @@ namespace AuthService.Application.Features.UserProfile
                     CancellationToken cancellationToken) =>
                 {
                     return await handler.Handle(cancellationToken);
-                }).RequirePermissions();
+                }).RequireAuthorization();
         }
     }
 }
