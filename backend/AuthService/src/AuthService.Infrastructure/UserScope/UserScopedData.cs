@@ -12,9 +12,9 @@ namespace AuthService.Infrastructure.UserScope
 
         public void Authenticate(ClaimsPrincipal user)
         {
-            var userIdStr = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = user.FindFirstValue(JwtRegisteredClaimNames.Sub);
             var tryParseUserId = Guid.TryParse(userIdStr, out var userId);
-            var email = user.FindFirstValue(JwtRegisteredClaimNames.Email) ?? user.FindFirstValue(ClaimTypes.Email);
+            var email = user.FindFirstValue(JwtRegisteredClaimNames.Email);
 
             var name = user.FindFirstValue(JwtRegisteredClaimNames.Name);
             var firstName = string.Empty;
