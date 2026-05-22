@@ -117,6 +117,7 @@ namespace AuthService.Infrastructure
             })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
+                options.MapInboundClaims = false;
                 var jwtOptions = configuration.GetSection(JwtOptions.SECTION_NAME).Get<JwtOptions>() 
                     ?? throw new ArgumentNullException(nameof(JwtOptions));
                 options.TokenValidationParameters = new TokenValidationParameters
