@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="manuilov.framework" />
+    <PackageReference Include="Manuilov.Framework" />
   </ItemGroup>
 
 </Project>

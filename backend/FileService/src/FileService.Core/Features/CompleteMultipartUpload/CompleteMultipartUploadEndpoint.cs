@@ -6,6 +6,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.CompleteMultipartUpload;
 
@@ -20,6 +22,6 @@ public sealed class CompleteMultipartUploadEndpoint : IEndpoint
         {
             var command = new CompleteMultipartUploadCommand(request);
             return await handler.Handle(command, cancellationToken);
-        });
+        }).RequirePermissions(PlatformPermissions.FILES_MANAGE);
     }
 }

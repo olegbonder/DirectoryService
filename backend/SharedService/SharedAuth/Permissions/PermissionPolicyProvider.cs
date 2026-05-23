@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
-namespace AuthService.Infrastructure.Permission
+namespace SharedAuth.Permissions
 {
     public class PermissionPolicyProvider : IAuthorizationPolicyProvider
     {

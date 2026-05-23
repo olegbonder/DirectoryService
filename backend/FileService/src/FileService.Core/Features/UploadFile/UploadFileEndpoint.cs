@@ -4,6 +4,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.UploadFile;
 
@@ -18,6 +20,8 @@ public class UploadFileEndpoint : IEndpoint
         {
             var command = new UploadFileCommand(request);
             return await handler.Handle(command, cancellationToken);
-        }).DisableAntiforgery();
+        })
+        .DisableAntiforgery()
+        .RequirePermissions(PlatformPermissions.FILES_MANAGE);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace AuthService.Infrastructure.UserScope
+namespace SharedAuth.UserScope
 {
     public static class UserScopedDataMiddlewareExtensions
     {

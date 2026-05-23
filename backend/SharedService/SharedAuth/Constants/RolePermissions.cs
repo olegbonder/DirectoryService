@@ -1,4 +1,4 @@
-﻿namespace AuthService.Domain.Permissions;
+﻿namespace SharedAuth.Constants;
 
 public static class RolePermissions
 {

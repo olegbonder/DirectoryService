@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="CrystalQuartz.AspNetCore" />
+    <PackageReference Include="Manuilov.Auth" />
     <PackageReference Include="manuilov.core" />
     <PackageReference Include="Manuilov.Framework" />
     <PackageReference Include="Manuilov.IntegrationEvents" />

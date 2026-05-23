@@ -1,10 +1,10 @@
-﻿using AuthService.Application.Permission;
-using AuthService.Domain.Permissions;
-using Framework.EndpointResult;
+﻿using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace AuthService.Application.Features.Admin.RemoveUserRole;
 

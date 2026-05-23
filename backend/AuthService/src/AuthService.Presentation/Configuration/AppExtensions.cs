@@ -1,9 +1,9 @@
-﻿using AuthService.Infrastructure.UserScope;
-using Framework.Cors;
+﻿using Framework.Cors;
 using Framework.Endpoints;
 using Framework.Middlewares;
 using Framework.Swagger;
 using Serilog;
+using SharedAuth.Jwt;
 
 namespace AuthService.Presentation.Configuration
 {
@@ -25,9 +25,7 @@ namespace AuthService.Presentation.Configuration
 
             app.ConfigureCors("http://localhost:3000");
 
-            app.UseAuthentication();
-            app.UseUserScopedData();
-            app.UseAuthorization();
+            app.UseJwtAuthentication();
 
             return app;
         }

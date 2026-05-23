@@ -12,5 +12,6 @@
   <Project Path="Core/Core.csproj" />
   <Project Path="Framework/Framework.csproj" />
   <Project Path="Messaging/IntegrationEvents/IntegrationEvents.csproj" />
+  <Project Path="SharedAuth/SharedAuth.csproj" />
   <Project Path="SharedKernel/SharedKernel.csproj" />
 </Solution>

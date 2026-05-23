@@ -1,8 +1,7 @@
-﻿using AuthService.Application;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace AuthService.Infrastructure.UserScope
+namespace SharedAuth.UserScope
 {
     public class UserScopedDataMiddleware
     {

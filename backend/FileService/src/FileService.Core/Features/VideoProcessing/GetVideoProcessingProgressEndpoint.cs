@@ -1,10 +1,11 @@
-﻿using FileService.Contracts.Dtos.MediaAssets.DownloadFile;
-using FileService.Contracts.Dtos.VideoProcessing;
+﻿using FileService.Contracts.Dtos.VideoProcessing;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.VideoProcessing;
 
@@ -20,6 +21,6 @@ public sealed class GetVideoProcessingProgressEndpoint : IEndpoint
         {
             var query = new ProgressEventRequest(videoAssetId);
             return await handler.Handle(query, CancellationToken.None);
-        });
+        }).RequirePermissions(PlatformPermissions.FILES_MANAGE);
     }
 }

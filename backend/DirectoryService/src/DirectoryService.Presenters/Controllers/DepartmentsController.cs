@@ -21,7 +21,10 @@ using DirectoryService.Contracts.Departments.MoveDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartment;
 using DirectoryService.Contracts.Departments.UpdateDepartmentLocations;
 using Framework.EndpointResult;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 using SharedKernel;
 using SharedKernel.PaginationAndOrder;
 
@@ -36,6 +39,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<DepartmentDTO>>> GetDepartments(
             [FromQuery] GetDepartmentsRequest request,
             [FromServices] GetDepartmentsHandler handler,
@@ -49,6 +53,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> Create(
             [FromBody] CreateDepartmentRequest request,
             [FromServices] CreateDepartmentHandler handler,
@@ -63,6 +68,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> UpdateDepartmentLocations(
             [FromRoute] Guid departmentId,
             [FromBody] UpdateDepartmentLocationsRequest request,
@@ -78,6 +84,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> MoveDepartment(
             [FromRoute] Guid departmentId,
             [FromBody] MoveDepartmentRequest request,
@@ -93,6 +100,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<GetTopDepartmentsResponse>> GetTopDepartments(
             [FromQuery] GetTopDepartmentsRequest request,
             [FromServices] GetTopDepartmentsHandler handler,
@@ -104,6 +112,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("roots")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<RootDepartmentDTO>>> GetRootDepartments(
             [FromQuery] GetRootDepartmentsRequest request,
             [FromServices] GetRootDepartmentsHandler handler,
@@ -115,6 +124,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("dictionary")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<DictionaryItemResponse>>> GetDepartmentDictionary(
             [FromQuery] GetDepartmentDictionaryRequest request,
             [FromServices] GetDepartmentDictionaryHandler handler,
@@ -126,6 +136,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("{parentId:guid}/children")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<ChildDepartmentDTO>>> GetChildDepartments(
             [FromRoute] Guid parentId,
             [FromQuery] PaginationRequest request,
@@ -141,6 +152,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<DepartmentDetailDTO?>> GetPosition(
             [FromRoute] Guid departmentId,
             [FromServices] GetDepartmentDetailHandler handler,
@@ -153,6 +165,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpPatch("{departmentId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> Update(
             [FromRoute] Guid departmentId,
             [FromBody] UpdateDepartmentRequest request,
@@ -166,6 +179,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpDelete("{departmentId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> SoftDelete(
             [FromRoute] Guid departmentId,
             [FromServices] SoftDeleteDepartmentHandler handler,
@@ -180,6 +194,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> AttachDepartmentVideo(
             [FromRoute] Guid departmentId,
             [FromBody] AttachDepartmentVideoRequest request,

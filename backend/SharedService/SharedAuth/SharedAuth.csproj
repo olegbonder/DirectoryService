@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackageId>Manuilov.Auth</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Manuilov Oleg</Authors>
+    <PackageDescription>General Authentication Project</PackageDescription>
+    <RepositoryUrl>https://github.com/olegbonder/DirectoryService</RepositoryUrl>
+  </PropertyGroup>
+</Project>

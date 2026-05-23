@@ -5,6 +5,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.GetChunkUploadUrl;
 
@@ -21,6 +23,6 @@ public sealed class GetChunkUploadUrlEndpoint : IEndpoint
                 {
                     var command = new GetChunkUploadUrlCommand(request);
                     return await handler.Handle(command, cancellationToken);
-                });
+                }).RequirePermissions(PlatformPermissions.CONTENT_VIEW);
     }
 }

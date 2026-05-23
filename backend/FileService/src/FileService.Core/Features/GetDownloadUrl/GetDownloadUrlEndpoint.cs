@@ -4,6 +4,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.GetDownloadUrl;
 
@@ -20,6 +22,6 @@ public sealed class GetDownloadUrlEndpoint : IEndpoint
                 {
                     var command = new GetDownloadUrlCommand(request);
                     return await handler.Handle(command, cancellationToken);
-                });
+                }).RequirePermissions(PlatformPermissions.CONTENT_VIEW);
     }
 }
