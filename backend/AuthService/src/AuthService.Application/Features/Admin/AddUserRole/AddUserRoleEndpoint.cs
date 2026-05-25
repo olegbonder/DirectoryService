@@ -1,11 +1,11 @@
-﻿using AuthService.Application.Permission;
-using AuthService.Contracts.Dtos.Admin.AddUserRole;
-using AuthService.Domain.Permissions;
+﻿using AuthService.Contracts.Dtos.Admin.AddUserRole;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace AuthService.Application.Features.Admin.AddUserRole;
 

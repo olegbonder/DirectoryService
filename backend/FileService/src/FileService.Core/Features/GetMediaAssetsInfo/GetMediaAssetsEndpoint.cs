@@ -4,6 +4,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.GetMediaAssetsInfo
 {
@@ -15,7 +17,8 @@ namespace FileService.Core.Features.GetMediaAssetsInfo
                     [FromBody] GetMediaAssetsRequest request,
                     [FromServices] GetMediaAssetsHandler handler,
                     CancellationToken cancellationToken) =>
-                await handler.Handle(request, cancellationToken));
+                await handler.Handle(request, cancellationToken))
+                .RequirePermissions(PlatformPermissions.CONTENT_VIEW);
         }
     }
 }

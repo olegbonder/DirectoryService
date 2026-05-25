@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace AuthService.Application.Permission
+namespace SharedAuth.Endpoints
 {
     public static class EndpointPermissionExtensions
     {

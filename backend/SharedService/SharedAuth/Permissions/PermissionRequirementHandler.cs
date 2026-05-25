@@ -1,8 +1,8 @@
-﻿using AuthService.Application;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using SharedAuth.UserScope;
 
-namespace AuthService.Infrastructure.Permission
+namespace SharedAuth.Permissions
 {
     public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequirement>
     {

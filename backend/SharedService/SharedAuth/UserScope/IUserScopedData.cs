@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
-using AuthService.Domain;
 
-namespace AuthService.Application
+namespace SharedAuth.UserScope
 {
     public interface IUserScopedData
     {

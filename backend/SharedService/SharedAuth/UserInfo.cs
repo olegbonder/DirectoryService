@@ -1,4 +1,4 @@
-﻿namespace AuthService.Domain
+﻿namespace SharedAuth
 {
     public record UserInfo(
         Guid Id,

@@ -4,6 +4,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.DeleteFile;
 
@@ -18,6 +20,6 @@ public class DeleteFileEndpoint : IEndpoint
         {
             var command = new DeleteFileCommand(mediaAssetId);
             return await handler.Handle(command, cancellationToken);
-        });
+        }).RequirePermissions(PlatformPermissions.FILES_MANAGE);
     }
 }

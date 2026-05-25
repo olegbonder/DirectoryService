@@ -519,3 +519,4 @@ backend/AuthService/src/AuthService.Contracts/AuthService.Contracts.csproj.lscac
 backend/AuthService/src/AuthService.Domain/AuthService.Domain.csproj.lscache
 backend/AuthService/src/AuthService.Infrastructure/AuthService.Infrastructure.csproj.lscache
 backend/AuthService/src/AuthService.Application/AuthService.Application.csproj.lscache
+backend/SharedService/SharedAuth/SharedAuth.csproj.lscache

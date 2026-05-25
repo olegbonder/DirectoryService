@@ -3,6 +3,9 @@ using DirectoryService.Application;
 using FileService.Contracts.HttpCommunication;
 using Framework.Logging;
 using Framework.Swagger;
+using SharedAuth.DevAuth;
+using SharedAuth.Jwt;
+using SharedAuth.Permissions;
 
 namespace DirectoryService.Web.Configuration
 {
@@ -16,6 +19,9 @@ namespace DirectoryService.Web.Configuration
                 .AddOpenApiSpec()
                 .AddApplication()
                 .AddCors()
+                .AddJwtAuthentication(configuration)
+                .AddPermissionAuthorization()
+                .AddDevAuth(configuration)
                 .AddFileHttpCommunication(configuration)
                 .AddControllers();
 

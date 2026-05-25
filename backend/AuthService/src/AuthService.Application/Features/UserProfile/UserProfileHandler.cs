@@ -1,6 +1,8 @@
 ﻿using AuthService.Domain;
 using Core.Abstractions;
 using Microsoft.Extensions.Logging;
+using SharedAuth;
+using SharedAuth.UserScope;
 using SharedKernel.Result;
 
 namespace AuthService.Application.Features.UserProfile

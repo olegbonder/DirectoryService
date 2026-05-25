@@ -1,10 +1,10 @@
 ﻿using AuthService.Domain;
-using AuthService.Domain.Permissions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SharedAuth.Constants;
 using SharedKernel.Result;
 
 namespace AuthService.Infrastructure.Seed;

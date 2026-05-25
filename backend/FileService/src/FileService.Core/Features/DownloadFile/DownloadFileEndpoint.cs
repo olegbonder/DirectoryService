@@ -4,6 +4,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.DownloadFile;
 
@@ -18,6 +20,6 @@ public class DownloadFileEndpoint : IEndpoint
         {
             var request = new DownloadFileRequest(id);
             return await handler.Handle(request, cancellationToken);
-        });
+        }).RequirePermissions(PlatformPermissions.CONTENT_VIEW);
     }
 }

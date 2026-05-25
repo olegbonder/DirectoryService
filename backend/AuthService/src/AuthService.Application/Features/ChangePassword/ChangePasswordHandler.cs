@@ -6,6 +6,7 @@ using Core.Validation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using SharedAuth.UserScope;
 using SharedKernel.Result;
 
 namespace AuthService.Application.Features.ChangePassword;

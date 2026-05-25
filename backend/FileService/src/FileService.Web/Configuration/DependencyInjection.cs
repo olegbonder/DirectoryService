@@ -6,6 +6,9 @@ using FileService.VideoProcessing;
 using Framework.Endpoints;
 using Framework.Logging;
 using Framework.Swagger;
+using SharedAuth.DevAuth;
+using SharedAuth.Jwt;
+using SharedAuth.Permissions;
 
 namespace FileService.Web.Configuration
 {
@@ -19,6 +22,9 @@ namespace FileService.Web.Configuration
                 .AddOpenApiSpec()
                 .AddApplication(configuration)
                 .AddEndpoints(typeof(DependencyInjectionCore).Assembly)
+                .AddJwtAuthentication(configuration)
+                .AddPermissionAuthorization()
+                .AddDevAuth(configuration)
                 .AddCors()
                 .AddS3(configuration)
                 .AddVideoProcessing(configuration)

@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="manuilov.sharedkernel" />
+    <PackageReference Include="Manuilov.SharedKernel" />
   </ItemGroup>
 </Project>

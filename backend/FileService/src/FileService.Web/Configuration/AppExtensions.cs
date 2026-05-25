@@ -7,6 +7,7 @@ using Framework.Middlewares;
 using Framework.Swagger;
 using Quartz;
 using Serilog;
+using SharedAuth.Jwt;
 
 namespace FileService.Web.Configuration
 {
@@ -36,6 +37,8 @@ namespace FileService.Web.Configuration
             });
 
             app.ConfigureCors("http://localhost:3000");
+
+            app.UseJwtAuthentication();
 
             return app;
         }

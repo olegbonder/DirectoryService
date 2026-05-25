@@ -4,6 +4,8 @@ using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 
 namespace FileService.Core.Features.CheckMediaAssetExists
 {
@@ -17,7 +19,8 @@ namespace FileService.Core.Features.CheckMediaAssetExists
                     [FromRoute] Guid mediaAssetId,
                     [FromServices] CheckMediaAssetExistsHandler handler,
                     CancellationToken cancellationToken) =>
-                await handler.Handle(mediaAssetId, cancellationToken));
+                await handler.Handle(mediaAssetId, cancellationToken))
+                    .RequirePermissions(PlatformPermissions.CONTENT_VIEW);
         }
     }
 }

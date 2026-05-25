@@ -3,7 +3,7 @@ using DirectoryService.Contracts.Locations.GetLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
 using Microsoft.EntityFrameworkCore;
-using Shared;
+using SharedKernel.PaginationAndOrder;
 using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Locations
@@ -19,7 +19,7 @@ namespace DirectoryService.IntegrationTests.Locations
         public async Task GetLocations_with_valid_department_list_should_suceed()
         {
             // arrange
-            var deptAndLocations = new[] { 2, 3, 1, 1 };
+            int[] deptAndLocations = [2, 3, 1, 1];
             var departments = await TestData.CreateDepartments(deptAndLocations);
             var expectedDepts = departments.Take(2);
             var departmentIds = TestData.GetDepartmentIds(expectedDepts);
@@ -59,7 +59,7 @@ namespace DirectoryService.IntegrationTests.Locations
         public async Task GetLocations_with_not_exist_department_list_should_suceed()
         {
             // arrange
-            await TestData.CreateLocations(2);
+            await TestData.CreateLocations();
 
             var departmentIds = new List<DepartmentId>
             {
@@ -83,12 +83,12 @@ namespace DirectoryService.IntegrationTests.Locations
         public async Task GetLocations_search_by_location_name_should_suceed()
         {
             // arrange
-            var locationCount = 5;
+            const int locationCount = 5;
             var expectedLocations = await TestData.CreateLocations(locationCount);
             var locationIds = expectedLocations
                 .OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt)
                 .Select(l => l.Id.Value).ToList();
-            var locationName = "Location";
+            const string locationName = "Location";
 
             var cancellationToken = CancellationToken.None;
 
@@ -109,7 +109,7 @@ namespace DirectoryService.IntegrationTests.Locations
         public async Task GetLocations_search_by_location_status_is_active_should_suceed()
         {
             // arrange
-            var locationCount = 5;
+            const int locationCount = 5;
             var expectedLocations = await TestData.CreateLocations(locationCount);
             var locationIds = expectedLocations
                 .OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt)
@@ -133,8 +133,7 @@ namespace DirectoryService.IntegrationTests.Locations
         public async Task GetLocations_search_by_location_status_is_not_active_should_suceed()
         {
             // arrange
-            var locationCount = 2;
-            var locations = await TestData.CreateLocations(locationCount);
+            await TestData.CreateLocations();
 
             var cancellationToken = CancellationToken.None;
 
@@ -151,7 +150,7 @@ namespace DirectoryService.IntegrationTests.Locations
         public async Task GetLocations_search_by_pagination_should_suceed()
         {
             // arrange
-            var locationCount = 10;
+            const int locationCount = 10;
             var locations = await TestData.CreateLocations(locationCount);
             locations = locations.OrderBy(l => l.Name.Value).ThenBy(l => l.CreatedAt).ToList();
             var expectedLocations = locations.TakeLast(5);

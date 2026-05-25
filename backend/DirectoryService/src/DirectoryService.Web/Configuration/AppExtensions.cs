@@ -1,8 +1,8 @@
 ﻿using Framework.Cors;
-using Framework.Logging;
 using Framework.Middlewares;
 using Framework.Swagger;
 using Serilog;
+using SharedAuth.Jwt;
 
 namespace DirectoryService.Web.Configuration
 {
@@ -21,6 +21,8 @@ namespace DirectoryService.Web.Configuration
             app.MapControllers();
 
             app.ConfigureCors("http://localhost:3000");
+
+            app.UseJwtAuthentication();
 
             return app;
         }

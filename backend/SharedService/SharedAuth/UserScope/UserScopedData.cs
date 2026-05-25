@@ -1,10 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using AuthService.Application;
-using AuthService.Domain;
-using AuthService.Domain.Permissions;
+using SharedAuth.Constants;
 
-namespace AuthService.Infrastructure.UserScope
+namespace SharedAuth.UserScope
 {
     public class UserScopedData : IUserScopedData
     {
@@ -28,7 +26,7 @@ namespace AuthService.Infrastructure.UserScope
 
             var roles = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
             var permissions = user.FindAll(ClaimTypes.Authentication).Select(c => c.Value).ToList();
-            Profile = new UserInfo(userId, email, firstName, lastName!, roles, permissions);
+            Profile = new UserInfo(userId, email!, firstName, lastName!, roles, permissions);
         }
 
         public bool HasPermission(string permission) =>

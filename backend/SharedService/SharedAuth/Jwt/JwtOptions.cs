@@ -1,4 +1,4 @@
-﻿namespace AuthService.Infrastructure.Token;
+﻿namespace SharedAuth.Jwt;
 
 public class JwtOptions
 {

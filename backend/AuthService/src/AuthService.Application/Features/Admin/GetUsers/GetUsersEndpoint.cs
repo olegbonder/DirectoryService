@@ -1,12 +1,12 @@
-﻿using AuthService.Application.Permission;
-using AuthService.Contracts.Dtos.Admin.GetUsers;
-using AuthService.Domain.Permissions;
+﻿using AuthService.Contracts.Dtos.Admin.GetUsers;
 using Framework.EndpointResult;
 using Framework.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 using SharedKernel.PaginationAndOrder;
 
 namespace AuthService.Application.Features.Admin.GetUsers;

@@ -5,12 +5,13 @@ using AuthService.Application;
 using AuthService.Application.Database;
 using AuthService.Application.Model;
 using AuthService.Domain;
-using AuthService.Domain.Permissions;
 using AuthService.Domain.Shared;
 using AuthService.Domain.Token;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SharedAuth.Constants;
+using SharedAuth.Jwt;
 using SharedKernel.Result;
 
 namespace AuthService.Infrastructure.Token;

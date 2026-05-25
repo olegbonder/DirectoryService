@@ -1,6 +1,5 @@
 ﻿using AuthService.Application.Database;
 using AuthService.Domain;
-using AuthService.Domain.Permissions;
 using AuthService.Domain.Shared;
 using Core.Abstractions;
 using Core.Validation;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using SharedAuth.Constants;
 using SharedKernel.Result;
 
 namespace AuthService.Application.Features.RegisterUser;

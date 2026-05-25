@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="MailKit" Version="4.16.0" />
+    <PackageVersion Include="Manuilov.Auth" Version="0.0.1" />
     <PackageVersion Include="Manuilov.Core" Version="0.0.7" />
     <PackageVersion Include="Manuilov.Framework" Version="0.0.6" />
     <PackageVersion Include="Manuilov.SharedKernel" Version="0.0.8" />

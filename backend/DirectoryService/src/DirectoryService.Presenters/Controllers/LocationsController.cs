@@ -9,8 +9,10 @@ using DirectoryService.Contracts.Locations.GetLocationDictionary;
 using DirectoryService.Contracts.Locations.GetLocations;
 using Framework.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 using SharedKernel;
+using SharedKernel.PaginationAndOrder;
 
 namespace DirectoryService.Presenters.Controllers
 {
@@ -24,6 +26,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> Create(
             [FromBody] CreateLocationRequest request,
             [FromServices] CreateLocationHandler handler,
@@ -38,6 +41,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<LocationDTO>>> GetLocations(
             [FromQuery] GetLocationsRequest request,
             [FromServices] GetLocationsHandler handler,
@@ -49,6 +53,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpGet("dictionary")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<DictionaryItemResponse>>> GetLocationDictionary(
             [FromQuery] GetLocationDictionaryRequest request,
             [FromServices] GettLocationDictionaryHandler handler,
@@ -60,6 +65,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpPut("{locationId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> Update(
             [FromRoute] Guid locationId,
             [FromBody] UpdateLocationRequest request,
@@ -73,6 +79,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpDelete("{locationId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> SoftDelete(
             [FromRoute] Guid locationId,
             [FromServices] SoftDeleteLocationHandler handler,

@@ -1,9 +1,8 @@
 ﻿using DirectoryService.Application.Features.Departments.Queries.GetDepartments;
-using DirectoryService.Contracts;
 using DirectoryService.Contracts.Departments.GetChildDepartments;
 using DirectoryService.Domain.Departments;
 using DirectoryService.IntegrationTests.Infrasructure;
-using Shared;
+using SharedKernel.PaginationAndOrder;
 using SharedKernel.Result;
 
 namespace DirectoryService.IntegrationTests.Departments;

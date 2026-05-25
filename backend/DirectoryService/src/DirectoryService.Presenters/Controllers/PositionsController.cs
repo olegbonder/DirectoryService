@@ -12,8 +12,10 @@ using DirectoryService.Contracts.Positions.GetPosition;
 using DirectoryService.Contracts.Positions.GetPositions;
 using Framework.EndpointResult;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
+using SharedAuth.Constants;
+using SharedAuth.Endpoints;
 using SharedKernel;
+using SharedKernel.PaginationAndOrder;
 
 namespace DirectoryService.Presenters.Controllers
 {
@@ -26,6 +28,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PaginationResponse<PositionDTO>>> GetPositions(
             [FromQuery] GetPositionsRequest request,
             [FromServices] GetPositionsHandler handler,
@@ -39,6 +42,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_VIEW)]
         public async Task<EndpointResult<PositionDetailDTO?>> GetPosition(
             [FromRoute] Guid positionId,
             [FromServices] GetPositionDetailHandler handler,
@@ -54,6 +58,7 @@ namespace DirectoryService.Presenters.Controllers
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> Create(
             [FromBody] CreatePositionRequest request,
             [FromServices] CreatePositionHandler handler,
@@ -66,6 +71,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpPatch("{positionId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> Update(
             [FromRoute] Guid positionId,
             [FromBody] UpdatePositionRequest request,
@@ -79,6 +85,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpDelete("{positionId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> SoftDelete(
             [FromRoute] Guid positionId,
             [FromServices] SoftDeletePositionHandler handler,
@@ -91,6 +98,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpDelete("{positionId:guid}/departments/{departmentId:guid}")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> DeletePositionDepartment(
             [FromRoute] Guid positionId,
             [FromRoute] Guid departmentId,
@@ -104,6 +112,7 @@ namespace DirectoryService.Presenters.Controllers
         [HttpPost("{positionId:guid}/departments")]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(404)]
+        [RequirePermissions(PlatformPermissions.CONTENT_MANAGE)]
         public async Task<EndpointResult<Guid>> CreatePositionDepartments(
             [FromRoute] Guid positionId,
             [FromBody] CreatePositionDepartmentsRequest request,
