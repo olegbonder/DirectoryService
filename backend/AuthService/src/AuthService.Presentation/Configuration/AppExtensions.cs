@@ -1,7 +1,9 @@
-﻿using Framework.Cors;
+﻿using CrystalQuartz.AspNetCore;
+using Framework.Cors;
 using Framework.Endpoints;
 using Framework.Middlewares;
 using Framework.Swagger;
+using Quartz;
 using Serilog;
 using SharedAuth.Jwt;
 
@@ -24,6 +26,13 @@ namespace AuthService.Presentation.Configuration
             app.MapEndpoints(apiGroup);
 
             app.ConfigureCors("http://localhost:3000");
+
+            app.UseRouting();
+            app.UseCrystalQuartz(() =>
+            {
+                var factory = app.Services.GetRequiredService<ISchedulerFactory>();
+                return factory.GetScheduler().GetAwaiter().GetResult();
+            });
 
             app.UseJwtAuthentication();
 

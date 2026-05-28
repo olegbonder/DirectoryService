@@ -86,7 +86,8 @@ public sealed class LoginUserHandler : ICommandHandler<LoginResponse, LoginUserC
         {
             _logger.LogError("Failed login or password for user {Email}", email);
             await _userManager.AccessFailedAsync(user);
-            await _transactionManager.RollbackAsync(cancellationToken);
+            await _transactionManager.SaveChangesAsync(cancellationToken);
+            await _transactionManager.CommitTransactionAsync(cancellationToken);
             return UserErrors.FailedLoginOrPassword();
         }
 

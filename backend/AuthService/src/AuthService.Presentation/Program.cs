@@ -1,4 +1,4 @@
-using AuthService.Infrastructure;
+﻿using AuthService.Infrastructure;
 using AuthService.Infrastructure.Migrations;
 using AuthService.Presentation.Configuration;
 using Serilog;

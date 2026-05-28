@@ -16,9 +16,7 @@ namespace AuthService.Application.Features.UserProfile
                 async Task<EndpointResult<UserInfo>>(
                     [FromServices] UserProfileHandler handler,
                     CancellationToken cancellationToken) =>
-                {
-                    return await handler.Handle(cancellationToken);
-                }).RequireAuthorization();
+                    await handler.Handle(cancellationToken)).RequireAuthorization();
         }
     }
 }
