@@ -149,19 +149,6 @@ public class TokenProvider : ITokenProvider
         return Result.Success();
     }
 
-    public async Task<Result> CleanupExpiredTokensAsync(DateTime olderThan, CancellationToken cancellationToken)
-    {
-        var expiredTokens = await _repository
-            .GetCollectionBy(rt => rt.ExpiresAt < olderThan, cancellationToken);
-
-        if (expiredTokens.Any())
-        {
-            _repository.DeleteTokensAsync(expiredTokens);
-        }
-
-        return Result.Success();
-    }
-
     public Result<Guid> ExtactUserIdFromAccessToken(string accessToken)
     {
         var result = ValidateAccessToken(accessToken);

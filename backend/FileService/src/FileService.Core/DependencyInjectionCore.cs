@@ -30,7 +30,7 @@ namespace FileService.Core
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddQuartz(options => 
+            services.AddQuartz(options =>
             {
                 options.UsePersistentStore(persistenceOptions =>
                 {

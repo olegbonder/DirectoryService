@@ -3,6 +3,7 @@ using AuthService.Application.Database;
 using AuthService.Domain;
 using AuthService.Infrastructure.Database;
 using AuthService.Infrastructure.EmailSender;
+using AuthService.Infrastructure.Jobs;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
 using AuthService.Infrastructure.Token;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SharedAuth;
+using Quartz;
 using SharedAuth.DevAuth;
 using SharedAuth.Jwt;
 using SharedAuth.Permissions;
@@ -31,7 +32,8 @@ namespace AuthService.Infrastructure
                 .AddJwtAuthentication(configuration)
                 .AddEmail(configuration)
                 .AddPermissionAuthorization()
-                .AddDevAuth(configuration);
+                .AddDevAuth(configuration)
+                .AddQuartzServices(configuration);
 
             return services;
         }
@@ -116,6 +118,47 @@ namespace AuthService.Infrastructure
         private static IServiceCollection AddTokenProvider(this IServiceCollection services)
         {
             services.AddScoped<ITokenProvider, TokenProvider>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddQuartzServices(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            services.Configure<CleanUpRefreshTokenJobOptions>(configuration.GetSection(CleanUpRefreshTokenJobOptions.SECTION_NAME));
+
+            var jobOptions = configuration
+                .GetSection(CleanUpRefreshTokenJobOptions.SECTION_NAME)
+                .Get<CleanUpRefreshTokenJobOptions>() ?? new CleanUpRefreshTokenJobOptions();
+            services.AddQuartz(options =>
+            {
+                /*options.UsePersistentStore(persistenceOptions =>
+                {
+                    persistenceOptions.UsePostgres(cfg =>
+                    {
+                        cfg.ConnectionString = configuration.GetConnectionString(ConnectionStringNames.DATABASE)!;
+                    });
+
+                    persistenceOptions.UseNewtonsoftJsonSerializer();
+                    persistenceOptions.UseProperties = true;
+                });*/
+
+                var jobKey = new JobKey("clean-up-refresh-token");
+                options.AddJob<CleanUpRefreshTokenJob>(opts =>
+                    opts.WithIdentity(jobKey)
+                        .StoreDurably(true) // job not delete if not triggers
+                        .RequestRecovery(true)); // job retry if application failed
+
+                options.AddTrigger(opts => opts
+                    .ForJob(jobKey)
+                    .WithIdentity("clean-up-refresh-token-trigger")
+                    .WithSchedule(SimpleScheduleBuilder.Create()
+                        .WithInterval(TimeSpan.FromDays(jobOptions.IntervalInDays))
+                        .RepeatForever()));
+            });
+
+            services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
             return services;
         }

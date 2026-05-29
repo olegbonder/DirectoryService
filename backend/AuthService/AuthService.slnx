@@ -4,6 +4,9 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AuthService.IntegrationTests/AuthService.IntegrationTests.csproj" />
+  </Folder>
   <Project Path="src/AuthService.Application/AuthService.Application.csproj" />
   <Project Path="src/AuthService.Contracts/AuthService.Contracts.csproj" />
   <Project Path="src/AuthService.Domain/AuthService.Domain.csproj" />
