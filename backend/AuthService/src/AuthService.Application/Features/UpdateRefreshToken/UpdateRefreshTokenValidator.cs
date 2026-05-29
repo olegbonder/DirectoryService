@@ -14,8 +14,5 @@ public class UpdateRefreshTokenValidator : AbstractValidator<UpdateRefreshTokenC
         RuleFor(f => f.Request.AccessToken)
             .NotEmpty()
             .WithError(GeneralErrors.ValueIsRequired("user.access_token"));
-        RuleFor(f => f.Request.RefreshToken)
-            .NotEmpty()
-            .WithError(GeneralErrors.ValueIsRequired("user.refresh_token"));
     }
 }

@@ -1,4 +1,4 @@
 ﻿namespace AuthService.Contracts.Dtos.UpdateRefreshToken
 {
-    public record UpdateRefreshTokenRequest(string AccessToken, string RefreshToken);
+    public record UpdateRefreshTokenRequest(string AccessToken);
 }

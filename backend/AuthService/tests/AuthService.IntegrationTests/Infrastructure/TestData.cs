@@ -100,10 +100,25 @@ namespace AuthService.IntegrationTests.Infrastructure
             UpdateRefreshTokenRequest request,
             CancellationToken cancellationToken)
         {
-            var refreshResponse = await _appHttpClient.PostAsJsonAsync(
-                Constants.REFRESH_ACCESS_TOKEN_URL,
-                request,
-                cancellationToken);
+            return await RefreshTokens(request, null, cancellationToken);
+        }
+
+        public async Task<Result<LoginResponse>> RefreshTokens(
+            UpdateRefreshTokenRequest request,
+            string? refreshToken,
+            CancellationToken cancellationToken)
+        {
+            var refreshRequest = new HttpRequestMessage(HttpMethod.Post, Constants.REFRESH_ACCESS_TOKEN_URL)
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+            {
+                refreshRequest.Headers.Add("Cookie", $"refreshToken={refreshToken}");
+            }
+
+            var refreshResponse = await _appHttpClient.SendAsync(refreshRequest, cancellationToken);
 
             var refreshResult = await refreshResponse
                 .HandleResponseAsync1<LoginResponse>(cancellationToken);
