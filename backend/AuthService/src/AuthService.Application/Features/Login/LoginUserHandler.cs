@@ -17,6 +17,7 @@ public sealed class LoginUserHandler : ICommandHandler<LoginResponse, LoginUserC
     private readonly IValidator<LoginUserCommand> _validator;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITransactionManager _transactionManager;
+    private readonly IRefreshTokenCookieManager _cookieManager;
     private readonly ILogger<LoginUserHandler> _logger;
 
     public LoginUserHandler(
@@ -24,12 +25,14 @@ public sealed class LoginUserHandler : ICommandHandler<LoginResponse, LoginUserC
         IValidator<LoginUserCommand> validator,
         ITokenProvider tokenProvider,
         ITransactionManager transactionManager,
+        IRefreshTokenCookieManager cookieManager,
         ILogger<LoginUserHandler> logger)
     {
         _userManager = userManager;
         _validator = validator;
         _tokenProvider = tokenProvider;
         _transactionManager = transactionManager;
+        _cookieManager = cookieManager;
         _logger = logger;
     }
 
@@ -117,11 +120,12 @@ public sealed class LoginUserHandler : ICommandHandler<LoginResponse, LoginUserC
 
         await _transactionManager.CommitTransactionAsync(cancellationToken);
 
+        _cookieManager.Set(refreshTokenResult.Value.Token.Value);
+
         _logger.LogInformation("User {Email} logged in", email);
 
         var result = new LoginResponse(
             accessTokenResult.Value.Token,
-            refreshTokenResult.Value.Token.Value,
             accessTokenResult.Value.ExpiresAt);
 
         return result;

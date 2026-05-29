@@ -1,6 +1,8 @@
 ﻿using AuthService.Domain;
 using AuthService.Infrastructure;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using SharedAuth.Constants;
 
@@ -13,7 +15,10 @@ public class AuthServiceTestsBase : IAsyncLifetime, IClassFixture<IntegrationTes
     protected AuthServiceTestsBase(IntegrationTestsWebFactory factory)
     {
         _factory = factory;
-        AppHttpClient = _factory.CreateClient();
+        AppHttpClient = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = true
+        });
         Services = _factory.Services;
         TestData = new TestData(Services, AppHttpClient);
     }

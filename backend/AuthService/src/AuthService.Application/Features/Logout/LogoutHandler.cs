@@ -16,6 +16,7 @@ public sealed class LogoutHandler : IResultCommandHandler<LogoutCommand>
     private readonly IValidator<LogoutCommand> _validator;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITransactionManager _transactionManager;
+    private readonly IRefreshTokenCookieManager _cookieManager;
     private readonly ILogger<LogoutHandler> _logger;
 
     public LogoutHandler(
@@ -23,12 +24,14 @@ public sealed class LogoutHandler : IResultCommandHandler<LogoutCommand>
         IValidator<LogoutCommand> validator,
         ITokenProvider tokenProvider,
         ITransactionManager transactionManager,
+        IRefreshTokenCookieManager cookieManager,
         ILogger<LogoutHandler> logger)
     {
         _userManager = userManager;
         _validator = validator;
         _tokenProvider = tokenProvider;
         _transactionManager = transactionManager;
+        _cookieManager = cookieManager;
         _logger = logger;
     }
 
@@ -75,6 +78,8 @@ public sealed class LogoutHandler : IResultCommandHandler<LogoutCommand>
         }
 
         await _transactionManager.CommitTransactionAsync(cancellationToken);
+
+        _cookieManager.Delete();
 
         _logger.LogInformation("Logout user {UserId}", userId);
 

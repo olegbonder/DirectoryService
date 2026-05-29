@@ -1,6 +1,8 @@
-﻿using AuthService.Contracts.Dtos.Login;
+﻿using System.Net.Http.Json;
+using AuthService.Contracts.Dtos.Login;
 using AuthService.Contracts.Dtos.RegisterUser;
 using AuthService.IntegrationTests.Infrastructure;
+using SharedAuth.Constants;
 
 namespace AuthService.IntegrationTests.Features
 {
@@ -25,14 +27,17 @@ namespace AuthService.IntegrationTests.Features
             var loginRequest = new LoginRequest(email, password);
 
             // act
-            var result = await TestData.Login(loginRequest, cancellationToken);
+            var loginResponseMessage = await AppHttpClient.PostAsJsonAsync(Constants.LOGIN_URL, loginRequest, cancellationToken);
+            var result = await loginResponseMessage.HandleResponseAsync1<LoginResponse>(cancellationToken);
 
             // assert
             Assert.True(result.IsSuccess);
             var loginResponse = result.Value;
             Assert.NotNull(loginResponse.AccessToken);
-            Assert.NotNull(loginResponse.RefreshToken);
             Assert.True(loginResponse.ExpiresIn > 0);
+
+            Assert.True(loginResponseMessage.Headers.TryGetValues("Set-Cookie", out var setCookieValues));
+            Assert.Contains(setCookieValues, header => header.Contains("refreshToken=", StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
