@@ -7,6 +7,7 @@ using AuthService.Infrastructure.Jobs;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Seed;
 using AuthService.Infrastructure.Token;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +34,8 @@ namespace AuthService.Infrastructure
                 .AddEmail(configuration)
                 .AddPermissionAuthorization()
                 .AddDevAuth(configuration)
-                .AddQuartzServices(configuration);
+                .AddQuartzServices(configuration)
+                .AddCookie();
 
             return services;
         }
@@ -159,6 +161,22 @@ namespace AuthService.Infrastructure
             });
 
             services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+
+            return services;
+        }
+
+        private static IServiceCollection AddCookie(this IServiceCollection services)
+        {
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.Path = RefreshTokenCookieManager.COOKIE_PATH;
+            });
+
+            services.AddSingleton<IRefreshTokenCookieManager, RefreshTokenCookieManager>();
+            services.AddHttpContextAccessor();
 
             return services;
         }

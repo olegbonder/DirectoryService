@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Text;
 using AuthService.Application;
-using AuthService.Application.Database;
 using AuthService.Application.Model;
 using AuthService.Domain;
 using AuthService.Domain.Shared;
@@ -25,7 +24,6 @@ public class TokenProvider : ITokenProvider
     public TokenProvider(
         IOptions<JwtOptions> options,
         IRefreshTokenRepository repository,
-        ITransactionManager transactionManager,
         ILogger<TokenProvider> logger)
     {
         _options = options.Value;

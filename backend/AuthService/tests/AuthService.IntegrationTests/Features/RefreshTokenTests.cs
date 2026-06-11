@@ -1,4 +1,5 @@
-﻿using AuthService.Contracts.Dtos.Login;
+﻿using System.Net.Http.Json;
+using AuthService.Contracts.Dtos.Login;
 using AuthService.Contracts.Dtos.RegisterUser;
 using AuthService.Contracts.Dtos.UpdateRefreshToken;
 using AuthService.IntegrationTests.Infrastructure;
@@ -28,17 +29,29 @@ namespace AuthService.IntegrationTests.Features
             var loginResult = await TestData.Login(loginRequest, cancellationToken);
 
             var initialTokens = loginResult.Value;
-            var refreshRequest = new UpdateRefreshTokenRequest(initialTokens.AccessToken, initialTokens.RefreshToken);
+            string initialRefreshToken = string.Empty;
+            await TestData.ExecuteInDb(async db =>
+            {
+                var refreshTokenEntity = await db.RefreshTokens.FirstOrDefaultAsync(
+                    r => r.UserId == userId && r.ReplacedByToken == null,
+                    cancellationToken);
+                Assert.NotNull(refreshTokenEntity);
+                initialRefreshToken = refreshTokenEntity!.Token.Value;
+            });
+
+            var refreshRequest = new UpdateRefreshTokenRequest(initialTokens.AccessToken);
 
             // act
-            var result = await TestData.RefreshTokens(refreshRequest, cancellationToken);
+            var updateRefreshTokenResponseMessage = await AppHttpClient.PostAsJsonAsync(Constants.REFRESH_ACCESS_TOKEN_URL, refreshRequest, cancellationToken);
+            var result = await updateRefreshTokenResponseMessage.HandleResponseAsync1<LoginResponse>(cancellationToken);
 
             // assert
             Assert.True(result.IsSuccess);
             var newTokens = result.Value;
             Assert.NotNull(newTokens.AccessToken);
-            Assert.NotNull(newTokens.RefreshToken);
             Assert.True(newTokens.ExpiresIn > 0);
+            Assert.True(updateRefreshTokenResponseMessage.Headers.TryGetValues("Set-Cookie", out var setCookieValues));
+            Assert.Contains(setCookieValues, header => header.Contains("refreshToken=", StringComparison.OrdinalIgnoreCase));
 
             // new tokens should be different from old ones
             Assert.NotEqual(initialTokens.AccessToken, newTokens.AccessToken);
@@ -47,7 +60,7 @@ namespace AuthService.IntegrationTests.Features
             {
                 var oldRefreshToken = await db.RefreshTokens.FirstOrDefaultAsync(
                     r =>
-                    r.UserId == userId && r.Token.Value == initialTokens.RefreshToken, cancellationToken);
+                    r.UserId == userId && r.Token.Value == initialRefreshToken, cancellationToken);
                 var newRefreshToken = await db.RefreshTokens.FirstOrDefaultAsync(
                     r =>
                         r.UserId == userId && r.ReplacedByToken == null, cancellationToken);
@@ -66,10 +79,10 @@ namespace AuthService.IntegrationTests.Features
             string expiredRefreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MTYyMzkwMjJ9.expired_token";
             string validAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
 
-            var refreshRequest = new UpdateRefreshTokenRequest(validAccessToken, expiredRefreshToken);
+            var refreshRequest = new UpdateRefreshTokenRequest(validAccessToken);
 
             // act
-            var result = await TestData.RefreshTokens(refreshRequest, cancellationToken);
+            var result = await TestData.RefreshTokens(refreshRequest, expiredRefreshToken, cancellationToken);
 
             // assert
             Assert.True(result.IsFailure);
@@ -84,30 +97,47 @@ namespace AuthService.IntegrationTests.Features
             string password = "Test123!";
 
             var registerRequest = new RegisterUserRequest(email, password, "test", "test");
-            await TestData.RegisterUserAndVerifyEmail(registerRequest, cancellationToken);
+            var registerResult = await TestData.RegisterUserAndVerifyEmail(registerRequest, cancellationToken);
+            var userId = registerResult.Value;
 
             var loginRequest = new LoginRequest(email, password);
             var loginResult = await TestData.Login(loginRequest, cancellationToken);
 
             var initialTokens = loginResult.Value;
-            var refreshRequest = new UpdateRefreshTokenRequest(initialTokens.AccessToken, initialTokens.RefreshToken);
+            string initialRefreshToken = string.Empty;
+            await TestData.ExecuteInDb(async db =>
+            {
+                var refreshTokenEntity = await db.RefreshTokens.FirstOrDefaultAsync(
+                    r => r.UserId == userId && r.ReplacedByToken == null,
+                    cancellationToken);
+                Assert.NotNull(refreshTokenEntity);
+                initialRefreshToken = refreshTokenEntity!.Token.Value;
+            });
+
+            var refreshRequest = new UpdateRefreshTokenRequest(initialTokens.AccessToken);
 
             // use the refresh token once
-            var firstRefreshResult = await TestData.RefreshTokens(refreshRequest, cancellationToken);
-            Assert.True(firstRefreshResult.IsSuccess);
+            var firstRefreshResponse = await AppHttpClient.PostAsJsonAsync(Constants.REFRESH_ACCESS_TOKEN_URL, refreshRequest, cancellationToken);
+            var firstRefreshResult = await firstRefreshResponse.HandleResponseAsync1<LoginResponse>(cancellationToken);
+            var firstTokens = firstRefreshResult.Value;
 
-            // try to use the same refresh token again (should fail because it's been rotated out)
-            var secondRefreshResult = await TestData.RefreshTokens(refreshRequest, cancellationToken);
+            firstRefreshResponse.Headers.TryGetValues("Set-Cookie", out var setCookieFirstRefreshValues);
+            var refreshTokenCookieFirstRefresh = setCookieFirstRefreshValues.First().Split(";")[0];
+
+            // try to use the same refresh token again
+            var secondRefreshResponse = await AppHttpClient.PostAsJsonAsync(Constants.REFRESH_ACCESS_TOKEN_URL, refreshRequest, cancellationToken);
+            var secondRefreshResult = await secondRefreshResponse.HandleResponseAsync1<LoginResponse>(cancellationToken);
 
             // assert
             Assert.True(secondRefreshResult.IsSuccess);
-            var newTokens = secondRefreshResult.Value;
-            Assert.NotNull(newTokens.AccessToken);
-            Assert.NotNull(newTokens.RefreshToken);
-            Assert.True(newTokens.ExpiresIn > 0);
-
-            // new tokens should be different from old ones
-            Assert.NotEqual(initialTokens.AccessToken, newTokens.AccessToken);
+            var secondTokens = secondRefreshResult.Value;
+            Assert.NotNull(secondTokens.AccessToken);
+            Assert.True(secondTokens.ExpiresIn > 0);
+            Assert.NotEqual(firstTokens.AccessToken, secondTokens.AccessToken);
+            Assert.True(secondRefreshResponse.Headers.TryGetValues("Set-Cookie", out var setCookieSecondRefreshValues));
+            Assert.Contains(setCookieSecondRefreshValues, header => header.Contains("refreshToken=", StringComparison.OrdinalIgnoreCase));
+            var refreshTokenCookieSecondRefresh = setCookieSecondRefreshValues.First().Split(";")[0];
+            Assert.NotEqual(refreshTokenCookieFirstRefresh, refreshTokenCookieSecondRefresh);
         }
     }
 }

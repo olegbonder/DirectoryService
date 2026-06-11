@@ -17,6 +17,7 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
     private readonly IValidator<UpdateRefreshTokenCommand> _validator;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITransactionManager _transactionManager;
+    private readonly IRefreshTokenCookieManager _cookieManager;
     private readonly ILogger<UpdateRefreshTokenHandler> _logger;
 
     public UpdateRefreshTokenHandler(
@@ -24,17 +25,25 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
         IValidator<UpdateRefreshTokenCommand> validator,
         ITokenProvider tokenProvider,
         ITransactionManager transactionManager,
+        IRefreshTokenCookieManager cookieManager,
         ILogger<UpdateRefreshTokenHandler> logger)
     {
         _userManager = userManager;
         _validator = validator;
         _tokenProvider = tokenProvider;
         _transactionManager = transactionManager;
+        _cookieManager = cookieManager;
         _logger = logger;
     }
 
     public async Task<Result<LoginResponse>> Handle(UpdateRefreshTokenCommand command, CancellationToken cancellationToken)
     {
+        string? refreshToken = _cookieManager.Get();
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return TokenErrors.RefreshTokenNotFound();
+        }
+
         var validResult = await _validator.ValidateAsync(command, cancellationToken);
         if (validResult.IsValid == false)
         {
@@ -43,7 +52,6 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
 
         var request = command.Request;
         string accessToken = request.AccessToken;
-        string refreshToken = request.RefreshToken;
         var userIdClaimResult = _tokenProvider.ExtactUserIdFromAccessToken(accessToken);
         if (userIdClaimResult.IsFailure)
         {
@@ -86,12 +94,13 @@ public sealed class UpdateRefreshTokenHandler : ICommandHandler<LoginResponse, U
 
         await _transactionManager.CommitTransactionAsync(cancellationToken);
 
+        _cookieManager.Set(refreshTokenResult.Value.Token.Value);
+
         _logger.LogInformation("Refresh token updated for user {UserId}", userId);
 
         var accessTokenDto = accessTokenResult.Value;
         var loginResponse = new LoginResponse(
             accessTokenDto.Token,
-            refreshTokenResult.Value.Token.Value,
             accessTokenDto.ExpiresAt);
         return loginResponse;
     }
